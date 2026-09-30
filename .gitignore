@@ -1,0 +1,24 @@
+# Local Project Documentation and Guidelines
+/implimentationplan.md
+/agent.md
+/AGENTS.md
+
+# Environment and Secrets
+.env
+*.env.local
+
+# Flutter and Dart Build Artifacts
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+
+# IDE Configuration
+.idea/
+.vscode/
+*.iml
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
