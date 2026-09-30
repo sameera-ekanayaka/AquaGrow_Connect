@@ -1,0 +1,47 @@
+name: aquagrow_mobile
+description: "AquaGrow Connect - Intelligent, Aesthetic Soil-less Cultivation System Mobile Application"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management (Universal)
+  flutter_riverpod: ^2.5.1
+
+  # Cloud Backend & Security (Member 2)
+  supabase_flutter: ^2.5.6
+  flutter_secure_storage: ^9.2.2
+  
+  # Offline Cache & Local Database (Member 2)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Data Visualization & Analytics (Member 5)
+  fl_chart: ^0.68.0
+
+  # GPS Geolocation & Networking (Member 3 & Member 4)
+  geolocator: ^12.0.0
+  http: ^1.2.1
+
+  # Traceability & QR Code Generation (Member 5)
+  qr_flutter: ^4.1.0
+
+  # UI Design, Icons & Typography (Clean UI/UX)
+  google_fonts: ^6.2.1
+  cupertino_icons: ^1.0.6
+  intl: ^0.19.0
+  uuid: ^4.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
