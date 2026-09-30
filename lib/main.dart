@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/constants/app_colors.dart';
 import 'core/theme/biophilic_theme.dart';
+import 'features/auth/presentation/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,14 +24,7 @@ class AquaGrowApp extends StatelessWidget {
       theme: BiophilicTheme.lightTheme,
       darkTheme: BiophilicTheme.darkTheme,
       themeMode: ThemeMode.dark,
-      home: const Scaffold(
-        backgroundColor: AppColors.darkBackground,
-        body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.mintAccent),
-          ),
-        ),
-      ),
+      home: const LoginScreen(),
     );
   }
 }
