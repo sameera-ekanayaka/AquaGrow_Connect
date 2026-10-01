@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/interfaces/i_auth_repository.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/network/supabase_client.dart';

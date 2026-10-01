@@ -88,10 +88,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               onPressed: () async {
                 final email = resetEmailController.text.trim();
                 if (email.isNotEmpty) {
+                  final nav = Navigator.of(dialogCtx);
+                  final messenger = ScaffoldMessenger.of(context);
                   await ref.read(authRepositoryProvider).resetPassword(email: email);
                   if (mounted) {
-                    Navigator.of(dialogCtx).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    nav.pop();
+                    messenger.showSnackBar(
                       SnackBar(
                         content: Text('Recovery instructions dispatched to $email'),
                         backgroundColor: AppColors.primarySage,
