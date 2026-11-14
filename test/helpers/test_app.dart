@@ -7,7 +7,6 @@ import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// A signed-in demo user for widget tests.
 final testUser = UserProfile(
@@ -63,7 +62,6 @@ class FakeAuthRepository implements IAuthRepository {
 /// await tester.pump();
 /// ```
 Widget testApp({required PodSimulator sim, UserProfile? user, bool signedIn = true}) {
-  GoogleFonts.config.allowRuntimeFetching = false;
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(

@@ -2,7 +2,6 @@ import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/shared/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
       theme: AppTheme.light,
@@ -10,8 +9,6 @@ Widget _wrap(Widget child) => MaterialApp(
     );
 
 void main() {
-  setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
-
   testWidgets('SensorTile shows label, value and caption', (tester) async {
     await tester.pumpWidget(
       _wrap(const SensorTile(label: 'pH', value: '6.2', caption: 'Target 5.5–6.5')),
