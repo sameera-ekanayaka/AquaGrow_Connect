@@ -97,7 +97,8 @@ Only `lib/data/data_providers.dart` reads the mode. Everything else just reads p
 
 - Read shared data only through `lib/data/data_providers.dart`:
   `podsProvider`, `selectedPodIdProvider`, `selectedPodProvider`, `latestReadingProvider(podId)`,
-  `actuatorStateProvider(podId)`, `alertsProvider`, `unreadAlertCountProvider`, and the repository providers.
+  `actuatorStateProvider(podId)`, `alertsProvider`, `unreadAlertCountProvider`, `preferencesStoreProvider`,
+  and the repository providers.
 - Put a feature's own providers in `lib/features/<feature>/application/<feature>_providers.dart`.
 - Use `StreamProvider` for live data, `FutureProvider` for one-off loads, and
   `StateNotifierProvider` or `AsyncNotifierProvider` for screens with actions.
@@ -130,7 +131,7 @@ go_router, configured in `lib/app/router/app_router.dart`. Paths live in `AppRou
 | Risky actions | Pump, light, dosing and logout need a confirm dialog. Biometric unlock before controls (Should have). |
 | Backups | `android:allowBackup="false"` so app data is not copied to cloud backups. |
 | Input | Every form uses `Validators`, with numeric ranges for pH and EC. |
-| Permissions | Ask for location and notifications only when the feature is opened, with a reason shown first. |
+| Permissions | Ask for location and notifications only when the feature is opened, with a reason shown first. Notifications: asked once after sign-in (`NotificationSetup`), after a short explanation. |
 
 ## 10. Lecture coverage map
 
