@@ -24,7 +24,9 @@ Harvest Passport QR that proves where food came from. You also own the report.
 
 ### 1. MUST: My Pods list to Figma (`feature/udeshika-my-pods`)
 
-Replace the simple rows in `crops_screen.dart` with the Figma **Pod card**:
+Replace the simple rows in `crops_screen.dart` with the Figma **Pod card**. Use the shared
+`PodCard` widget once Osanda merges it (target Sunday 11 AM); if it is not there yet, build your
+card in `lib/features/crops/presentation/widgets/` and switch later. The card has a
 photo on top (`batch.imageAsset`, or a soft `subtle` box with an eco icon when null), a
 `StatusBadge` with the stage over the photo, then crop name (`titleLarge`), `Kitchen · Pod Alpha`
 (`bodySmall`), stage in green-brand text, and `Day 8 · Harvest est. in 20 days`.
