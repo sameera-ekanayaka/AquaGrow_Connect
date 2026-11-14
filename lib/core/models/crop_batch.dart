@@ -63,7 +63,7 @@ class CropBatch {
   /// 0.0 at planting, 1.0 at harvest day.
   double progress(DateTime now) {
     final p = now.difference(plantedAt).inHours / (daysToHarvest * 24);
-    return p.clamp(0.0, 1.0);
+    return p.clamp(0.0, 1.0).toDouble();
   }
 
   /// Current stage, as of [now].
