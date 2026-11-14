@@ -52,6 +52,8 @@ Done when: Care > Pod simulator > **pH crash**, then the Home bell shows 1 and A
 
 ### 2. MUST: Local notifications (`feature/tharindu-notifications`)
 
+- [x] Done: `NotificationService` (+ fake), `NotificationPermissionFlow`, `NotificationSetup` in the shell.
+
 - `lib/features/alerts/application/notification_service.dart` with `flutter_local_notifications`,
   behind a small interface so tests can use a fake.
 - Android channel `pod_alerts`, high importance, icon `@mipmap/ic_launcher`.

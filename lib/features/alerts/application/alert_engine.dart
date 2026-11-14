@@ -7,7 +7,9 @@ import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/pod_alert.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
+import 'package:aquagrow_mobile/core/models/sensor_status.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
+import 'package:aquagrow_mobile/features/alerts/application/notification_service.dart';
 import 'package:aquagrow_mobile/features/alerts/domain/alert_copy.dart';
 import 'package:aquagrow_mobile/features/alerts/domain/alert_rules.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,9 +27,13 @@ class AlertEngine {
     required ITelemetryRepository telemetry,
     required IAlertRepository alerts,
     AlertRules? rules,
+    this.onRaised,
   })  : _telemetry = telemetry,
         _alerts = alerts,
         _rules = rules ?? AlertRules();
+
+  /// Called after each new alert is saved, for example to notify the user.
+  final void Function(PodAlert alert)? onRaised;
 
   final ITelemetryRepository _telemetry;
   final IAlertRepository _alerts;
@@ -90,6 +96,7 @@ class AlertEngine {
       );
       _log.info('${severity.name} alert: ${copy.title} ($podName)');
       await _alerts.add(alert);
+      onRaised?.call(alert);
     }
   }
 
@@ -105,10 +112,18 @@ class AlertEngine {
 
 /// The one running [AlertEngine]. `AppShell` watches it, so it runs while the
 /// app is open, and it follows `podsProvider` as pods come and go.
+///
+/// Every critical alert is also shown as a system notification.
 final alertEngineProvider = Provider<AlertEngine>((ref) {
+  final notifications = ref.watch(notificationServiceProvider);
   final engine = AlertEngine(
     telemetry: ref.watch(telemetryRepositoryProvider),
     alerts: ref.watch(alertRepositoryProvider),
+    onRaised: (alert) {
+      if (alert.severity == SensorStatus.critical) {
+        unawaited(notifications.showAlert(alert));
+      }
+    },
   );
   ref.listen<AsyncValue<List<Pod>>>(
     podsProvider,

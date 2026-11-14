@@ -1,7 +1,9 @@
 import 'package:aquagrow_mobile/core/config/app_config.dart';
+import 'package:aquagrow_mobile/core/constants/app_constants.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_alert_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_control_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
+import 'package:aquagrow_mobile/core/interfaces/i_preferences_store.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_telemetry_repository.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/models/actuator_state.dart';
@@ -9,9 +11,11 @@ import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/pod_alert.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
+import 'package:aquagrow_mobile/data/local/preferences_store.dart';
 import 'package:aquagrow_mobile/data/simulation/in_memory_alert_repository.dart';
 import 'package:aquagrow_mobile/data/simulation/sim_repositories.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 
 /// THE place where the app decides which data source to use.
 ///
@@ -28,7 +32,8 @@ const _log = AppLogger('data');
 // -----------------------------------------------------------------------------
 
 /// Build settings. Overridden in `main.dart`, and in tests.
-final appConfigProvider = Provider<AppConfig>((ref) => AppConfig.fromEnvironment());
+final appConfigProvider =
+    Provider<AppConfig>((ref) => AppConfig.fromEnvironment());
 
 /// The single pod simulator for the whole app. Starts ticking on first use.
 final podSimulatorProvider = Provider<PodSimulator>((ref) {
@@ -73,6 +78,20 @@ final alertRepositoryProvider = Provider<IAlertRepository>((ref) {
   return repo;
 });
 
+/// Small device-only settings (theme, permission prompts).
+///
+/// Uses the Hive `app_preferences` box opened in `bootstrap.dart`. If Hive did
+/// not open (or in tests), falls back to memory so the app still works.
+final preferencesStoreProvider = Provider<IPreferencesStore>((ref) {
+  if (Hive.isBoxOpen(AppConstants.preferencesBoxKey)) {
+    return HivePreferencesStore(
+      Hive.box<dynamic>(AppConstants.preferencesBoxKey),
+    );
+  }
+  _log.warning('Preferences box not open, keeping preferences in memory');
+  return InMemoryPreferencesStore();
+});
+
 // -----------------------------------------------------------------------------
 // Shared app state that several tabs read
 // -----------------------------------------------------------------------------
@@ -83,7 +102,8 @@ final podsProvider = StreamProvider<List<Pod>>((ref) {
 });
 
 /// The pod the user is looking at. Home, Insights and controls follow it.
-final selectedPodIdProvider = StateProvider<String>((ref) => SimPodSeed.demo.first.id);
+final selectedPodIdProvider =
+    StateProvider<String>((ref) => SimPodSeed.demo.first.id);
 
 /// The selected pod, or null while pods are loading.
 final selectedPodProvider = Provider<Pod?>((ref) {
@@ -96,12 +116,14 @@ final selectedPodProvider = Provider<Pod?>((ref) {
 });
 
 /// Live readings for one pod: `ref.watch(latestReadingProvider(podId))`.
-final latestReadingProvider = StreamProvider.family<SensorReading, String>((ref, podId) {
+final latestReadingProvider =
+    StreamProvider.family<SensorReading, String>((ref, podId) {
   return ref.watch(telemetryRepositoryProvider).watchReadings(podId);
 });
 
 /// Live pump, light and doser state for one pod.
-final actuatorStateProvider = StreamProvider.family<ActuatorState, String>((ref, podId) {
+final actuatorStateProvider =
+    StreamProvider.family<ActuatorState, String>((ref, podId) {
   return ref.watch(controlRepositoryProvider).watchActuators(podId);
 });
 

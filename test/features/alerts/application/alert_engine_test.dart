@@ -4,18 +4,26 @@ import 'package:aquagrow_mobile/core/models/sensor_status.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/alerts/application/alert_engine.dart';
+import 'package:aquagrow_mobile/features/alerts/application/notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../../helpers/fake_notification_service.dart';
 
 void main() {
   late PodSimulator sim;
   late ProviderContainer container;
+  late FakeNotificationService notifications;
 
   setUp(() {
     var now = DateTime(2026, 11, 15, 10);
     sim = PodSimulator(clock: () => now = now.add(const Duration(seconds: 2)));
+    notifications = FakeNotificationService();
     container = ProviderContainer(
-      overrides: [podSimulatorProvider.overrideWithValue(sim)],
+      overrides: [
+        podSimulatorProvider.overrideWithValue(sim),
+        notificationServiceProvider.overrideWithValue(notifications),
+      ],
     );
   });
 
@@ -65,6 +73,8 @@ void main() {
     expect(list.single.severity, SensorStatus.critical);
     expect(list.single.title, 'pH is too low');
     expect(list.single.message, startsWith('Pod Alpha reads pH 4.8'));
+    expect(notifications.shown, hasLength(1));
+    expect(notifications.shown.single.id, list.single.id);
   });
 
   test('low water on Pod Beta raises a water level alert for Pod Beta',
