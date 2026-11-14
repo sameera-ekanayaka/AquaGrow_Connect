@@ -47,7 +47,7 @@ that switching to `7 days` asks for a 7-day range.
 - Keep `MicroclimateScreen` reachable for the full detail, or remove it and its route (ask Tharindu).
 - The weather API key comes from `ref.watch(appConfigProvider).openWeatherApiKey`; with no key, use the mock service.
 
-### 3. MUST: Location permission flow (`feature/imasha-location`)
+### 3. [x] MUST: Location permission flow (`feature/imasha-location`)
 
 - Before asking for location, show a short dialog: why (local weather and nearby suppliers).
 - Handle: granted, denied (explain and offer Try again), permanently denied (button opens app settings),
