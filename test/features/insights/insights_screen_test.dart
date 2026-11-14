@@ -85,10 +85,22 @@ void main() {
         expect(find.textContaining('POD ALPHA'), findsOneWidget);
 
         // Metric chips are present
-        expect(find.text('pH'), findsOneWidget);
-        expect(find.text('Nutrients (EC)'), findsOneWidget);
-        expect(find.text('Water temp'), findsOneWidget);
-        expect(find.text('Water level'), findsOneWidget);
+        expect(
+          find.widgetWithText(FilterChip, 'pH'),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(FilterChip, 'Nutrients (EC)'),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(FilterChip, 'Water temp'),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(FilterChip, 'Water level'),
+          findsOneWidget,
+        );
 
         // Range selector
         expect(find.text('24 hours'), findsOneWidget);
@@ -161,7 +173,7 @@ void main() {
         expect(container.read(historyMetricProvider), equals(SensorMetric.ph));
 
         // Tap Nutrients (EC) chip
-        await tester.tap(find.text('Nutrients (EC)'));
+        await tester.tap(find.widgetWithText(FilterChip, 'Nutrients (EC)'));
         await tester.pump();
         await tester.pump();
 
