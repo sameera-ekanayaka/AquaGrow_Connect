@@ -1,10 +1,8 @@
 import 'package:aquagrow_mobile/app/router/app_router.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
+import 'package:aquagrow_mobile/features/settings/application/theme_mode_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-/// Light, dark or follow the phone. Changed from the settings screen.
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 /// Root widget: theme and router. No screens are built here.
 class AquaGrowApp extends ConsumerWidget {
