@@ -6,6 +6,8 @@ import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/insights/application/history_providers.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/widgets/telemetry_history_chart.dart';
+import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
+import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
 import 'package:aquagrow_mobile/shared/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,9 +140,19 @@ class InsightsScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: AgSpace.s20),
+          const SizedBox(height: AgSpace.s16),
 
-          // Weather and VPD advice navigation banner
+          // Hyper-local ambient weather summary
+          const WeatherSummaryCard(),
+
+          const SizedBox(height: AgSpace.s16),
+
+          // Real-time canopy transpiration VPD gauge
+          const VpdGaugeCard(),
+
+          const SizedBox(height: AgSpace.s16),
+
+          // Microclimate detail navigation banner
           Card(
             color: colors.surface,
             elevation: 0,
@@ -151,14 +163,14 @@ class InsightsScreen extends ConsumerWidget {
             child: ListTile(
               leading: Icon(Icons.wb_sunny_outlined, color: colors.brand),
               title: Text(
-                'Weather and VPD',
+                'Microclimate Controls',
                 style: TextStyle(
                   color: colors.text,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               subtitle: Text(
-                'Local weather and growing advice',
+                'Manual sliders and full climate detail',
                 style: TextStyle(color: colors.textSecondary),
               ),
               trailing: Icon(Icons.chevron_right, color: colors.textSecondary),

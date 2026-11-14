@@ -6,6 +6,8 @@ import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/insights/application/history_providers.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/insights_screen.dart';
+import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
+import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -106,17 +108,25 @@ void main() {
         expect(find.text('24 hours'), findsOneWidget);
         expect(find.text('7 days'), findsOneWidget);
 
-        // Weather and VPD banner
-        expect(find.text('Weather and VPD'), findsOneWidget);
-
         // Stats row under chart has stability info
         expect(find.textContaining('% in range'), findsOneWidget);
+
+        // Embedded weather summary and VPD cards
+        expect(find.byType(WeatherSummaryCard), findsOneWidget);
+        expect(find.byType(VpdGaugeCard), findsOneWidget);
+
+        // Microclimate controls navigation banner
+        expect(find.text('Microclimate Controls'), findsOneWidget);
       },
     );
 
     testWidgets(
       'switching to 7 days updates the historyRangeProvider and requests 7 days',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
         final sim = PodSimulator(clock: () => fixedClock);
         final container = ProviderContainer(
           overrides: [
@@ -154,6 +164,11 @@ void main() {
     testWidgets(
       'switching metric chip updates the active graphed metric',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
         final sim = PodSimulator(clock: () => fixedClock);
         final container = ProviderContainer(
           overrides: [
