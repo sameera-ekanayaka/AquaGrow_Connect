@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:aquagrow_mobile/app/app.dart';
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_auth_repository.dart';
@@ -22,13 +24,25 @@ final testUser = UserProfile(
 );
 
 /// Auth repository that never touches Supabase or secure storage.
+///
+/// Like the real one, it announces sign-in and sign-out on
+/// [authStateChanges], so the router moves between login and Home.
 class FakeAuthRepository implements IAuthRepository {
-  FakeAuthRepository({this.user});
+  /// [user] is who is signed in at startup (null for signed out);
+  /// [account] is who any sign-in or sign-up succeeds as.
+  FakeAuthRepository({this.user, UserProfile? account})
+      : account = account ?? testUser;
 
+  /// The signed-in user, or null.
   UserProfile? user;
 
+  /// The user every sign-in returns.
+  final UserProfile account;
+
+  final _changes = StreamController<UserProfile?>.broadcast();
+
   @override
-  Stream<UserProfile?> get authStateChanges => const Stream.empty();
+  Stream<UserProfile?> get authStateChanges => _changes.stream;
 
   @override
   Future<UserProfile?> getCurrentUser() async => user;
@@ -41,7 +55,7 @@ class FakeAuthRepository implements IAuthRepository {
     required String email,
     required String password,
   }) async =>
-      user;
+      _setUser(account);
 
   @override
   Future<UserProfile?> signUp({
@@ -50,10 +64,16 @@ class FakeAuthRepository implements IAuthRepository {
     String? fullName,
     UserRole role = UserRole.owner,
   }) async =>
-      user;
+      _setUser(account);
 
   @override
-  Future<void> signOut() async => user = null;
+  Future<void> signOut() async => _setUser(null);
+
+  UserProfile? _setUser(UserProfile? next) {
+    user = next;
+    _changes.add(next);
+    return next;
+  }
 
   @override
   Future<void> resetPassword({required String email}) async {}
