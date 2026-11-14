@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:aquagrow_mobile/core/config/app_config.dart';
+import 'package:aquagrow_mobile/core/interfaces/i_geo_service.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
 import 'package:aquagrow_mobile/core/mocks/mock_weather_service.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
@@ -10,6 +11,7 @@ import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
 import 'package:aquagrow_mobile/core/services/weather_service.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
+import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Offline mock implementation of [IWeatherService] with zero artificial latency,
@@ -50,7 +52,7 @@ class InstantMockWeatherService extends MockWeatherService {
 }
 
 /// Provider for the hardware GPS and geolocation service.
-final geoServiceProvider = Provider<GeoService>((ref) {
+final geoServiceProvider = Provider<IGeoService>((ref) {
   return GeoService();
 });
 
@@ -66,10 +68,34 @@ final weatherServiceProvider = Provider<IWeatherService>((ref) {
   return WeatherService(defaultApiKey: config.openWeatherApiKey);
 });
 
-/// Current geographic coordinates provider with asynchronous acquisition.
-final currentPositionProvider = FutureProvider<GeoPosition>((ref) async {
+/// Tracks whether the location rationale dialog has been shown in this session.
+final locationRationaleShownProvider = StateProvider<bool>((ref) => false);
+
+/// Asynchronous location acquisition result, including permission status.
+///
+/// Returns a [LocationResult] that callers can inspect for [LocationResult.isFallback]
+/// and [LocationResult.status] to decide what banner or action to present.
+final locationResultProvider = FutureProvider<LocationResult>((ref) async {
   final geoService = ref.watch(geoServiceProvider);
-  return await geoService.getCurrentPosition();
+  return await geoService.getPosition();
+});
+
+/// Current geographic coordinates provider — extracts [GeoPosition] from [locationResultProvider].
+///
+/// Falls back to Colombo when permission is denied or GPS unavailable.
+final currentPositionProvider = FutureProvider<GeoPosition>((ref) async {
+  final result = await ref.watch(locationResultProvider.future);
+  return result.position;
+});
+
+/// Human-readable fallback note shown in the UI when location could not be acquired.
+///
+/// Returns `null` when the full GPS location was obtained successfully.
+final locationFallbackNoteProvider = Provider<String?>((ref) {
+  final resultAsync = ref.watch(locationResultProvider);
+  return resultAsync.valueOrNull?.isFallback == true
+      ? resultAsync.valueOrNull?.fallbackReason
+      : null;
 });
 
 /// Live outdoor atmospheric weather data provider based on current GPS location.
