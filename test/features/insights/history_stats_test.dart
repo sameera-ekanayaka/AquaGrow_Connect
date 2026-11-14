@@ -132,7 +132,8 @@ void main() {
       },
     );
 
-    test('reaches 100% stability when all readings stay within target range', () {
+    test('reaches 100% stability when all readings stay within target range',
+        () {
       final base = DateTime(2026, 11, 15, 12, 0);
       final readings = [
         makeReading(
@@ -156,7 +157,8 @@ void main() {
       expect(stats.summaryLabel(SensorMetric.ph), contains('100% in range'));
     });
 
-    test('evaluates different metrics accurately (EC and Water Temperature)', () {
+    test('evaluates different metrics accurately (EC and Water Temperature)',
+        () {
       final base = DateTime(2026, 11, 15, 12, 0);
       final readings = [
         makeReading(
