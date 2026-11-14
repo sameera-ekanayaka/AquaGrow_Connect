@@ -1,8 +1,13 @@
+import 'package:aquagrow_mobile/core/errors/app_failure.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_auth_repository.dart';
+import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/models/user_profile.dart';
 import 'package:aquagrow_mobile/core/network/supabase_client.dart';
+import 'package:aquagrow_mobile/features/auth/data/auth_error_mapper.dart';
 import 'package:aquagrow_mobile/features/auth/data/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const _log = AppLogger('auth');
 
 /// Exposes the centralized authentication repository instance.
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
@@ -14,6 +19,16 @@ final authRepositoryProvider = Provider<IAuthRepository>((ref) {
 final authStateChangesProvider = StreamProvider<UserProfile?>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return repository.authStateChanges;
+});
+
+/// The signed-in user, or null when signed out.
+///
+/// Starts with the saved session and then follows every sign-in and sign-out,
+/// so screens opened later (such as Profile) still know who is signed in.
+final currentUserProvider = StreamProvider<UserProfile?>((ref) async* {
+  final repository = ref.watch(authRepositoryProvider);
+  yield await repository.getCurrentUser();
+  yield* repository.authStateChanges;
 });
 
 /// Represents the presentation state of authentication requests (login, register).
@@ -58,10 +73,7 @@ class AuthController extends StateNotifier<AuthUiState> {
       state = state.copyWith(isLoading: false, user: user);
       return true;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString().replaceAll('Exception:', '').trim(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: _messageFor(e));
       return false;
     }
   }
@@ -84,10 +96,7 @@ class AuthController extends StateNotifier<AuthUiState> {
       state = state.copyWith(isLoading: false, user: user);
       return true;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString().replaceAll('Exception:', '').trim(),
-      );
+      state = state.copyWith(isLoading: false, errorMessage: _messageFor(e));
       return false;
     }
   }
@@ -97,6 +106,30 @@ class AuthController extends StateNotifier<AuthUiState> {
     state = state.copyWith(isLoading: true);
     await _repository.signOut();
     state = const AuthUiState();
+  }
+
+  /// Sends a password reset email to [email].
+  ///
+  /// Returns null when the email was sent, or a message that is safe to show
+  /// in the reset dialog. It does not touch the login form's error text.
+  Future<String?> resetPassword(String email) async {
+    try {
+      await _repository.resetPassword(email: email);
+      return null;
+    } catch (e) {
+      return _messageFor(e);
+    }
+  }
+
+  /// A friendly message for [error]. Raw exception text is never shown.
+  static String _messageFor(Object error) {
+    final failure = error is ArgumentError
+        ? ValidationFailure('${error.message}')
+        : mapAuthError(error);
+    if (failure is UnexpectedFailure) {
+      _log.error('Auth request failed', error);
+    }
+    return failure.message;
   }
 
   /// Clears transient error messages.
