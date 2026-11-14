@@ -187,6 +187,8 @@ class SliderRow extends StatelessWidget {
               activeTrackColor: c.brand,
               inactiveTrackColor: c.subtle,
               thumbColor: c.background,
+              // Steps of 5% without the dots, as in Figma.
+              tickMarkShape: SliderTickMarkShape.noTickMark,
               overlayColor: c.brand.withValues(alpha: 0.2),
             ),
             child: Slider(
