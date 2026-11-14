@@ -24,6 +24,9 @@ storage, and the signed APK we install for the demo. You also review and merge e
 ### 0. ALWAYS: Review and merge PRs
 
 Check each PR against its template checklist and `CONTRIBUTING.md`. Merge only with green CI.
+You are the first choice to merge, not the only one: if you are busy for more than about
+30 minutes, another teammate may merge, and authors may self-merge when blocked or near a
+deadline (see CONTRIBUTING.md section 4). Review self-merged PRs afterwards.
 Prefer "Rebase and merge" so the small commits stay. Ask for changes when a PR edits
 someone else's folder without agreement.
 
