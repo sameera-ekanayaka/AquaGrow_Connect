@@ -1,3 +1,4 @@
+import 'package:aquagrow_mobile/app/shell/notification_setup.dart';
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
 import 'package:aquagrow_mobile/features/alerts/application/alert_engine.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,8 @@ import 'package:go_router/go_router.dart';
 /// (go_router `StatefulShellRoute.indexedStack`), so switching tabs never
 /// loses what the user was doing.
 ///
-/// The shell also keeps the alert engine running while the user is signed in.
+/// The shell also keeps the alert engine running while the user is signed in,
+/// and starts notifications ([NotificationSetup]).
 class AppShell extends ConsumerWidget {
   const AppShell({required this.navigationShell, super.key});
 
@@ -53,11 +55,13 @@ class AppShell extends ConsumerWidget {
     // Starts the alert engine once and keeps it alive while the shell is shown.
     ref.watch(alertEngineProvider);
     return Scaffold(
-      body: Column(
-        children: [
-          const OfflineBanner(),
-          Expanded(child: navigationShell),
-        ],
+      body: NotificationSetup(
+        child: Column(
+          children: [
+            const OfflineBanner(),
+            Expanded(child: navigationShell),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
