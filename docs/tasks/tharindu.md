@@ -29,6 +29,8 @@ other task. Keep `ARCHITECTURE.md`, `DESIGN.md` and `AGENTS.md` true when shared
 
 ### 1. MUST: Alert engine (`feature/tharindu-alert-engine`)
 
+- [x] Done: `AlertRules`, `AlertCopy`, `AlertEngine`, started by `AppShell`.
+
 Create `lib/features/alerts/application/alert_engine.dart`.
 
 - Listens to `telemetryRepositoryProvider.watchReadings(podId)` for every pod in `podsProvider`.
