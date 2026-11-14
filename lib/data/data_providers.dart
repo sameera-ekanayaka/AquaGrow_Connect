@@ -2,6 +2,7 @@ import 'package:aquagrow_mobile/core/config/app_config.dart';
 import 'package:aquagrow_mobile/core/constants/app_constants.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_alert_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_control_repository.dart';
+import 'package:aquagrow_mobile/core/interfaces/i_local_data_eraser.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_preferences_store.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_telemetry_repository.dart';
@@ -12,6 +13,7 @@ import 'package:aquagrow_mobile/core/models/pod_alert.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/network/supabase_client.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
+import 'package:aquagrow_mobile/data/local/local_data_eraser.dart';
 import 'package:aquagrow_mobile/data/local/preferences_store.dart';
 import 'package:aquagrow_mobile/data/simulation/in_memory_alert_repository.dart';
 import 'package:aquagrow_mobile/data/simulation/sim_repositories.dart';
@@ -104,6 +106,11 @@ final preferencesStoreProvider = Provider<IPreferencesStore>((ref) {
   }
   _log.warning('Preferences box not open, keeping preferences in memory');
   return InMemoryPreferencesStore();
+});
+
+/// Deletes everything stored on this phone (Settings > Privacy).
+final localDataEraserProvider = Provider<ILocalDataEraser>((ref) {
+  return HiveLocalDataEraser(preferences: ref.watch(preferencesStoreProvider));
 });
 
 // -----------------------------------------------------------------------------
