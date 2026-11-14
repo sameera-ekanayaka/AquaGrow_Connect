@@ -1,31 +1,35 @@
-# Osanda: IoT dashboard, controls and alerts
+# Osanda: UI/UX lead (Home, shared widgets, controls, onboarding)
 
-You make the pod feel alive: live readings on Home, controls that change the pod, and
-alerts when something goes wrong. Your part is the centre of the demo.
+You own how the app looks and feels. You build the screens examiners notice first (Home, the
+shared crop widgets, onboarding) and you review every screen PR so the whole app matches Figma.
 
 ## Read first
 
 1. `AGENTS.md`, `CONTRIBUTING.md`, `DESIGN.md`, `docs/ARCHITECTURE.md`
-2. `lib/core/simulation/pod_simulator.dart` (how the pod behaves)
-3. `lib/data/data_providers.dart` (every provider you need already exists)
-4. `lib/features/dashboard/presentation/home_screen.dart` (your starting point)
+2. Figma file "AquaGrow": page "01 — Refined Direction" (components, Home, My Pods) and
+   "Page 1" (splash, onboarding)
+3. `lib/core/theme/app_tokens.dart`, `lib/shared/widgets/` (the UI kit you will extend)
+4. `lib/data/data_providers.dart` (every provider you need already exists)
+5. `lib/features/dashboard/presentation/home_screen.dart` (your starting point)
 
 ## You own (edit freely)
 
-- `lib/features/dashboard/`
-- `lib/features/controls/` (create it)
-- `lib/features/alerts/`
-- `lib/features/simulator/`
-- `test/features/dashboard/`, `test/features/controls/`, `test/features/alerts/`
+- `lib/shared/widgets/` (you may change existing widgets too; keep their tests passing)
+- `lib/features/dashboard/`, `lib/features/controls/` (create it), `lib/features/simulator/`,
+  `lib/features/onboarding/` (create it)
+- `assets/images/`
+- `test/shared/`, `test/features/dashboard/`, `test/features/controls/`, `test/features/onboarding/`
 
-**Do not edit:** `lib/core/`, `lib/data/`, `lib/app/` (ask Tharindu to add routes), `pubspec.yaml`.
-Your old branch `feature/m1-telemetry-simulator` is replaced by `PodSimulator`. Do not merge it.
+**Do not edit:** `lib/core/` (ask Tharindu, except `lib/core/theme/` where you may adjust token
+values to match Figma), `lib/data/`, `lib/app/` (ask Tharindu for routes), `pubspec.yaml`,
+other members' feature folders. Your old branch `feature/m1-telemetry-simulator` is replaced by
+`PodSimulator`. Do not merge it.
 
 ## Tasks
 
 ### 0. FIRST, before anyone else starts: Verify the foundation on a real device
 
-The foundation (PR #4, branch `chore/foundation`) passed CI (analyze, tests, APK build), but it
+The foundation (PR #4, branch `chore/foundation`) passes CI (analyze, tests, APK build), but it
 was written on a laptop without Flutter, so nobody has run it on a device yet. You check it,
 so the other four start from a base that works.
 
@@ -54,41 +58,25 @@ open a PR into `chore/foundation`, and tell Tharindu. When all 8 steps pass, com
 `Verified on <emulator/phone model>, Android <version>: all 8 checks pass.` and tell the group
 in WhatsApp. Sameera then merges PR #4 and everyone starts.
 
-### 1. MUST: Alert engine (`feature/osanda-alert-engine`)
+### 1. MUST, by Sunday 11 AM: Shared crop widgets (`feature/osanda-crop-widgets`)
 
-Create `lib/features/alerts/application/alert_engine.dart`.
+Udeshika (My Pods) and your own Home screen need these. Build them in `lib/shared/widgets/`
+from the Figma components, export them in `widgets.dart`, and add a widget test for each:
 
-- Listens to `telemetryRepositoryProvider.watchReadings(podId)` for every pod in `podsProvider`.
-- For each `SensorMetric`, works out `metric.statusOf(metric.valueOf(reading))`.
-- Raises a `PodAlert` through `alertRepositoryProvider.add(...)` when a metric **moves into**
-  warning or critical (edge-triggered, not on every reading).
-- Cooldown: at most one alert per pod + metric + severity every 5 minutes.
-- Titles and messages are human: `pH is too low` / `Pod Alpha reads pH 4.8. Add pH-up or change the water.`
-  Write one message per metric and direction (low and high).
-- Start the engine once from a provider (`alertEngineProvider`) that Home watches, so it runs while the app is open.
-- Put the pure decision logic (status change + cooldown) in `lib/features/alerts/domain/alert_rules.dart`
-  with no Flutter imports, and pass the clock in.
+- `CropTile({title, detail, imageAsset})`: 166 wide, photo 112 high, radius 20, title
+  `titleMedium`, detail `bodySmall`. Without `imageAsset`, a `subtle` box with an eco icon.
+- `CropHero({name, badgeLabel, caption, imageAsset})`: photo card radius 24, about 286 high,
+  `StatusBadge` top-left, near-black summary box (radius 20) at the bottom with white
+  `titleLarge` name and `bodySmall` caption.
+- `PodCard({cropName, location, stageLabel, harvestLine, imageAsset, onTap})`: Figma "Pod card":
+  photo with a stage badge, then name, `Kitchen · Pod Alpha`, stage in text colour, harvest line.
 
-Tests (`test/features/alerts/domain/alert_rules_test.dart`): normal to critical raises one alert;
-staying critical raises no more; cooldown blocks repeats within 5 minutes; recovery then a
-new drop raises again. Use a fixed clock.
+Post in WhatsApp as soon as it is merged. If you will miss 11 AM, tell Udeshika so she builds
+her card inside `lib/features/crops/` instead.
 
-Done when: Care > Pod simulator > **pH crash**, then the Home bell shows 1 and Alerts lists `pH is too low`.
+### 2. MUST: Home screen to Figma (`feature/osanda-home`)
 
-### 2. MUST: Local notifications (`feature/osanda-notifications`)
-
-- `lib/features/alerts/application/notification_service.dart` using `flutter_local_notifications`.
-- Android channel `pod_alerts`, high importance. App icon `@mipmap/ic_launcher`.
-- Ask for the notification permission (Android 13+) the first time Home opens, after a short
-  explanation dialog ("Get notified when your plants need you").
-- Show a notification for every **critical** alert from the engine. Tapping it opens `/alerts`.
-- Wrap the plugin behind a small interface so tests can use a fake.
-
-Done when: with the app in the background, a pH crash shows a system notification.
-
-### 3. MUST: Home screen to Figma (`feature/osanda-home`)
-
-Match the Figma "Home / Opaque / Refined" screen, top to bottom:
+Match "Home / Opaque / Refined", top to bottom:
 
 1. `TabHeader` (exists).
 2. **Pod selector card**: `Pod Alpha · Kitchen` + `StatusBadge('Live · 12s ago', brand)` or `Offline`.
@@ -96,36 +84,42 @@ Match the Figma "Home / Opaque / Refined" screen, top to bottom:
 3. **Priority task card** (warning surface, radius 20): the single most urgent problem from the
    latest reading (critical before warning; water level before pH before temp before EC). Example:
    `Water needs attention` / `Refill Pod Alpha today.` / button `Mark as refilled`
-   (confirm dialog, then `controlRepositoryProvider.markRefilled`). Hide the card when all is normal.
-   Put the "most urgent problem" logic in `lib/features/dashboard/domain/priority_task.dart` and test it.
-4. **Crop hero**: photo, `Day 8 · Growing` badge, dark summary box with crop name and
-   `Harvest est. in 20 days`. Use the shared `CropHero` widget if Tharindu has merged it; otherwise
-   build it in `dashboard/presentation/widgets/` and tell Tharindu.
-5. **Growing conditions**: `SectionHeader(caption: 'Updated 12s ago')` + the existing tiles grid.
-6. **Your plants**: tiles for the other pods' crops, `View crops` goes to `AppRoutes.crops`.
+   (confirm dialog, then `controlRepositoryProvider.markRefilled`). Hidden when all is normal.
+   Put the "most urgent problem" logic in `lib/features/dashboard/domain/priority_task.dart` and unit test it.
+4. **Crop hero** (`CropHero`): `Day 8 · Growing`, crop name, `Harvest est. in 20 days`.
+5. **Growing conditions**: `SectionHeader(caption: 'Updated 12s ago')` + the tiles grid (exists).
+6. **Your plants**: `CropTile`s for the other pods' crops; `View crops` goes to `AppRoutes.crops`.
 
-Rules: offline pod shows the `Offline` badge and greys the tiles' captions; loading and error states use `AsyncValueView`.
+Offline pod: `Offline` badge, controls disabled. Loading and error states via `AsyncValueView`.
 
-### 4. MUST: Pod controls (`feature/osanda-controls`)
+### 3. MUST: Pod controls UI (`feature/osanda-controls`)
 
-`lib/features/controls/presentation/pod_controls_card.dart`, shown on Home under the readings.
+`lib/features/controls/presentation/pod_controls_card.dart`, on Home under the readings.
 
 - Pump switch, grow light switch, brightness slider (0 to 100, applies on release), `pH down` button.
-- Read state from `actuatorStateProvider(podId)`. Send commands through `controlRepositoryProvider`.
+- State from `actuatorStateProvider(podId)`. Commands through `controlRepositoryProvider`.
 - **Every command asks first** with `showConfirmDialog`. Turning the pump off is `destructive: true`.
-- While a command runs, show a small progress indicator and disable the control.
+- While a command runs: small progress indicator, control disabled.
 - `pH down` shows the `PhDoseResult`: applied (SnackBar `pH lowered`), noEffect (warning text
   `No change. Check the pH-down bottle (2 of 5).`), locked (critical text `Dosing locked for safety`).
-- If the pod is offline, controls are disabled with the reason shown. Catch `DeviceFailure` and show its message.
+- Pod offline: controls disabled with the reason shown. Catch `DeviceFailure` and show its message.
 - If Sameera's `biometricGuardProvider` exists, call it before sending (Should have).
 
-Tests: a widget test that tapping the pump switch opens the dialog, Cancel changes nothing, Confirm turns it off.
+Test: tapping the pump switch opens the dialog; Cancel changes nothing; Confirm turns it off.
 
-### 5. SHOULD: Alerts screen polish (`feature/osanda-alerts-ui`)
+### 4. ALWAYS: UX review of screen PRs
 
-Group into `Today` and `Earlier`, severity colour bar on the left, swipe to mark read,
-and keep alerts across restarts with a Hive-backed `IAlertRepository` in `lib/features/alerts/data/`
-(ask Tharindu to switch the provider).
+Review every PR that changes a screen (Crops, Insights, auth, alerts, settings) against
+`DESIGN.md` and Figma before Sameera merges: tokens only, 48 dp targets, four states, light and
+dark mode, no overflow at 360 px wide. Comment with specific fixes. Keep a short heuristics table
+(Nielsen's 10 heuristics, one row each, where the app meets it) in `docs/UX_REVIEW.md` for the
+report (lecture 6).
+
+### 5. SHOULD: Splash and onboarding (`feature/osanda-onboarding`)
+
+Figma "Splash Screen" and "Onboarding Screen": logo splash, then 3 slides
+(Grow fresh food at home / Know your plants live / Get alerted before it's too late) shown once,
+remembered in Hive `app_preferences`. Ask Tharindu to add the route and the first-launch redirect.
 
 ### 6. SHOULD: Simulator panel polish (`feature/osanda-simulator-ui`)
 
@@ -134,11 +128,11 @@ presenter sees the change happen. Group scenarios as Water, Nutrients, Device.
 
 ## Demo lines you present (about 1.5 minutes)
 
-"Here is Pod Alpha live. I'll crash the pH from the simulator... the tile turns red, a
-notification arrives, and the alert is in the list. Now I'll turn the pump off: the app
-asks me first, because that is risky."
+"This is Home, built from our Figma design. Pod Alpha is live. I'll crash the pH from the
+simulator... the tile turns red and the task card tells me what to do. Now I'll turn the pump
+off: the app asks me first, because that is risky."
 
 ## Lectures you cover
 
-L4 (MVVM, Service = alert engine + notifications), L5 (Material, dialogs, bottom sheet, lists),
-L8 (IoT sensing via the simulator), ILO6 (IoT).
+L5 (Material, navigation, dialogs, bottom sheet), L6 (Figma, heuristics, UX review),
+L4 (MVVM view layer), ILO6 (IoT controls).
