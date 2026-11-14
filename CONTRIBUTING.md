@@ -90,9 +90,17 @@ that break this rule. If your agent adds such a line, remove it before committin
 
 1. Push your branch: `git push -u origin feature/<your-name>-<what>`.
 2. Open a PR into `main` on GitHub. Fill in the template.
-3. CI must be green: commit messages, analyze, tests and the APK build.
-4. **Sameera reviews and merges** (Tharindu if Sameera is busy). Use "Squash" only if
-   your commits are messy; otherwise "Rebase and merge" to keep the atomic history.
+3. CI must be green before anyone merges. At minimum the **Commit messages** and
+   **Analyze and test** checks must pass (the APK build may still be running for docs-only PRs).
+4. Who merges, in this order (we have little time, so nobody waits long):
+   1. **Sameera** reviews and merges.
+   2. If Sameera has not merged within about **30 minutes**, **any other teammate** (not the
+      author) may review and merge.
+   3. If the PR blocks someone else, or it is close to a deadline (for example the Sunday 9 PM
+      freeze), the **author may merge their own PR**, and posts "self-merged #N" in the group so
+      Sameera can review it afterwards.
+   Never merge with a red check. Use **Rebase and merge** to keep the atomic commits;
+   "Squash" only if the commits are messy.
 5. If `main` moved on, update your branch: `git fetch && git rebase origin/main`, then
    `git push --force-with-lease`.
 
