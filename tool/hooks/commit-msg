@@ -1,0 +1,4 @@
+#!/bin/sh
+# Rejects a commit whose message breaks the team rules in CONTRIBUTING.md.
+# Install once per clone:   git config core.hooksPath tool/hooks
+exec sh "$(git rev-parse --show-toplevel)/tool/check_commit_message.sh" "$1"
