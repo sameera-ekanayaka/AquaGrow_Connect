@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HTTPS only. Plain HTTP is blocked for every host (OWASP M5, insecure communication).
+  If a real ESP32 pod on the local Wi-Fi is added later, allow only its local
+  address in a <domain-config cleartextTrafficPermitted="true"> block here.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
