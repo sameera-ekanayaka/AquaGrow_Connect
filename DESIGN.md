@@ -31,7 +31,11 @@ final c = context.ag;           // import core/theme/app_tokens.dart
 Container(color: c.warningSurface, child: Text('Water needs attention', style: TextStyle(color: c.warning)));
 ```
 
-## 2. Type (Inter, line height 1.4)
+## 2. Type (line height 1.4)
+
+Figma uses **Inter**. Until the Inter font files are bundled in `assets/fonts/`, the app uses
+the Android system font (Roboto). Never load fonts from the internet at runtime: the demo
+phone may be offline.
 
 | Figma style | Flutter | Size / weight | Example |
 | --- | --- | --- | --- |
