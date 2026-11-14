@@ -32,6 +32,8 @@ someone else's folder without agreement.
 
 ### 1. MUST: Auth screens to the new design (`feature/sameera-auth-ui`)
 
+- [x] Done: login, register and profile on the Figma theme, forgot password, `AuthFailure` messages.
+
 - Restyle `login_screen.dart`, `register_screen.dart`, `profile_screen.dart` with the Figma theme
   (`DESIGN.md`): white background, near-black filled button, Inter type, `AgSpace`/`AgRadius` tokens.
   Remove every use of `AppColors` and `GoogleFonts` from these files.
