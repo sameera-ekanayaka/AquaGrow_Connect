@@ -5,8 +5,8 @@
 /// ```
 library;
 
-export 'confirm_dialog.dart';
-export 'section_header.dart';
-export 'sensor_tile.dart';
-export 'state_views.dart';
-export 'status_badge.dart';
+export 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
+export 'package:aquagrow_mobile/shared/widgets/section_header.dart';
+export 'package:aquagrow_mobile/shared/widgets/sensor_tile.dart';
+export 'package:aquagrow_mobile/shared/widgets/state_views.dart';
+export 'package:aquagrow_mobile/shared/widgets/status_badge.dart';

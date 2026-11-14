@@ -1,4 +1,4 @@
-import '../constants/app_constants.dart';
+import 'package:aquagrow_mobile/core/constants/app_constants.dart';
 
 /// Immutable representation of high-frequency telemetry ingested from the hydroponic sensors.
 class SensorReading {

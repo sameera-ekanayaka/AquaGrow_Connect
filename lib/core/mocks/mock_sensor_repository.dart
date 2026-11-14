@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-import '../constants/app_constants.dart';
-import '../interfaces/i_sensor_repository.dart';
-import '../models/sensor_reading.dart';
+
+import 'package:aquagrow_mobile/core/constants/app_constants.dart';
+import 'package:aquagrow_mobile/core/interfaces/i_sensor_repository.dart';
+import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 
 /// Mock sensor repository providing simulated telemetry streams for parallel feature development.
 class MockSensorRepository implements ISensorRepository {

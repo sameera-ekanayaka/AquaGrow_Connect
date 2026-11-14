@@ -1,8 +1,9 @@
 import 'dart:async';
-import '../../../core/interfaces/i_auth_repository.dart';
-import '../../../core/models/user_profile.dart';
-import '../../../core/network/supabase_client.dart';
-import '../../../core/security/secure_storage_service.dart';
+
+import 'package:aquagrow_mobile/core/interfaces/i_auth_repository.dart';
+import 'package:aquagrow_mobile/core/models/user_profile.dart';
+import 'package:aquagrow_mobile/core/network/supabase_client.dart';
+import 'package:aquagrow_mobile/core/security/secure_storage_service.dart';
 
 /// Concrete authentication repository orchestrating Supabase Auth,
 /// hardware-backed keystore token persistence, and instant offline/mock fallbacks.

@@ -1,9 +1,9 @@
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/core/constants/app_constants.dart';
+import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
+import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_constants.dart';
-import 'auth_providers.dart';
-import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 
 /// User profile and session management screen.
 /// Displays authenticated role, cryptographic keystore status, and hardware permissions.

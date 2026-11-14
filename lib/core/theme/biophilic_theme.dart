@@ -1,6 +1,6 @@
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../constants/app_colors.dart';
 
 /// Defines the biophilic design system theme for AquaGrow Connect.
 /// Provides both light and dark themes optimized for biological telemetry clarity.

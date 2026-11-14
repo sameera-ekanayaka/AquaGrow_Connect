@@ -1,4 +1,4 @@
-import '../models/sensor_reading.dart';
+import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 
 /// Abstract contract governing sensor telemetry ingestion and actuator override commands.
 /// Allows parallel team development by decoupling telemetry consumers from hardware clients.

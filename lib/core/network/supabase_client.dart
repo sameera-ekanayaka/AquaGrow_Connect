@@ -1,6 +1,6 @@
+import 'package:aquagrow_mobile/core/security/secure_storage_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../security/secure_storage_service.dart';
 
 /// Riverpod provider exposing the hardware-backed secure storage service.
 final secureStorageServiceProvider = Provider<SecureStorageService>((ref) {

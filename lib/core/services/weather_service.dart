@@ -1,9 +1,10 @@
 import 'dart:convert';
+
+import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
+import 'package:aquagrow_mobile/core/mocks/mock_weather_service.dart';
+import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import '../interfaces/i_weather_service.dart';
-import '../mocks/mock_weather_service.dart';
-import '../models/weather_data.dart';
 
 /// Real OpenWeatherMap REST API client with automatic fallback to [MockWeatherService].
 /// Guarantees that whether an API key is available or offline, the app continues

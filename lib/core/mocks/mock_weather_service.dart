@@ -1,6 +1,7 @@
 import 'dart:math' as math;
-import '../interfaces/i_weather_service.dart';
-import '../models/weather_data.dart';
+
+import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
+import 'package:aquagrow_mobile/core/models/weather_data.dart';
 
 /// Offline mock implementation of [IWeatherService].
 /// Provides deterministic, hyper-local equatorial weather telemetry for Sri Lanka

@@ -1,8 +1,8 @@
+import 'package:aquagrow_mobile/core/interfaces/i_auth_repository.dart';
+import 'package:aquagrow_mobile/core/models/user_profile.dart';
+import 'package:aquagrow_mobile/core/network/supabase_client.dart';
+import 'package:aquagrow_mobile/features/auth/data/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/interfaces/i_auth_repository.dart';
-import '../../../core/models/user_profile.dart';
-import '../../../core/network/supabase_client.dart';
-import '../data/auth_repository.dart';
 
 /// Exposes the centralized authentication repository instance.
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {

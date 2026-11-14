@@ -1,9 +1,9 @@
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
+import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
+import 'package:aquagrow_mobile/features/location/widgets/supplier_pin_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/models/hydro_supplier.dart';
-import '../widgets/supplier_pin_modal.dart';
-import 'location_providers.dart';
 
 /// Interactive Hydro-Hub supply directory screen with GPS distance computation,
 /// category filtering, product search, and verified supplier details.

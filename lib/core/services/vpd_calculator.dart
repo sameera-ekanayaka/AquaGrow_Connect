@@ -1,5 +1,6 @@
 import 'dart:math' as math;
-import '../models/vpd_reading.dart';
+
+import 'package:aquagrow_mobile/core/models/vpd_reading.dart';
 
 /// Scientific calculation engine for Vapor Pressure Deficit (VPD),
 /// leaf transpiration dynamics, and circadian photoperiod grow-light scheduling.
