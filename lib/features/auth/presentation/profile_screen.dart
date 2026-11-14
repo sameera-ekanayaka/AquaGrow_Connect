@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import 'auth_providers.dart';
-import 'login_screen.dart';
+import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 
 /// User profile and session management screen.
 /// Displays authenticated role, cryptographic keystore status, and hardware permissions.
@@ -28,12 +28,7 @@ class ProfileScreen extends ConsumerWidget {
             icon: const Icon(Icons.logout_rounded, color: AppColors.statusCritical),
             tooltip: 'Sign Out',
             onPressed: () async {
-              await ref.read(authControllerProvider.notifier).signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
-              }
+              await _confirmSignOut(context, ref);
             },
           ),
         ],
@@ -282,12 +277,7 @@ class ProfileScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: () async {
-                  await ref.read(authControllerProvider.notifier).signOut();
-                  if (context.mounted) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
-                  }
+                  await _confirmSignOut(context, ref);
                 },
               ),
             ],
@@ -295,6 +285,18 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Logout must be confirmed (lecture 5). The router then shows the login screen.
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: 'Sign out?',
+      message: 'You will need your email and password to sign back in.',
+      confirmLabel: 'Sign out',
+      destructive: true,
+    );
+    if (ok) await ref.read(authControllerProvider.notifier).signOut();
   }
 
   Widget _buildPermissionRow({
