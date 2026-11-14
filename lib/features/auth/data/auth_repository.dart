@@ -4,6 +4,7 @@ import 'package:aquagrow_mobile/core/interfaces/i_auth_repository.dart';
 import 'package:aquagrow_mobile/core/models/user_profile.dart';
 import 'package:aquagrow_mobile/core/network/supabase_client.dart';
 import 'package:aquagrow_mobile/core/security/secure_storage_service.dart';
+import 'package:aquagrow_mobile/features/auth/data/auth_error_mapper.dart';
 
 /// Concrete authentication repository orchestrating Supabase Auth,
 /// hardware-backed keystore token persistence, and instant offline/mock fallbacks.
@@ -87,8 +88,8 @@ class AuthRepository implements IAuthRepository {
           return _currentUser;
         }
       } catch (e) {
-        // Fall through to rethrow Supabase authentication exception
-        rethrow;
+        // Screens only ever see a friendly AppFailure, never the raw error.
+        throw mapAuthError(e);
       }
     }
 
@@ -153,7 +154,7 @@ class AuthRepository implements IAuthRepository {
           return _currentUser;
         }
       } catch (e) {
-        rethrow;
+        throw mapAuthError(e);
       }
     }
 
@@ -196,8 +197,14 @@ class AuthRepository implements IAuthRepository {
     }
 
     if (SupabaseManager.isConfigured) {
-      await SupabaseManager.client.auth.resetPasswordForEmail(sanitizedEmail);
+      try {
+        await SupabaseManager.client.auth.resetPasswordForEmail(sanitizedEmail);
+      } catch (e) {
+        throw mapAuthError(e);
+      }
     }
+    // Without Supabase (simulation) there is no email to send; the screen
+    // still shows the same success message so the flow can be demonstrated.
   }
 
   /// Queries the public.profiles relational table and emits updated domain model.
