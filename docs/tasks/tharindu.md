@@ -35,6 +35,11 @@ the Figma components, export them in `widgets.dart`, and add widget tests:
 
 Tell the group in WhatsApp as soon as it is merged.
 
+### 1b. SHOULD: Bundle the Inter font (`feature/tharindu-inter-font`)
+
+Add Inter Regular, Medium, SemiBold and Bold (`.ttf`, OFL licence) to `assets/fonts/`, declare the
+family in `pubspec.yaml`, and set `fontFamily: 'Inter'` in `AppTheme`. Update DESIGN.md.
+
 ### 2. MUST: Settings screen (`feature/tharindu-settings`)
 
 `lib/features/settings/presentation/settings_screen.dart`, route `/settings`, linked from Care
