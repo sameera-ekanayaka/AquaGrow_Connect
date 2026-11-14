@@ -9,6 +9,10 @@ analyzer:
     missing_required_param: error
     missing_return: error
     todo: ignore
+    # Flutter 3.47+ marks package:flutter/material.dart as deprecated in favour of
+    # package:material_ui. The team stays on material.dart until after the demo,
+    # so hide that notice instead of showing it in every file. Do NOT migrate.
+    deprecated_member_use: ignore
   exclude:
     - build/**
     - "**/*.g.dart"
