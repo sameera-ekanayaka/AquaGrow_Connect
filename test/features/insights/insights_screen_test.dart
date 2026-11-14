@@ -58,105 +58,117 @@ void main() {
 
   group('InsightsScreen widget tests', () {
     testWidgets(
-        'renders screen headers, metric chips, and initial 24-hour chart',
-        (tester) async {
-      final sim = PodSimulator(clock: () => fixedClock);
-      final container = ProviderContainer(
-        overrides: [
-          podSimulatorProvider.overrideWithValue(sim),
-          clockProvider.overrideWithValue(() => fixedClock),
-          selectedPodProvider.overrideWithValue(demoPod),
-          historyProvider.overrideWith((ref) => Future.value(sampleReadings)),
-        ],
-      );
-      addTearDown(container.dispose);
+      'renders screen headers, metric chips, and initial 24-hour chart',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(createWidgetUnderTest(container: container));
-      await tester.pump();
-      await tester.pump();
+        final sim = PodSimulator(clock: () => fixedClock);
+        final container = ProviderContainer(
+          overrides: [
+            podSimulatorProvider.overrideWithValue(sim),
+            clockProvider.overrideWithValue(() => fixedClock),
+            selectedPodProvider.overrideWithValue(demoPod),
+            historyProvider.overrideWith((ref) => sampleReadings),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      // Screen title and pod display name in overline
-      expect(find.text('Insights'), findsOneWidget);
-      expect(find.text('POD ALPHA · KITCHEN'), findsOneWidget);
+        await tester.pumpWidget(createWidgetUnderTest(container: container));
+        await tester.pump();
+        await tester.pump();
 
-      // Metric chips are present
-      expect(find.text('pH'), findsOneWidget);
-      expect(find.text('Nutrients (EC)'), findsOneWidget);
-      expect(find.text('Water temp'), findsOneWidget);
-      expect(find.text('Water level'), findsOneWidget);
+        // Screen title and pod display name in overline
+        expect(find.text('Insights'), findsOneWidget);
+        expect(find.textContaining('POD ALPHA'), findsOneWidget);
 
-      // Range selector
-      expect(find.text('24 hours'), findsOneWidget);
-      expect(find.text('7 days'), findsOneWidget);
+        // Metric chips are present
+        expect(find.text('pH'), findsOneWidget);
+        expect(find.text('Nutrients (EC)'), findsOneWidget);
+        expect(find.text('Water temp'), findsOneWidget);
+        expect(find.text('Water level'), findsOneWidget);
 
-      // Weather and VPD banner
-      expect(find.text('Weather and VPD'), findsOneWidget);
+        // Range selector
+        expect(find.text('24 hours'), findsOneWidget);
+        expect(find.text('7 days'), findsOneWidget);
 
-      // Stats row under chart has stability info
-      expect(find.textContaining('% in range'), findsOneWidget);
-    });
+        // Weather and VPD banner
+        expect(find.text('Weather and VPD'), findsOneWidget);
+
+        // Stats row under chart has stability info
+        expect(find.textContaining('% in range'), findsOneWidget);
+      },
+    );
 
     testWidgets(
-        'switching to 7 days updates the historyRangeProvider and requests 7 days',
-        (tester) async {
-      final sim = PodSimulator(clock: () => fixedClock);
-      final container = ProviderContainer(
-        overrides: [
-          podSimulatorProvider.overrideWithValue(sim),
-          clockProvider.overrideWithValue(() => fixedClock),
-          selectedPodProvider.overrideWithValue(demoPod),
-          historyProvider.overrideWith((ref) => Future.value(sampleReadings)),
-        ],
-      );
-      addTearDown(container.dispose);
+      'switching to 7 days updates the historyRangeProvider and requests 7 days',
+      (tester) async {
+        final sim = PodSimulator(clock: () => fixedClock);
+        final container = ProviderContainer(
+          overrides: [
+            podSimulatorProvider.overrideWithValue(sim),
+            clockProvider.overrideWithValue(() => fixedClock),
+            selectedPodProvider.overrideWithValue(demoPod),
+            historyProvider.overrideWith((ref) => sampleReadings),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      await tester.pumpWidget(createWidgetUnderTest(container: container));
-      await tester.pump();
-      await tester.pump();
+        await tester.pumpWidget(createWidgetUnderTest(container: container));
+        await tester.pump();
+        await tester.pump();
 
-      // Initially in 24 hours
-      expect(
-        container.read(historyRangeProvider),
-        equals(HistoryRange.hours24),
-      );
+        // Initially in 24 hours
+        expect(
+          container.read(historyRangeProvider),
+          equals(HistoryRange.hours24),
+        );
 
-      // Tap 7 days button
-      await tester.tap(find.text('7 days'));
-      await tester.pump();
-      await tester.pump();
+        // Tap 7 days button
+        await tester.tap(find.text('7 days'));
+        await tester.pump();
+        await tester.pump();
 
-      // Verify state transitioned to 7 days
-      expect(container.read(historyRangeProvider), equals(HistoryRange.days7));
-    });
+        // Verify state transitioned to 7 days
+        expect(
+          container.read(historyRangeProvider),
+          equals(HistoryRange.days7),
+        );
+      },
+    );
 
-    testWidgets('switching metric chip updates the active graphed metric',
-        (tester) async {
-      final sim = PodSimulator(clock: () => fixedClock);
-      final container = ProviderContainer(
-        overrides: [
-          podSimulatorProvider.overrideWithValue(sim),
-          clockProvider.overrideWithValue(() => fixedClock),
-          selectedPodProvider.overrideWithValue(demoPod),
-          historyProvider.overrideWith((ref) => Future.value(sampleReadings)),
-        ],
-      );
-      addTearDown(container.dispose);
+    testWidgets(
+      'switching metric chip updates the active graphed metric',
+      (tester) async {
+        final sim = PodSimulator(clock: () => fixedClock);
+        final container = ProviderContainer(
+          overrides: [
+            podSimulatorProvider.overrideWithValue(sim),
+            clockProvider.overrideWithValue(() => fixedClock),
+            selectedPodProvider.overrideWithValue(demoPod),
+            historyProvider.overrideWith((ref) => sampleReadings),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      await tester.pumpWidget(createWidgetUnderTest(container: container));
-      await tester.pump();
-      await tester.pump();
+        await tester.pumpWidget(createWidgetUnderTest(container: container));
+        await tester.pump();
+        await tester.pump();
 
-      // Initially pH
-      expect(container.read(historyMetricProvider), equals(SensorMetric.ph));
+        // Initially pH
+        expect(container.read(historyMetricProvider), equals(SensorMetric.ph));
 
-      // Tap Nutrients (EC) chip
-      await tester.tap(find.text('Nutrients (EC)'));
-      await tester.pump();
-      await tester.pump();
+        // Tap Nutrients (EC) chip
+        await tester.tap(find.text('Nutrients (EC)'));
+        await tester.pump();
+        await tester.pump();
 
-      // Verify metric changed to EC
-      expect(container.read(historyMetricProvider), equals(SensorMetric.ec));
-      expect(find.textContaining('mS/cm'), findsWidgets);
-    });
+        // Verify metric changed to EC
+        expect(container.read(historyMetricProvider), equals(SensorMetric.ec));
+        expect(find.textContaining('mS/cm'), findsWidgets);
+      },
+    );
   });
 }
