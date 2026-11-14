@@ -1,17 +1,39 @@
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
+import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/insights/application/history_providers.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/insights_screen.dart';
+import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
+import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
+import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final fixedClock = DateTime(2026, 11, 15, 10, 0);
+
+  final sampleWeather = WeatherData(
+    temperatureC: 28.0,
+    relativeHumidityPct: 70.0,
+    atmosphericPressureHpa: 1012.0,
+    uvIndex: 5.0,
+    windSpeedMps: 2.5,
+    weatherCondition: 'Clear',
+    weatherDescription: 'clear sky',
+    iconCode: '01d',
+    cityName: 'Colombo',
+    countryCode: 'LK',
+    latitude: 6.9271,
+    longitude: 79.8612,
+    sunriseTime: fixedClock.subtract(const Duration(hours: 4)),
+    sunsetTime: fixedClock.add(const Duration(hours: 8)),
+    recordedAt: fixedClock,
+  );
 
   final demoPod = Pod(
     id: 'pod-alpha',
@@ -72,13 +94,14 @@ void main() {
             clockProvider.overrideWithValue(() => fixedClock),
             selectedPodProvider.overrideWithValue(demoPod),
             historyProvider.overrideWith((ref) => sampleReadings),
+            weatherDataProvider.overrideWith((ref) => sampleWeather),
           ],
         );
         addTearDown(container.dispose);
 
         await tester.pumpWidget(createWidgetUnderTest(container: container));
         await tester.pump();
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         // Screen title and pod display name in overline
         expect(find.text('Insights'), findsOneWidget);
@@ -106,17 +129,25 @@ void main() {
         expect(find.text('24 hours'), findsOneWidget);
         expect(find.text('7 days'), findsOneWidget);
 
-        // Weather and VPD banner
-        expect(find.text('Weather and VPD'), findsOneWidget);
-
         // Stats row under chart has stability info
         expect(find.textContaining('% in range'), findsOneWidget);
+
+        // Embedded weather summary and VPD cards
+        expect(find.byType(WeatherSummaryCard), findsOneWidget);
+        expect(find.byType(VpdGaugeCard), findsOneWidget);
+
+        // Microclimate controls navigation banner
+        expect(find.text('Weather and VPD'), findsOneWidget);
       },
     );
 
     testWidgets(
       'switching to 7 days updates the historyRangeProvider and requests 7 days',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
         final sim = PodSimulator(clock: () => fixedClock);
         final container = ProviderContainer(
           overrides: [
@@ -124,13 +155,14 @@ void main() {
             clockProvider.overrideWithValue(() => fixedClock),
             selectedPodProvider.overrideWithValue(demoPod),
             historyProvider.overrideWith((ref) => sampleReadings),
+            weatherDataProvider.overrideWith((ref) => sampleWeather),
           ],
         );
         addTearDown(container.dispose);
 
         await tester.pumpWidget(createWidgetUnderTest(container: container));
         await tester.pump();
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         // Initially in 24 hours
         expect(
@@ -141,7 +173,7 @@ void main() {
         // Tap 7 days button
         await tester.tap(find.text('7 days'));
         await tester.pump();
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         // Verify state transitioned to 7 days
         expect(
@@ -154,6 +186,11 @@ void main() {
     testWidgets(
       'switching metric chip updates the active graphed metric',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
         final sim = PodSimulator(clock: () => fixedClock);
         final container = ProviderContainer(
           overrides: [
@@ -161,13 +198,14 @@ void main() {
             clockProvider.overrideWithValue(() => fixedClock),
             selectedPodProvider.overrideWithValue(demoPod),
             historyProvider.overrideWith((ref) => sampleReadings),
+            weatherDataProvider.overrideWith((ref) => sampleWeather),
           ],
         );
         addTearDown(container.dispose);
 
         await tester.pumpWidget(createWidgetUnderTest(container: container));
         await tester.pump();
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         // Initially pH
         expect(container.read(historyMetricProvider), equals(SensorMetric.ph));
@@ -175,7 +213,7 @@ void main() {
         // Tap Nutrients (EC) chip
         await tester.tap(find.widgetWithText(FilterChip, 'Nutrients (EC)'));
         await tester.pump();
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
         // Verify metric changed to EC
         expect(container.read(historyMetricProvider), equals(SensorMetric.ec));

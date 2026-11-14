@@ -1,43 +1,34 @@
-import 'package:aquagrow_mobile/core/constants/app_colors.dart';
 import 'package:aquagrow_mobile/core/models/weather_data.dart';
+import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Biophilic glassmorphic card displaying hyper-local ambient weather conditions,
-/// atmospheric pressure, UV index, and solar daylight duration.
+/// Card displaying hyper-local ambient weather conditions,
+/// atmospheric pressure, UV index, and solar daylight schedule.
+///
+/// Restyled strictly to Figma design tokens (`context.ag`, `AgSpace`, `AgRadius`).
 class WeatherSummaryCard extends ConsumerWidget {
   const WeatherSummaryCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsync = ref.watch(weatherDataProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.ag;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(AgSpace.s16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.25 : 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: colors.surface,
+        borderRadius: AgRadius.all(AgRadius.r20),
+        border: Border.all(color: colors.border),
       ),
       child: weatherAsync.when(
-        data: (weather) => _buildWeatherContent(context, ref, weather, isDark),
-        loading: () => const Center(
+        data: (weather) => _buildWeatherContent(context, ref, weather),
+        loading: () => Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 32.0),
-            child: CircularProgressIndicator(color: AppColors.mintAccent),
+            padding: const EdgeInsets.symmetric(vertical: AgSpace.s32),
+            child: CircularProgressIndicator(color: colors.brand),
           ),
         ),
         error: (error, _) => _buildErrorContent(context, ref, error.toString()),
@@ -49,10 +40,9 @@ class WeatherSummaryCard extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     WeatherData weather,
-    bool isDark,
   ) {
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,31 +53,32 @@ class WeatherSummaryCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.location_on,
-                  color: AppColors.mintAccent,
-                  size: 22,
+                  color: colors.brand,
+                  size: 20,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AgSpace.s8),
                 Text(
                   '${weather.cityName}, ${weather.countryCode}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: primaryTextColor,
-                      ),
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.text,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AgSpace.s8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primarySage.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
+                    color: colors.brandSurface,
+                    borderRadius: AgRadius.all(AgRadius.pill),
                   ),
                   child: Text(
                     '${weather.latitude.toStringAsFixed(2)}°, ${weather.longitude.toStringAsFixed(2)}°',
-                    style: TextStyle(
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colors.textSecondary,
                       fontSize: 11,
-                      color: secondaryTextColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -96,16 +87,13 @@ class WeatherSummaryCard extends ConsumerWidget {
             ),
             IconButton(
               tooltip: 'Refresh Weather',
-              icon: const Icon(Icons.refresh, size: 20),
-              color: AppColors.mintAccent,
-              onPressed: () {
-                ref.invalidate(weatherDataProvider);
-              },
+              icon: Icon(Icons.refresh, size: 18, color: colors.textSecondary),
+              onPressed: () => ref.invalidate(weatherDataProvider),
             ),
           ],
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AgSpace.s12),
 
         // Primary Temperature & Condition Row
         Row(
@@ -120,34 +108,32 @@ class WeatherSummaryCard extends ConsumerWidget {
                   children: [
                     Text(
                       '${weather.temperatureC.toStringAsFixed(1)}°',
-                      style: TextStyle(
-                        fontSize: 48,
+                      style: textTheme.displaySmall?.copyWith(
+                        color: colors.text,
                         fontWeight: FontWeight.w800,
-                        color: primaryTextColor,
+                        fontSize: 42,
                         height: 1.0,
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 4.0),
+                    Padding(
+                      padding: const EdgeInsets.only(top: AgSpace.s4),
                       child: Text(
                         'C',
-                        style: TextStyle(
-                          fontSize: 20,
+                        style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppColors.mintAccent,
+                          color: colors.brand,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AgSpace.s4),
                 Text(
                   weather.weatherDescription.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.1,
-                    color: secondaryTextColor,
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -155,102 +141,102 @@ class WeatherSummaryCard extends ConsumerWidget {
 
             // Weather Condition Badge Icon
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AgSpace.s12),
               decoration: BoxDecoration(
-                color: AppColors.primarySage.withOpacity(0.12),
+                color: colors.brandSurface,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 _getWeatherIcon(weather.weatherCondition),
-                size: 38,
-                color: AppColors.mintAccent,
+                size: 32,
+                color: colors.text,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 20),
-        const Divider(height: 1),
-        const SizedBox(height: 16),
+        const SizedBox(height: AgSpace.s16),
+        Divider(color: colors.border, height: 1),
+        const SizedBox(height: AgSpace.s16),
 
         // Atmospheric Metrics Grid
         Row(
           children: [
             Expanded(
               child: _buildMetricTile(
+                context: context,
                 icon: Icons.water_drop_outlined,
                 label: 'Humidity',
                 value: '${weather.relativeHumidityPct.toStringAsFixed(0)}%',
-                isDark: isDark,
               ),
             ),
             Expanded(
               child: _buildMetricTile(
+                context: context,
                 icon: Icons.compress_outlined,
                 label: 'Pressure',
-                value: '${weather.atmosphericPressureHpa.toStringAsFixed(0)} hPa',
-                isDark: isDark,
+                value:
+                    '${weather.atmosphericPressureHpa.toStringAsFixed(0)} hPa',
               ),
             ),
             Expanded(
               child: _buildMetricTile(
+                context: context,
                 icon: Icons.wb_sunny_outlined,
                 label: 'UV Index',
                 value: weather.uvIndex.toStringAsFixed(1),
-                isDark: isDark,
               ),
             ),
             Expanded(
               child: _buildMetricTile(
+                context: context,
                 icon: Icons.air,
                 label: 'Wind',
                 value: '${weather.windSpeedMps.toStringAsFixed(1)} m/s',
-                isDark: isDark,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AgSpace.s16),
 
         // Solar Daylight Bar
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-              width: 0.8,
-            ),
+            color: colors.subtle,
+            borderRadius: AgRadius.all(AgRadius.r16),
+            border: Border.all(color: colors.border),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  const Icon(Icons.wb_twilight, color: Color(0xFFF4A261), size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.wb_twilight, color: colors.warning, size: 18),
+                  const SizedBox(width: AgSpace.s8),
                   Text(
                     'Sunrise: ${_formatTime(weather.sunriseTime)}',
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: secondaryTextColor,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
               ),
               Row(
                 children: [
-                  const Icon(Icons.nightlight_round, color: Color(0xFF457B9D), size: 16),
-                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.nightlight_round,
+                    color: colors.textSecondary,
+                    size: 16,
+                  ),
+                  const SizedBox(width: AgSpace.s8),
                   Text(
                     'Sunset: ${_formatTime(weather.sunsetTime)}',
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: secondaryTextColor,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -263,32 +249,31 @@ class WeatherSummaryCard extends ConsumerWidget {
   }
 
   Widget _buildMetricTile({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
-    required bool isDark,
   }) {
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
 
     return Column(
       children: [
-        Icon(icon, size: 20, color: AppColors.mintAccent),
-        const SizedBox(height: 6),
+        Icon(icon, size: 18, color: colors.brand),
+        const SizedBox(height: AgSpace.s4),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 13,
+          style: textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: primaryTextColor,
+            color: colors.text,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
+          style: textTheme.bodySmall?.copyWith(
             fontSize: 11,
-            color: secondaryTextColor,
+            color: colors.textSecondary,
           ),
         ),
       ],
@@ -296,22 +281,28 @@ class WeatherSummaryCard extends ConsumerWidget {
   }
 
   Widget _buildErrorContent(BuildContext context, WidgetRef ref, String error) {
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       children: [
-        const Icon(Icons.cloud_off, color: AppColors.statusWarning, size: 36),
-        const SizedBox(height: 8),
+        Icon(Icons.cloud_off, color: colors.warning, size: 36),
+        const SizedBox(height: AgSpace.s8),
         Text(
           'Unable to acquire live weather',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colors.text,
+          ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AgSpace.s4),
         Text(
           error,
-          style: const TextStyle(fontSize: 11, color: AppColors.textDarkSecondary),
+          style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 12),
-        ElevatedButton.icon(
+        const SizedBox(height: AgSpace.s12),
+        OutlinedButton.icon(
           onPressed: () => ref.invalidate(weatherDataProvider),
           icon: const Icon(Icons.refresh, size: 16),
           label: const Text('Retry Connection'),
