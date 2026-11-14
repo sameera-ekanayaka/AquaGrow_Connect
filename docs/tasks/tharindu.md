@@ -85,6 +85,8 @@ family in `pubspec.yaml`, set `fontFamily: 'Inter'` in `AppTheme`, update DESIGN
 
 ### 6. MUST: Demo-flow widget test (`test/app/demo_flow_test.dart`)
 
+- [x] Done: sign in, Home, pH crash, bell and Alerts, notification, Crops, Insights.
+
 One widget test that walks the demo: sign in, Home shows pods, simulator pH crash, alert appears,
 open Crops, open Insights. Uses `testApp()` and `sim.tick()`.
 
