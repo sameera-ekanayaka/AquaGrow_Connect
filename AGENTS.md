@@ -48,6 +48,9 @@ repeat for each small step:
     git commit                                  # one small, atomic, conventional commit
 git push -u origin feature/<name>-<task>
 open a PR into main using the template; tick the task's checkbox in the same PR
+merge only when CI's "Commit messages" and "Analyze and test" checks are green, and only
+    if the user says to (merge order: Sameera, then any teammate after ~30 min, then the
+    author when blocked or near a deadline; see CONTRIBUTING.md section 4)
 ```
 
 Then move to the next task on a new branch from the updated `main`.
