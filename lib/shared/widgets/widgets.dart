@@ -6,6 +6,10 @@
 library;
 
 export 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
+export 'package:aquagrow_mobile/shared/widgets/crop_hero.dart';
+export 'package:aquagrow_mobile/shared/widgets/crop_photo.dart';
+export 'package:aquagrow_mobile/shared/widgets/crop_tile.dart';
+export 'package:aquagrow_mobile/shared/widgets/pod_card.dart';
 export 'package:aquagrow_mobile/shared/widgets/section_header.dart';
 export 'package:aquagrow_mobile/shared/widgets/sensor_tile.dart';
 export 'package:aquagrow_mobile/shared/widgets/state_views.dart';
