@@ -38,7 +38,7 @@ On the Insights tab, replacing the "Charts are on the way" placeholder.
 Tests: `history_stats_test.dart` (known lists give known min/max/avg/stability), plus a widget test
 that switching to `7 days` asks for a 7-day range.
 
-### 2. MUST: Weather and VPD in Insights (`feature/imasha-weather-ui`)
+### 2. [x] MUST: Weather and VPD in Insights (`feature/imasha-weather-ui`)
 
 - Move the weather summary and VPD gauge cards from `microclimate_screen.dart` onto the Insights tab,
   under the chart, restyled to the Figma theme (no `AppColors`, no `GoogleFonts` in your files).
