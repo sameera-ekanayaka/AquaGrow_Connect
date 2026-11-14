@@ -1,10 +1,13 @@
+import 'package:aquagrow_mobile/core/config/app_config.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
+import 'package:aquagrow_mobile/core/mocks/mock_weather_service.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/models/vpd_reading.dart';
 import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
 import 'package:aquagrow_mobile/core/services/weather_service.dart';
+import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Provider for the hardware GPS and geolocation service.
@@ -13,8 +16,15 @@ final geoServiceProvider = Provider<GeoService>((ref) {
 });
 
 /// Provider for the atmospheric weather service.
+///
+/// Automatically uses the API key configured in [AppConfig], delegating to
+/// [MockWeatherService] when offline or no API key is set.
 final weatherServiceProvider = Provider<IWeatherService>((ref) {
-  return WeatherService();
+  final config = ref.watch(appConfigProvider);
+  if (!config.hasWeatherKey) {
+    return MockWeatherService();
+  }
+  return WeatherService(defaultApiKey: config.openWeatherApiKey);
 });
 
 /// Current geographic coordinates provider with asynchronous acquisition.
@@ -54,16 +64,27 @@ final photoperiodScheduleProvider = Provider<PhotoperiodSchedule?>((ref) {
   );
 });
 
-/// Ambient temperature override for VPD calculations (e.g. from telemetry or user adjustment).
+/// Ambient temperature fallback for VPD calculations when sensor readings lack ambient temp.
 final ambientTempProvider = StateProvider<double>((ref) => 28.5);
 
-/// Ambient humidity override for VPD calculations (e.g. from telemetry or user adjustment).
+/// Ambient humidity fallback for VPD calculations when sensor readings lack ambient humidity.
 final ambientHumidityProvider = StateProvider<double>((ref) => 72.0);
 
 /// Real-time Vapor Pressure Deficit (VPD) reading provider.
+///
+/// Automatically feeds from the selected pod's latest [SensorReading.ambientTempC]
+/// and [SensorReading.humidityPct] via [latestReadingProvider], falling back to
+/// manual ambient settings if not yet reporting.
 final vpdReadingProvider = Provider<VpdReading>((ref) {
-  final temp = ref.watch(ambientTempProvider);
-  final humidity = ref.watch(ambientHumidityProvider);
+  final selectedPodId = ref.watch(selectedPodIdProvider);
+  final latestReading =
+      ref.watch(latestReadingProvider(selectedPodId)).valueOrNull;
+
+  final double temp =
+      latestReading?.ambientTempC ?? ref.watch(ambientTempProvider);
+  final double humidity =
+      latestReading?.humidityPct ?? ref.watch(ambientHumidityProvider);
+
   return VpdCalculator.calculateVpd(
     airTempC: temp,
     humidityPct: humidity,
@@ -79,7 +100,8 @@ final supplierSearchQueryProvider = StateProvider<String>((ref) => '');
 /// Filtered and distance-sorted list of verified hydroponic suppliers.
 final sortedSuppliersProvider = Provider<List<HydroSupplier>>((ref) {
   final selectedCategory = ref.watch(selectedSupplierCategoryProvider);
-  final searchQuery = ref.watch(supplierSearchQueryProvider).toLowerCase().trim();
+  final searchQuery =
+      ref.watch(supplierSearchQueryProvider).toLowerCase().trim();
   final positionAsync = ref.watch(currentPositionProvider);
   final position = positionAsync.value ?? GeoPosition.defaultColombo;
 
@@ -95,7 +117,8 @@ final sortedSuppliersProvider = Provider<List<HydroSupplier>>((ref) {
     suppliers = suppliers.where((s) {
       final nameMatches = s.name.toLowerCase().contains(searchQuery);
       final cityMatches = s.city.toLowerCase().contains(searchQuery);
-      final productMatches = s.featuredProducts.any((p) => p.toLowerCase().contains(searchQuery));
+      final productMatches =
+          s.featuredProducts.any((p) => p.toLowerCase().contains(searchQuery));
       return nameMatches || cityMatches || productMatches;
     }).toList();
   }
