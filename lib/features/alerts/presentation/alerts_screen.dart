@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 /// Every alert, newest first.
 ///
-/// OWNER: Osanda (see docs/tasks/osanda.md).
+/// OWNER: Tharindu (see docs/tasks/tharindu.md).
 /// Lists what is stored. The alert engine that raises alerts is still to build.
 class AlertsScreen extends ConsumerWidget {
   const AlertsScreen({super.key});
