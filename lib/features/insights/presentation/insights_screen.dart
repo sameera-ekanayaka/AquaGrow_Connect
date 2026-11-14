@@ -162,7 +162,11 @@ class InsightsScreen extends ConsumerWidget {
                 style: TextStyle(color: colors.textSecondary),
               ),
               trailing: Icon(Icons.chevron_right, color: colors.textSecondary),
-              onTap: () => context.push(AppRoutes.microclimate),
+              onTap: () {
+                if (GoRouter.maybeOf(context) != null) {
+                  context.push(AppRoutes.microclimate);
+                }
+              },
             ),
           ),
         ],

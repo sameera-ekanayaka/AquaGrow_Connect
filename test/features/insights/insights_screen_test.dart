@@ -1,4 +1,6 @@
+import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
+import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
@@ -11,16 +13,42 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final fixedClock = DateTime(2026, 11, 15, 10, 0);
 
+  final demoPod = Pod(
+    id: 'pod-alpha',
+    name: 'Pod Alpha',
+    room: 'Kitchen',
+    isOnline: true,
+    lastSeenAt: fixedClock,
+  );
+
+  final sampleReadings = [
+    SensorReading(
+      id: 'r1',
+      deviceId: 'pod-alpha',
+      ph: 6.2,
+      tdsPpm: 900,
+      ecMs: 1.8,
+      waterTempC: 22.0,
+      waterLevelPct: 80.0,
+      recordedAt: fixedClock.subtract(const Duration(hours: 12)),
+    ),
+    SensorReading(
+      id: 'r2',
+      deviceId: 'pod-alpha',
+      ph: 6.0,
+      tdsPpm: 900,
+      ecMs: 1.8,
+      waterTempC: 21.5,
+      waterLevelPct: 80.0,
+      recordedAt: fixedClock.subtract(const Duration(hours: 1)),
+    ),
+  ];
+
   Widget createWidgetUnderTest({
-    required PodSimulator sim,
-    ProviderContainer? container,
+    required ProviderContainer container,
   }) {
-    return ProviderScope(
-      parent: container,
-      overrides: [
-        podSimulatorProvider.overrideWithValue(sim),
-        clockProvider.overrideWithValue(() => fixedClock),
-      ],
+    return UncontrolledProviderScope(
+      container: container,
       child: MaterialApp(
         theme: AppTheme.light,
         home: const Scaffold(body: InsightsScreen()),
@@ -33,17 +61,23 @@ void main() {
         'renders screen headers, metric chips, and initial 24-hour chart',
         (tester) async {
       final sim = PodSimulator(clock: () => fixedClock);
+      final container = ProviderContainer(
+        overrides: [
+          podSimulatorProvider.overrideWithValue(sim),
+          clockProvider.overrideWithValue(() => fixedClock),
+          selectedPodProvider.overrideWithValue(demoPod),
+          historyProvider.overrideWith((ref) => Future.value(sampleReadings)),
+        ],
+      );
+      addTearDown(container.dispose);
 
-      await tester.pumpWidget(createWidgetUnderTest(sim: sim));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(createWidgetUnderTest(container: container));
+      await tester.pump();
+      await tester.pump();
 
-      // Title and overline
+      // Screen title and pod display name in overline
       expect(find.text('Insights'), findsOneWidget);
-      expect(
-        find.textContaining('HOW YOUR PODS ARE DOING'),
-        findsNothing,
-      ); // Overline has pod name
-      expect(find.textContaining('KITCHEN'), findsOneWidget);
+      expect(find.text('POD ALPHA · KITCHEN'), findsOneWidget);
 
       // Metric chips are present
       expect(find.text('pH'), findsOneWidget);
@@ -70,13 +104,15 @@ void main() {
         overrides: [
           podSimulatorProvider.overrideWithValue(sim),
           clockProvider.overrideWithValue(() => fixedClock),
+          selectedPodProvider.overrideWithValue(demoPod),
+          historyProvider.overrideWith((ref) => Future.value(sampleReadings)),
         ],
       );
       addTearDown(container.dispose);
 
-      await tester
-          .pumpWidget(createWidgetUnderTest(sim: sim, container: container));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(createWidgetUnderTest(container: container));
+      await tester.pump();
+      await tester.pump();
 
       // Initially in 24 hours
       expect(
@@ -86,7 +122,8 @@ void main() {
 
       // Tap 7 days button
       await tester.tap(find.text('7 days'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump();
 
       // Verify state transitioned to 7 days
       expect(container.read(historyRangeProvider), equals(HistoryRange.days7));
@@ -99,20 +136,23 @@ void main() {
         overrides: [
           podSimulatorProvider.overrideWithValue(sim),
           clockProvider.overrideWithValue(() => fixedClock),
+          selectedPodProvider.overrideWithValue(demoPod),
+          historyProvider.overrideWith((ref) => Future.value(sampleReadings)),
         ],
       );
       addTearDown(container.dispose);
 
-      await tester
-          .pumpWidget(createWidgetUnderTest(sim: sim, container: container));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(createWidgetUnderTest(container: container));
+      await tester.pump();
+      await tester.pump();
 
       // Initially pH
       expect(container.read(historyMetricProvider), equals(SensorMetric.ph));
 
       // Tap Nutrients (EC) chip
       await tester.tap(find.text('Nutrients (EC)'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump();
 
       // Verify metric changed to EC
       expect(container.read(historyMetricProvider), equals(SensorMetric.ec));

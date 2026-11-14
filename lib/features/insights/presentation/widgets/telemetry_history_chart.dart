@@ -59,6 +59,27 @@ class TelemetryHistoryChart extends StatelessWidget {
     // Sort chronologically by X
     spots.sort((a, b) => a.x.compareTo(b.x));
 
+    if (spots.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(AgSpace.s16),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: AgRadius.all(AgRadius.r20),
+          border: Border.all(color: colors.border),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AgSpace.s24),
+            child: Text(
+              'No readings recorded for this period',
+              style:
+                  textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
+            ),
+          ),
+        ),
+      );
+    }
+
     // Dynamic Y-axis scale based on data and metric targets
     final dataMin = stats.min;
     final dataMax = stats.max;
