@@ -142,6 +142,30 @@ class InsightsScreen extends ConsumerWidget {
 
           const SizedBox(height: AgSpace.s16),
 
+          // Weather and VPD section header with shortcut to microclimate controls
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Weather and VPD',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colors.text,
+                    ),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (GoRouter.maybeOf(context) != null) {
+                    context.push(AppRoutes.microclimate);
+                  }
+                },
+                child: const Text('Controls'),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AgSpace.s8),
+
           // Hyper-local ambient weather summary
           const WeatherSummaryCard(),
 
@@ -149,38 +173,6 @@ class InsightsScreen extends ConsumerWidget {
 
           // Real-time canopy transpiration VPD gauge
           const VpdGaugeCard(),
-
-          const SizedBox(height: AgSpace.s16),
-
-          // Microclimate detail navigation banner
-          Card(
-            color: colors.surface,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: AgRadius.all(AgRadius.r16),
-              side: BorderSide(color: colors.border),
-            ),
-            child: ListTile(
-              leading: Icon(Icons.wb_sunny_outlined, color: colors.brand),
-              title: Text(
-                'Microclimate Controls',
-                style: TextStyle(
-                  color: colors.text,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              subtitle: Text(
-                'Manual sliders and full climate detail',
-                style: TextStyle(color: colors.textSecondary),
-              ),
-              trailing: Icon(Icons.chevron_right, color: colors.textSecondary),
-              onTap: () {
-                if (GoRouter.maybeOf(context) != null) {
-                  context.push(AppRoutes.microclimate);
-                }
-              },
-            ),
-          ),
         ],
       ),
     );
