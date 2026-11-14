@@ -90,8 +90,8 @@ void main() {
 
     testWidgets('signed-out user sees the login screen', (tester) async {
       await tester.pumpWidget(testApp(sim: sim, signedIn: false));
-      await tester.pump();
-      await tester.pump();
+      await tester.pump(); // saved session restored: no user
+      await tester.pump(const Duration(seconds: 1)); // finish the page transition
 
       expect(find.text('Your garden'), findsNothing);
       expect(find.byType(NavigationBar), findsNothing);
