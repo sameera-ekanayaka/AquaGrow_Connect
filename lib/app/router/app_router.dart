@@ -34,7 +34,9 @@ final _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 ///    implied) if it should cover the bar.
 /// 3. Navigate with `context.push(AppRoutes.x)` or `context.go(AppRoutes.x)`.
 final routerProvider = Provider<GoRouter>((ref) {
-  final session = ref.watch(authSessionProvider);
+  // read, not watch: the router must be built once. It re-checks the
+  // redirect itself whenever the session notifies (refreshListenable).
+  final session = ref.read(authSessionProvider);
 
   final router = GoRouter(
     navigatorKey: _rootKey,
