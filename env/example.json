@@ -1,0 +1,6 @@
+{
+  "DATA_MODE": "simulation",
+  "SUPABASE_URL": "",
+  "SUPABASE_ANON_KEY": "",
+  "OPENWEATHER_API_KEY": ""
+}
