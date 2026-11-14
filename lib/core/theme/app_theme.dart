@@ -1,10 +1,11 @@
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// The single Material 3 theme for the app, built from the Figma tokens.
 ///
-/// Text styles follow the Figma text styles (Inter, line height 1.4):
+/// Text styles follow the Figma text styles (line height 1.4). Figma uses Inter;
+/// the app uses the Android system font (Roboto) until Inter is bundled under
+/// `assets/fonts/` (runtime font downloads would fail offline and in tests):
 ///
 /// | Figma style | Flutter style      | Size / weight |
 /// |-------------|--------------------|---------------|
@@ -169,18 +170,16 @@ abstract final class AppTheme {
           color: color,
         );
 
-    return GoogleFonts.interTextTheme(
-      base.copyWith(
-        displaySmall: style(28, FontWeight.w700, c.text),
-        headlineMedium: style(28, FontWeight.w700, c.text),
-        titleLarge: style(20, FontWeight.w700, c.text),
-        titleMedium: style(16, FontWeight.w600, c.text),
-        bodyLarge: style(16, FontWeight.w400, c.text),
-        bodyMedium: style(14, FontWeight.w400, c.text),
-        labelLarge: style(14, FontWeight.w600, c.text),
-        bodySmall: style(12, FontWeight.w500, c.textSecondary),
-        labelSmall: style(12, FontWeight.w500, c.textSecondary),
-      ),
+    return base.copyWith(
+      displaySmall: style(28, FontWeight.w700, c.text),
+      headlineMedium: style(28, FontWeight.w700, c.text),
+      titleLarge: style(20, FontWeight.w700, c.text),
+      titleMedium: style(16, FontWeight.w600, c.text),
+      bodyLarge: style(16, FontWeight.w400, c.text),
+      bodyMedium: style(14, FontWeight.w400, c.text),
+      labelLarge: style(14, FontWeight.w600, c.text),
+      bodySmall: style(12, FontWeight.w500, c.textSecondary),
+      labelSmall: style(12, FontWeight.w500, c.textSecondary),
     );
   }
 }
