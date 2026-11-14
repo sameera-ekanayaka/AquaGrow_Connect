@@ -1,47 +1,60 @@
 name: aquagrow_mobile
-description: "AquaGrow Connect - Intelligent, Aesthetic Soil-less Cultivation System Mobile Application"
+description: "AquaGrow Connect: the companion app for the AquaGrow modular hydroponic pod."
 publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.19.0"
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
 
+# ---------------------------------------------------------------------------
+# RULE: only the foundation owner (Tharindu) or Sameera edits this file.
+# Need a package? Ask in the group first. See CONTRIBUTING.md.
+# Every package below is already used, or reserved for a named task.
+# ---------------------------------------------------------------------------
 dependencies:
   flutter:
     sdk: flutter
 
-  # State Management (Universal)
+  # State management and navigation
   flutter_riverpod: ^2.5.1
+  go_router: ^14.2.0
 
-  # Cloud Backend & Security (Member 2)
+  # Cloud backend and security
   supabase_flutter: ^2.5.6
   flutter_secure_storage: ^9.2.2
-  
-  # Offline Cache & Local Database (Member 2)
+  local_auth: ^2.2.0 # biometric unlock before pump/light commands
+
+  # Offline cache and network awareness
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  connectivity_plus: ^6.0.3 # offline banner + sync trigger
 
-  # Data Visualization & Analytics (Member 5)
-  fl_chart: ^0.68.0
-
-  # GPS Geolocation & Networking (Member 3 & Member 4)
+  # Device hardware (lecture 8)
   geolocator: ^12.0.0
+  sensors_plus: ^5.0.1 # shake to refresh
+  flutter_local_notifications: ^17.2.1 # alert notifications
+
+  # Networking
   http: ^1.2.1
 
-  # Traceability & QR Code Generation (Member 5)
+  # Charts, QR and formatting
+  fl_chart: ^0.68.0
   qr_flutter: ^4.1.0
-
-  # UI Design, Icons & Typography (Clean UI/UX)
-  google_fonts: ^6.2.1
-  cupertino_icons: ^1.0.6
   intl: ^0.19.0
   uuid: ^4.4.0
+
+  # UI
+  google_fonts: ^6.2.1
+  cupertino_icons: ^1.0.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/crops/
