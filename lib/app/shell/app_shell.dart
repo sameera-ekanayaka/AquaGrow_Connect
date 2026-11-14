@@ -1,6 +1,7 @@
 import 'package:aquagrow_mobile/app/shell/notification_setup.dart';
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
 import 'package:aquagrow_mobile/features/alerts/application/alert_engine.dart';
+import 'package:aquagrow_mobile/features/sync/presentation/sync_listener.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +13,8 @@ import 'package:go_router/go_router.dart';
 /// loses what the user was doing.
 ///
 /// The shell also keeps the alert engine running while the user is signed in,
-/// and starts notifications ([NotificationSetup]).
+/// starts notifications ([NotificationSetup]) and keeps offline sync running
+/// ([SyncListener]).
 class AppShell extends ConsumerWidget {
   const AppShell({required this.navigationShell, super.key});
 
@@ -55,12 +57,14 @@ class AppShell extends ConsumerWidget {
     // Starts the alert engine once and keeps it alive while the shell is shown.
     ref.watch(alertEngineProvider);
     return Scaffold(
-      body: NotificationSetup(
-        child: Column(
-          children: [
-            const OfflineBanner(),
-            Expanded(child: navigationShell),
-          ],
+      body: SyncListener(
+        child: NotificationSetup(
+          child: Column(
+            children: [
+              const OfflineBanner(),
+              Expanded(child: navigationShell),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: NavigationBar(
