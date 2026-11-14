@@ -23,6 +23,37 @@ Your old branch `feature/m1-telemetry-simulator` is replaced by `PodSimulator`. 
 
 ## Tasks
 
+### 0. FIRST, before anyone else starts: Verify the foundation on a real device
+
+The foundation (PR #4, branch `chore/foundation`) passed CI (analyze, tests, APK build), but it
+was written on a laptop without Flutter, so nobody has run it on a device yet. You check it,
+so the other four start from a base that works.
+
+```bash
+git fetch origin
+git switch chore/foundation
+flutter pub get
+flutter analyze            # expect: no errors, no warnings
+flutter test               # expect: all tests pass
+```
+
+Then in Android Studio run **AquaGrow (simulation)** on an emulator AND, if you can, a real phone:
+
+1. The login screen appears. Tap the demo account button and sign in. Home shows **Your garden**.
+2. Home shows **Pod Alpha · Kitchen** with a **Live** badge and 4 tiles (pH, Nutrients (EC), Water temp,
+   Water level) whose values change every 2 seconds.
+3. The bottom bar switches between Home, Crops (two pods), Insights and Care.
+4. Care > **Pod simulator** > **pH crash**, then back to Home: the pH tile shows 4.8 in red.
+5. Care > Pod simulator > **Pod offline** on Pod Beta: no crash. **Healthy pod** brings it back.
+6. Rotate the phone on Home: the layout still fits, no overflow stripes.
+7. Turn on flight mode: the offline banner appears; turn it off: it goes away.
+8. Profile > Sign out asks for confirmation, then returns to login.
+
+If something fails, fix it on a branch `fix/osanda-foundation-<what>` made from `chore/foundation`,
+open a PR into `chore/foundation`, and tell Tharindu. When all 8 steps pass, comment on PR #4:
+`Verified on <emulator/phone model>, Android <version>: all 8 checks pass.` and tell the group
+in WhatsApp. Sameera then merges PR #4 and everyone starts.
+
 ### 1. MUST: Alert engine (`feature/osanda-alert-engine`)
 
 Create `lib/features/alerts/application/alert_engine.dart`.
