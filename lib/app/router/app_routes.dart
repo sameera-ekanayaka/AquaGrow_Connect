@@ -18,6 +18,7 @@ abstract final class AppRoutes {
   static const alerts = '/alerts';
   static const profile = '/profile';
   static const simulator = '/simulator';
+  static const settings = '/settings';
   static const supplierMap = '/care/suppliers';
   static const microclimate = '/insights/microclimate';
 
