@@ -1,10 +1,41 @@
+# Static analysis rules. `flutter analyze` must report ZERO issues before any push.
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
   errors:
+    missing_required_param: error
+    missing_return: error
+    todo: ignore
+    # Flutter 3.47+ marks package:flutter/material.dart as deprecated in favour of
+    # package:material_ui. The team stays on material.dart until after the demo,
+    # so hide that notice instead of showing it in every file. Do NOT migrate.
     deprecated_member_use: ignore
+  exclude:
+    - build/**
+    - "**/*.g.dart"
 
 linter:
   rules:
-    prefer_const_constructors: true
-    prefer_const_declarations: true
+    # Correctness
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - avoid_print # use AppLogger instead
+    - cancel_subscriptions
+    - close_sinks
+    - unawaited_futures
+    - use_build_context_synchronously
+
+    # Readability and consistency
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_final_fields
+    - prefer_final_locals
+    - prefer_single_quotes
+    - require_trailing_commas
+    - sort_child_properties_last
+    - directives_ordering
+    - avoid_relative_lib_imports
+    - always_use_package_imports

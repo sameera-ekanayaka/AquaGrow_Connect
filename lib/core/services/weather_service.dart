@@ -1,9 +1,10 @@
 import 'dart:convert';
+
+import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
+import 'package:aquagrow_mobile/core/mocks/mock_weather_service.dart';
+import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import '../interfaces/i_weather_service.dart';
-import '../mocks/mock_weather_service.dart';
-import '../models/weather_data.dart';
 
 /// Real OpenWeatherMap REST API client with automatic fallback to [MockWeatherService].
 /// Guarantees that whether an API key is available or offline, the app continues
@@ -46,7 +47,7 @@ class WeatherService implements IWeatherService {
         return WeatherData.fromOpenWeatherMapJson(data);
       } else {
         debugPrint('[WeatherService] OpenWeatherMap returned HTTP ${response.statusCode}: ${response.body}. Using fallback.');
-        return _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
+        return await _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
       }
     } catch (e) {
       debugPrint('[WeatherService] Network or decoding error: $e. Using fallback.');
@@ -75,7 +76,7 @@ class WeatherService implements IWeatherService {
         return WeatherData.fromOpenWeatherMapJson(data);
       } else {
         debugPrint('[WeatherService] HTTP ${response.statusCode} for $cityName. Using fallback.');
-        return _mockFallback.fetchWeatherByCity(cityName: cityName);
+        return await _mockFallback.fetchWeatherByCity(cityName: cityName);
       }
     } catch (e) {
       debugPrint('[WeatherService] Network error for city $cityName: $e. Using fallback.');

@@ -1,8 +1,8 @@
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/core/models/weather_data.dart';
+import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/models/weather_data.dart';
-import 'location_providers.dart';
 
 /// Biophilic glassmorphic card displaying hyper-local ambient weather conditions,
 /// atmospheric pressure, UV index, and solar daylight duration.

@@ -1,4 +1,4 @@
-import '../models/user_profile.dart';
+import 'package:aquagrow_mobile/core/models/user_profile.dart';
 
 /// Abstract contract governing authentication, session management, and role resolution.
 /// Implemented by AuthRepository in lib/features/auth/data/.

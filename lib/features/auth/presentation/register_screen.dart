@@ -1,9 +1,8 @@
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/core/models/user_profile.dart';
+import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/models/user_profile.dart';
-import 'auth_providers.dart';
-import 'profile_screen.dart';
 
 /// Registration screen allowing new users to create accounts with explicit role selection.
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -51,9 +50,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           backgroundColor: AppColors.primarySage,
         ),
       );
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-      );
+      // The router redirects to Home automatically once signed in.
     }
   }
 

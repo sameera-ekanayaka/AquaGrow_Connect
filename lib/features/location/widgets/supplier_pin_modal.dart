@@ -1,6 +1,6 @@
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/models/hydro_supplier.dart';
 
 /// Modal bottom sheet displaying verified hydroponic retailer profile,
 /// inventory highlights, GPS coordinates, and direct contact options.

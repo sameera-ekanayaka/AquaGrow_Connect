@@ -1,11 +1,11 @@
+import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
+import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
+import 'package:aquagrow_mobile/core/models/vpd_reading.dart';
+import 'package:aquagrow_mobile/core/models/weather_data.dart';
+import 'package:aquagrow_mobile/core/services/geo_service.dart';
+import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
+import 'package:aquagrow_mobile/core/services/weather_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/interfaces/i_weather_service.dart';
-import '../../../core/models/hydro_supplier.dart';
-import '../../../core/models/vpd_reading.dart';
-import '../../../core/models/weather_data.dart';
-import '../../../core/services/geo_service.dart';
-import '../../../core/services/vpd_calculator.dart';
-import '../../../core/services/weather_service.dart';
 
 /// Provider for the hardware GPS and geolocation service.
 final geoServiceProvider = Provider<GeoService>((ref) {

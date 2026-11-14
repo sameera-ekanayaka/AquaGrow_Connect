@@ -1,9 +1,9 @@
+import 'package:aquagrow_mobile/app/router/app_routes.dart';
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
-import 'auth_providers.dart';
-import 'profile_screen.dart';
-import 'register_screen.dart';
+import 'package:go_router/go_router.dart';
 
 /// Biophilic aesthetic login screen featuring glassmorphic styling,
 /// rigorous input validation, and single-tap viva demo credentials.
@@ -43,11 +43,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _passwordController.text,
     );
 
-    if (success && mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-      );
-    }
+    // On success the router redirects to Home automatically (see AuthSession).
+    if (!success) return;
   }
 
   void _showForgotPasswordDialog() {
@@ -334,8 +331,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           const SizedBox(height: 20),
 
                           // Navigation to Register Screen
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          // Wrap, not Row: on narrow phones the link moves to a
+                          // second line instead of overflowing.
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               const Text(
                                 'New to AquaGrow?',
@@ -345,13 +345,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const RegisterScreen(),
-                                    ),
-                                  );
-                                },
+                                onPressed: () => context.push(AppRoutes.register),
                                 child: const Text(
                                   'Create an Account',
                                   style: TextStyle(

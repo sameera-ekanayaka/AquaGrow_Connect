@@ -1,4 +1,4 @@
-import '../models/weather_data.dart';
+import 'package:aquagrow_mobile/core/models/weather_data.dart';
 
 /// Abstract contract for atmospheric weather and solar data providers.
 /// Enables seamless substitution between live OpenWeatherMap API and offline mocks.

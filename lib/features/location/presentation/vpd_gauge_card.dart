@@ -1,8 +1,8 @@
+import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/core/models/vpd_reading.dart';
+import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/models/vpd_reading.dart';
-import 'location_providers.dart';
 
 /// Interactive Vapor Pressure Deficit (VPD) gauge card displaying real-time
 /// transpiration health, dynamic psychrometric metrics, and actionable horticultural advice.
