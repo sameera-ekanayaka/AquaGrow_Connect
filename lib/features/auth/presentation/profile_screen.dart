@@ -4,12 +4,16 @@ import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/auth/domain/initials.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
+import 'package:aquagrow_mobile/features/sync/application/sync_providers.dart';
+import 'package:aquagrow_mobile/features/sync/application/sync_service.dart';
+import 'package:aquagrow_mobile/features/sync/domain/last_synced_label.dart';
 import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// "Account · Profile" from Figma: who is signed in, how the app gets its
-/// data, how the account is protected, and Sign out.
+/// "Account · Profile" from Figma: who is signed in, when readings last
+/// synced, how the app gets its data, how the account is protected, and
+/// Sign out.
 ///
 /// Sign out asks first (lecture 5); the router then shows the sign-in screen.
 class ProfileScreen extends ConsumerWidget {
@@ -20,6 +24,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider).valueOrNull;
     final mode = ref.watch(appConfigProvider).dataMode;
+    final sync = ref.watch(syncServiceProvider);
+    final now = ref.watch(syncClockProvider).valueOrNull ?? DateTime.now();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -31,6 +37,12 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: AgSpace.s24),
             _RowGroup(
               children: [
+                _ProfileRow(
+                  key: const Key('profile-last-synced'),
+                  icon: Icons.sync_rounded,
+                  title: 'Last synced',
+                  subtitle: _syncSubtitle(sync, now),
+                ),
                 _ProfileRow(
                   icon: Icons.storage_rounded,
                   title: 'Data mode',
@@ -69,6 +81,19 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// "2 min ago · 37 readings", or how many readings are waiting offline.
+  static String _syncSubtitle(SyncStatus sync, DateTime now) {
+    final when = lastSyncedLabel(sync.lastSyncedAt, now: now);
+    if (sync.pending > 0) {
+      final waiting = '${sync.pending} '
+          '${sync.pending == 1 ? 'reading' : 'readings'} waiting';
+      return sync.offline ? 'Offline · $waiting' : '$when · $waiting';
+    }
+    if (sync.lastSyncedAt == null) return when;
+    return '$when · ${sync.lastSyncedCount} '
+        '${sync.lastSyncedCount == 1 ? 'reading' : 'readings'}';
   }
 
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
