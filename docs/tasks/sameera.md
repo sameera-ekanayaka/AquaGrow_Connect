@@ -47,6 +47,8 @@ Tests: widget test that an invalid email shows the error text and does not call 
 
 ### 2. MUST: Offline cache and sync (`feature/sameera-sync`)
 
+- [x] Done: `SyncService` (cache, Hive queue, batches of 50), Supabase uploader, migration 002, Profile "Last synced", `SyncListener`. Needs `SyncListener` in `AppShell` (Tharindu).
+
 - `lib/features/sync/application/sync_service.dart`:
   - caches every reading from `telemetryRepositoryProvider` into `LocalCacheService` (72-hour window, exists),
   - while `isOfflineProvider` is true, queues readings to upload,
