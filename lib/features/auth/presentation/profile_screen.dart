@@ -1,293 +1,76 @@
-import 'package:aquagrow_mobile/core/constants/app_colors.dart';
-import 'package:aquagrow_mobile/core/constants/app_constants.dart';
+import 'package:aquagrow_mobile/core/config/app_config.dart';
+import 'package:aquagrow_mobile/core/models/user_profile.dart';
+import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
+import 'package:aquagrow_mobile/data/data_providers.dart';
+import 'package:aquagrow_mobile/features/auth/domain/initials.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
 import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// User profile and session management screen.
-/// Displays authenticated role, cryptographic keystore status, and hardware permissions.
+/// "Account · Profile" from Figma: who is signed in, how the app gets its
+/// data, how the account is protected, and Sign out.
+///
+/// Sign out asks first (lecture 5); the router then shows the sign-in screen.
 class ProfileScreen extends ConsumerWidget {
+  /// Creates the profile screen.
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authControllerProvider);
-    final user = authState.user;
-    final theme = Theme.of(context);
+    final user = ref.watch(currentUserProvider).valueOrNull;
+    final mode = ref.watch(appConfigProvider).dataMode;
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('Account Profile', style: theme.textTheme.headlineSmall),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.statusCritical),
-            tooltip: 'Sign Out',
-            onPressed: () async {
-              await _confirmSignOut(context, ref);
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Profile')),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // User Identification Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.darkSurface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.darkBorder),
+        child: ListView(
+          padding: const EdgeInsets.all(AgSpace.screen),
+          children: [
+            _ProfileHeader(user: user),
+            const SizedBox(height: AgSpace.s24),
+            _RowGroup(
+              children: [
+                _ProfileRow(
+                  icon: Icons.storage_rounded,
+                  title: 'Data mode',
+                  subtitle: mode == DataMode.live
+                      ? 'Live · Supabase'
+                      : 'Simulation · built-in pods',
                 ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 32,
-                      backgroundColor: AppColors.primarySage.withValues(alpha: 0.3),
-                      child: Text(
-                        (user?.fullName?.isNotEmpty == true
-                                ? user!.fullName![0]
-                                : user?.email.isNotEmpty == true
-                                    ? user!.email[0]
-                                    : 'A')
-                            .toUpperCase(),
-                        style: const TextStyle(
-                          color: AppColors.mintAccent,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user?.fullName ?? 'AquaGrow Cultivator',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            user?.email ?? AppConstants.mockOwnerEmail,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.mintAccent.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: AppColors.mintAccent.withValues(alpha: 0.4),
-                              ),
-                            ),
-                            child: Text(
-                              user?.role.displayName ?? 'System Owner',
-                              style: const TextStyle(
-                                color: AppColors.mintAccent,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                const _ProfileRow(
+                  icon: Icons.shield_outlined,
+                  title: 'Security',
+                  subtitle: 'Session kept in the Android Keystore. '
+                      'Only you can read your pods.',
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Role-Based Access Control (RBAC) Permissions Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.darkSurface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.darkBorder),
+                if (user != null)
+                  _ProfileRow(
+                    icon: Icons.badge_outlined,
+                    title: 'Account type',
+                    subtitle: user.role.displayName,
+                  ),
+              ],
+            ),
+            const SizedBox(height: AgSpace.s16),
+            _RowGroup(
+              children: [
+                _ProfileRow(
+                  key: const Key('profile-sign-out'),
+                  icon: Icons.logout_rounded,
+                  title: 'Sign out',
+                  subtitle: 'You will need to sign in again',
+                  destructive: true,
+                  onTap: () => _confirmSignOut(context, ref),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Access Control & Privileges',
-                      style: TextStyle(
-                        color: AppColors.textDarkPrimary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildPermissionRow(
-                      icon: Icons.tune_rounded,
-                      title: 'Actuator Overrides & Dosing Pumps',
-                      hasAccess: user?.canControlHardware ?? true,
-                    ),
-                    const Divider(color: AppColors.darkBorder, height: 20),
-                    _buildPermissionRow(
-                      icon: Icons.psychology_outlined,
-                      title: 'Sensor Calibration & Threshold Editing',
-                      hasAccess: user?.canControlHardware ?? true,
-                    ),
-                    const Divider(color: AppColors.darkBorder, height: 20),
-                    _buildPermissionRow(
-                      icon: Icons.query_stats_rounded,
-                      title: 'Historical Telemetry & Chart Inspection',
-                      hasAccess: true,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Cryptographic Keystore Status Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.darkSurface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.darkBorder),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.security_rounded,
-                          color: AppColors.mintAccent,
-                          size: 20,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Hardware Security (Keystore / Keychain)',
-                          style: TextStyle(
-                            color: AppColors.textDarkPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Session tokens are encrypted using hardware-backed Android Keystore and iOS Keychain. Tokens never reside in unencrypted SharedPreferences.',
-                      style: TextStyle(
-                        color: AppColors.textDarkSecondary,
-                        fontSize: 13,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.statusOptimal,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Hardware Encryption: Active',
-                          style: TextStyle(
-                            color: AppColors.statusOptimal,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Registered Hydroponic Device Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.darkSurface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.darkBorder),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Linked Hydroponic Hardware',
-                          style: TextStyle(
-                            color: AppColors.textDarkPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.statusOptimal.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'ONLINE',
-                            style: TextStyle(
-                              color: AppColors.statusOptimal,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDeviceDetail('Unit Name', 'AquaGrow Living Decor 01'),
-                    _buildDeviceDetail('Serial Number', AppConstants.mockSerialNumber),
-                    _buildDeviceDetail('System Topology', 'Nutrient Film Technique (NFT)'),
-                    _buildDeviceDetail('Firmware', 'v1.0.4-esp32'),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
-              // Sign Out Button
-              OutlinedButton.icon(
-                icon: const Icon(Icons.logout_rounded, size: 18),
-                label: const Text('Sign Out from Device'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.statusCritical,
-                  side: const BorderSide(color: AppColors.statusCritical),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: () async {
-                  await _confirmSignOut(context, ref);
-                },
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Logout must be confirmed (lecture 5). The router then shows the login screen.
   Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
     final ok = await showConfirmDialog(
       context,
@@ -298,58 +81,115 @@ class ProfileScreen extends ConsumerWidget {
     );
     if (ok) await ref.read(authControllerProvider.notifier).signOut();
   }
+}
 
-  Widget _buildPermissionRow({
-    required IconData icon,
-    required String title,
-    required bool hasAccess,
-  }) {
+/// The lime initials circle, name and email at the top of Profile.
+class _ProfileHeader extends StatelessWidget {
+  const _ProfileHeader({required this.user});
+
+  final UserProfile? user;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ag;
+    final text = Theme.of(context).textTheme;
+    final name = user?.fullName?.trim();
+    final shownName = (name == null || name.isEmpty) ? 'AquaGrow grower' : name;
+
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: hasAccess ? AppColors.mintAccent : AppColors.textDarkSecondary,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
+        CircleAvatar(
+          radius: kMinTouchTarget / 2 + AgSpace.s4,
+          backgroundColor: c.brand,
           child: Text(
-            title,
-            style: TextStyle(
-              color: hasAccess ? AppColors.textDarkPrimary : AppColors.textDarkSecondary,
-              fontSize: 13,
-            ),
+            initialsFor(fullName: user?.fullName, email: user?.email),
+            // Lime stays light in both themes, so the letters stay dark.
+            style: text.titleMedium?.copyWith(color: AgColors.light.text),
           ),
         ),
-        Icon(
-          hasAccess ? Icons.check_circle_rounded : Icons.cancel_outlined,
-          size: 18,
-          color: hasAccess ? AppColors.statusOptimal : AppColors.textDarkSecondary,
+        const SizedBox(width: AgSpace.s16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(shownName, style: text.titleLarge),
+              if (user != null)
+                Text(
+                  user!.email,
+                  style: text.bodySmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+            ],
+          ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildDeviceDetail(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+/// A bordered card holding a few [_ProfileRow]s, as in Figma.
+class _RowGroup extends StatelessWidget {
+  const _RowGroup({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ag;
+    return Material(
+      color: c.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: AgRadius.all(AgRadius.r20),
+        side: BorderSide(color: c.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
         children: [
-          Text(
-            label,
-            style: const TextStyle(color: AppColors.textDarkSecondary, fontSize: 13),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: AppColors.textDarkPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) Divider(height: 1, color: c.border),
+            children[i],
+          ],
         ],
       ),
+    );
+  }
+}
+
+/// One line in a [_RowGroup]: a round icon, a title and a quiet subtitle.
+class _ProfileRow extends StatelessWidget {
+  const _ProfileRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+    this.destructive = false,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ag;
+    final text = Theme.of(context).textTheme;
+    final tone = destructive ? c.critical : c.text;
+
+    return ListTile(
+      onTap: onTap,
+      minVerticalPadding: AgSpace.s12,
+      leading: CircleAvatar(
+        backgroundColor: destructive ? c.criticalSurface : c.subtle,
+        child: Icon(icon, color: tone),
+      ),
+      title: Text(title, style: text.titleMedium?.copyWith(color: tone)),
+      subtitle: Text(subtitle, style: text.bodySmall),
+      trailing: onTap == null
+          ? null
+          : Icon(Icons.chevron_right_rounded, color: c.textSecondary),
     );
   }
 }
