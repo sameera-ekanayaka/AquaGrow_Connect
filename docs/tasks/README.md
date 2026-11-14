@@ -5,8 +5,8 @@ and how to know you are finished. Work top to bottom: items are in priority orde
 
 | Person | Role | Task file | Owns |
 | --- | --- | --- | --- |
-| Tharindu | Foundation, design system, app shell, settings, slides | [tharindu.md](tharindu.md) | `lib/app/`, `lib/core/theme/`, `lib/shared/`, `lib/features/settings/`, `lib/features/onboarding/` |
-| Osanda | IoT dashboard, controls, alerts, notifications, simulator panel | [osanda.md](osanda.md) | `lib/features/dashboard/`, `lib/features/controls/`, `lib/features/alerts/`, `lib/features/simulator/` |
+| Tharindu | Foundation, alert engine, notifications, settings, slides | [tharindu.md](tharindu.md) | `lib/app/`, `lib/core/`, `lib/data/simulation/`, `lib/features/alerts/`, `lib/features/settings/` |
+| Osanda | UI/UX lead: shared widgets, Home, controls UI, onboarding, design review | [osanda.md](osanda.md) | `lib/shared/widgets/`, `lib/features/dashboard/`, `lib/features/controls/`, `lib/features/simulator/`, `lib/features/onboarding/` |
 | Sameera | Auth, Supabase, offline sync, security, release APK, PR reviews | [sameera.md](sameera.md) | `lib/features/auth/`, `lib/features/sync/`, `lib/features/storage/`, `lib/data/supabase/`, `lib/core/network/`, `lib/core/security/`, `android/`, `supabase/` |
 | Imasha | Insights charts, weather and VPD, location, supplier map, shake | [imasha.md](imasha.md) | `lib/features/insights/`, `lib/features/location/`, `lib/features/care/` |
 | Udeshika | Crops, growth stages, Harvest Passport QR, report | [udeshika.md](udeshika.md) | `lib/features/crops/` |
