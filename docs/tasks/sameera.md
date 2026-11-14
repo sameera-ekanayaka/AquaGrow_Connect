@@ -78,6 +78,8 @@ biometrics (so the demo never blocks). Osanda calls it before pump and light com
 
 ### 5. SHOULD: Live Supabase repositories (`feature/sameera-supabase-repos`)
 
+- [x] Done: `SupabasePodRepository`, `SupabaseTelemetryRepository` (realtime + Hive fallback), live branches wired, migration 004, `supabase/seed/demo_account.sql`.
+
 `lib/data/supabase/supabase_pod_repository.dart` (`devices` table) and
 `supabase_telemetry_repository.dart` (`telemetry_logs`, realtime channel for new rows, Hive fallback).
 Return them from the `DataMode.live` branches in `data_providers.dart`. Add a migration
