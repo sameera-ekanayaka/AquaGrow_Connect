@@ -6,7 +6,6 @@ import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/network/supabase_client.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/storage/local_cache_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,7 +22,7 @@ Future<void> bootstrap() async {
     _log.error('Flutter error', details.exception, details.stack);
     FlutterError.presentError(details);
   };
-  PlatformDispatcher.instance.onError = (error, stack) {
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
     _log.error('Uncaught error', error, stack);
     return true;
   };
