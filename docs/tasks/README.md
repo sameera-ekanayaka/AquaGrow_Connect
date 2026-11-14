@@ -11,6 +11,14 @@ and how to know you are finished. Work top to bottom: items are in priority orde
 | Imasha | Insights charts, weather and VPD, location, supplier map, shake | [imasha.md](imasha.md) | `lib/features/insights/`, `lib/features/location/`, `lib/features/care/` |
 | Udeshika | Crops, growth stages, Harvest Passport QR, report | [udeshika.md](udeshika.md) | `lib/features/crops/` |
 
+## Start order
+
+1. **Osanda** runs Task 0 in `osanda.md`: checks the foundation (PR #4) on an emulator and a phone.
+2. **Sameera** merges PR #4 once Osanda confirms.
+3. **Everyone** pulls `main` and starts their own task file.
+
+Until PR #4 is merged, the others can install Flutter and Android Studio and read the docs.
+
 ## Timeline
 
 | When | Gate |
