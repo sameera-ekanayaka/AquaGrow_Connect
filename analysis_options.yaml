@@ -13,9 +13,17 @@ analyzer:
     # package:material_ui. The team stays on material.dart until after the demo,
     # so hide that notice instead of showing it in every file. Do NOT migrate.
     deprecated_member_use: ignore
+  # Flutter's pub get adds any missing platform folders here. Listing them all
+  # keeps this file unchanged on every teammate's machine.
   exclude:
     - build/**
     - "**/*.g.dart"
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
