@@ -1,5 +1,7 @@
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
+import 'package:aquagrow_mobile/features/alerts/application/alert_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// The bottom navigation bar with the four main tabs from Figma.
@@ -7,7 +9,9 @@ import 'package:go_router/go_router.dart';
 /// Each tab keeps its own navigation stack and scroll position
 /// (go_router `StatefulShellRoute.indexedStack`), so switching tabs never
 /// loses what the user was doing.
-class AppShell extends StatelessWidget {
+///
+/// The shell also keeps the alert engine running while the user is signed in.
+class AppShell extends ConsumerWidget {
   const AppShell({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
@@ -38,11 +42,16 @@ class AppShell extends StatelessWidget {
 
   void _onTap(int index) {
     // Tapping the current tab again returns it to its first screen.
-    navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex);
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Starts the alert engine once and keeps it alive while the shell is shown.
+    ref.watch(alertEngineProvider);
     return Scaffold(
       body: Column(
         children: [
