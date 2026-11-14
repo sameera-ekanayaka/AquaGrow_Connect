@@ -55,7 +55,7 @@ void main() {
 
     test(
         'vpdReadingProvider feeds dynamically from selected pod latest telemetry',
-        () {
+        () async {
       final liveReading = SensorReading(
         id: 'telemetry-now',
         deviceId: 'pod-alpha',
@@ -78,11 +78,14 @@ void main() {
       );
       addTearDown(container.dispose);
 
+      // Await first emission of latestReadingProvider so vpdReadingProvider reads the live telemetry
+      await container.read(latestReadingProvider('pod-alpha').future);
+
       final vpd = container.read(vpdReadingProvider);
       expect(vpd.airTemperatureC, equals(32.0));
       expect(vpd.relativeHumidityPct, equals(45.0));
       expect(vpd.vpdKpa, greaterThan(1.5));
-      expect(vpd.zone, equals(VpdZone.optimalGenerative));
+      expect(vpd.zone, equals(VpdZone.overTranspirationStress));
     });
   });
 }
