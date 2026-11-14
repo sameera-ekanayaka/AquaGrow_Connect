@@ -91,6 +91,8 @@ class PodPickerSheet extends ConsumerWidget {
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet<void>(
       context: context,
+      // Above the bottom navigation bar, as in the Figma "Pod picker" frame.
+      useRootNavigator: true,
       showDragHandle: true,
       backgroundColor: context.ag.background,
       builder: (_) => const PodPickerSheet(),
