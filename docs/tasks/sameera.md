@@ -70,6 +70,8 @@ Done when: turn on flight mode, wait 20 s, turn it off: the SnackBar shows readi
 
 ### 4. SHOULD: Biometric guard (`feature/sameera-biometric`)
 
+- [x] Done: `BiometricGuard.confirm` + `biometricGuardProvider`, FragmentActivity and AppCompat launch theme.
+
 `lib/core/security/biometric_guard.dart` + `biometricGuardProvider`:
 `Future<bool> confirm(String reason)` using `local_auth`. Returns true when the device has no
 biometrics (so the demo never blocks). Osanda calls it before pump and light commands.
