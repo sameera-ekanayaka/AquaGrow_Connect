@@ -1,8 +1,8 @@
+import 'package:aquagrow_mobile/core/models/sensor_status.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
 
-/// Whether a reading is inside its target range.
-enum SensorStatus { normal, warning, critical }
+export 'package:aquagrow_mobile/core/models/sensor_status.dart';
 
 /// One reading card from Figma component "AquaGrow Refined/Sensor":
 /// a label, a big value and a context line such as the target range.
