@@ -20,7 +20,7 @@ and VPD advice, the supplier map, and phone sensors.
 
 ## Tasks
 
-### 1. MUST: History charts (`feature/imasha-charts`)
+### 1. [x] MUST: History charts (`feature/imasha-charts`)
 
 On the Insights tab, replacing the "Charts are on the way" placeholder.
 
