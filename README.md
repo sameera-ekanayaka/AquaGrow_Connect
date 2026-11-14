@@ -88,8 +88,8 @@ docs/                           Architecture, tasks, demo
 
 | Member | Area |
 | --- | --- |
-| Tharindu | Foundation, design system, app shell, settings, presentation |
-| Osanda | IoT dashboard, controls, alerts and notifications, simulator panel |
+| Tharindu | Foundation, architecture, alert engine and notifications, settings, presentation |
+| Osanda | UI/UX lead: shared widgets, Home dashboard, controls, onboarding, design review |
 | Sameera | Auth, Supabase, offline sync, security, release, code review |
 | Imasha | Insights charts, weather and VPD, location, supplier map, sensors |
 | Udeshika | Crops, growth stages, Harvest Passport, report |

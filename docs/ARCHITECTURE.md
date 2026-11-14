@@ -44,10 +44,10 @@ repositories (Model). Screens never talk to Supabase, Hive or the simulator dire
 | `lib/core/models/` | `Pod`, `CropBatch`, `SensorReading`, `SensorMetric`, `ActuatorState`, `PodAlert`, ... | Frozen (ask the group) |
 | `lib/core/interfaces/` | Repository contracts | Frozen (ask the group) |
 | `lib/core/simulation/` | `PodSimulator`, `SimScenario` | Frozen (ask Tharindu) |
-| `lib/core/theme/` | `AgColors`, `AgSpace`, `AgRadius`, `AppTheme` from Figma | Tharindu |
+| `lib/core/theme/` | `AgColors`, `AgSpace`, `AgRadius`, `AppTheme` from Figma | Tharindu (Osanda may tune token values to match Figma) |
 | `lib/core/errors/`, `logging/`, `utils/` | `AppFailure`, `AppLogger`, `Validators` | Frozen |
 | `lib/data/` | Repository implementations and `data_providers.dart` | Sameera (live), Tharindu (sim) |
-| `lib/shared/widgets/` | UI kit: `SensorTile`, `StatusBadge`, `SectionHeader`, state views, `showConfirmDialog` | Tharindu (others may ADD new widgets) |
+| `lib/shared/widgets/` | UI kit: `SensorTile`, `StatusBadge`, `SectionHeader`, state views, `showConfirmDialog`, crop widgets | Osanda (others may ADD new widgets) |
 | `lib/features/<name>/` | One folder per feature, owned by one person | See [docs/tasks](tasks/) |
 | `test/` | Mirrors `lib/`. One test file per source file that has logic | Everyone |
 | `android/` | Gradle project, manifest, permissions, signing | Sameera |
