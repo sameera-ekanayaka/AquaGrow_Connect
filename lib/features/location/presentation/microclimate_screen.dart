@@ -1,4 +1,5 @@
 import 'package:aquagrow_mobile/core/constants/app_colors.dart';
+import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
@@ -70,7 +71,7 @@ class MicroclimateScreen extends ConsumerWidget {
   Widget _buildPhotoperiodCard(
     BuildContext context,
     WidgetRef ref,
-    dynamic photoperiod,
+    PhotoperiodSchedule photoperiod,
     bool isDark,
     Color primaryTextColor,
     Color secondaryTextColor,

@@ -1,5 +1,6 @@
 import 'package:aquagrow_mobile/core/constants/app_colors.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
+import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/widgets/supplier_pin_modal.dart';
 import 'package:flutter/material.dart';
@@ -182,7 +183,7 @@ class HydroMapScreen extends ConsumerWidget {
   Widget _buildSupplierCard(
     BuildContext context,
     HydroSupplier supplier,
-    dynamic userPos,
+    GeoPosition? userPos,
     bool isDark,
   ) {
     final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;

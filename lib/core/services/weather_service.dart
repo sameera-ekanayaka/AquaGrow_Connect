@@ -47,7 +47,7 @@ class WeatherService implements IWeatherService {
         return WeatherData.fromOpenWeatherMapJson(data);
       } else {
         debugPrint('[WeatherService] OpenWeatherMap returned HTTP ${response.statusCode}: ${response.body}. Using fallback.');
-        return _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
+        return await _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
       }
     } catch (e) {
       debugPrint('[WeatherService] Network or decoding error: $e. Using fallback.');
@@ -76,7 +76,7 @@ class WeatherService implements IWeatherService {
         return WeatherData.fromOpenWeatherMapJson(data);
       } else {
         debugPrint('[WeatherService] HTTP ${response.statusCode} for $cityName. Using fallback.');
-        return _mockFallback.fetchWeatherByCity(cityName: cityName);
+        return await _mockFallback.fetchWeatherByCity(cityName: cityName);
       }
     } catch (e) {
       debugPrint('[WeatherService] Network error for city $cityName: $e. Using fallback.');
