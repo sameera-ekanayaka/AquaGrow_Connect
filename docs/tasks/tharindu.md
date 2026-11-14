@@ -70,6 +70,8 @@ UX review. Optionally keep alerts across restarts with a Hive-backed `IAlertRepo
 
 ### 4. MUST: Settings and privacy (`feature/tharindu-settings`)
 
+- [x] Done: `/settings`, theme saved in Hive, data mode and version, privacy note with delete, About. Module code is a placeholder in `AppInfo.module`.
+
 `lib/features/settings/presentation/settings_screen.dart`, route `/settings`, a "Settings" tile in Care:
 
 - Theme: Light / Dark / System (`themeModeProvider`), remembered in Hive `app_preferences`.
