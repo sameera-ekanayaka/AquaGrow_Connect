@@ -10,10 +10,14 @@ import 'package:aquagrow_mobile/core/models/actuator_state.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/pod_alert.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
+import 'package:aquagrow_mobile/core/network/supabase_client.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/data/local/preferences_store.dart';
 import 'package:aquagrow_mobile/data/simulation/in_memory_alert_repository.dart';
 import 'package:aquagrow_mobile/data/simulation/sim_repositories.dart';
+import 'package:aquagrow_mobile/data/supabase/cached_telemetry.dart';
+import 'package:aquagrow_mobile/data/supabase/supabase_pod_repository.dart';
+import 'package:aquagrow_mobile/data/supabase/supabase_telemetry_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
@@ -23,7 +27,8 @@ import 'package:hive/hive.dart';
 /// They never create a repository or touch the simulator directly
 /// (the simulator panel is the one exception).
 ///
-/// To plug in Supabase later, change only the `switch` statements below.
+/// Live mode reads Supabase (`lib/data/supabase/`) and falls back to the
+/// simulator if Supabase did not start, so a bad env file never breaks the app.
 
 const _log = AppLogger('data');
 
@@ -51,8 +56,12 @@ final podRepositoryProvider = Provider<IPodRepository>((ref) {
     case DataMode.simulation:
       return SimPodRepository(ref.watch(podSimulatorProvider));
     case DataMode.live:
-      // TODO(sameera): return a Supabase-backed repository here.
-      _log.warning('Live pod repository not built yet, using simulation');
+      if (SupabaseManager.isConfigured) {
+        return SupabasePodRepository(
+          SupabaseDeviceSource(SupabaseManager.client),
+        );
+      }
+      _log.warning('Supabase did not start, showing the simulated pods');
       return SimPodRepository(ref.watch(podSimulatorProvider));
   }
 });
@@ -62,8 +71,13 @@ final telemetryRepositoryProvider = Provider<ITelemetryRepository>((ref) {
     case DataMode.simulation:
       return SimTelemetryRepository(ref.watch(podSimulatorProvider));
     case DataMode.live:
-      // TODO(sameera): return a Supabase + Hive cache repository here.
-      _log.warning('Live telemetry repository not built yet, using simulation');
+      if (SupabaseManager.isConfigured) {
+        return SupabaseTelemetryRepository(
+          SupabaseTelemetrySource(SupabaseManager.client),
+          cached: cachedTelemetry,
+        );
+      }
+      _log.warning('Supabase did not start, showing simulated readings');
       return SimTelemetryRepository(ref.watch(podSimulatorProvider));
   }
 });
