@@ -71,8 +71,8 @@ from the Figma components, export them in `widgets.dart`, and add a widget test 
 - `PodCard({cropName, location, stageLabel, harvestLine, imageAsset, onTap})`: Figma "Pod card":
   photo with a stage badge, then name, `Kitchen · Pod Alpha`, stage in text colour, harvest line.
 
-Post in WhatsApp as soon as it is merged. If you will miss 11 AM, tell Udeshika so she builds
-her card inside `lib/features/crops/` instead.
+Post in WhatsApp as soon as it is merged. If you will miss 11 AM, tell Udeshika so the pod card
+gets built inside `lib/features/crops/` instead.
 
 ### 2. MUST: Home screen to Figma (`feature/osanda-home`)
 
