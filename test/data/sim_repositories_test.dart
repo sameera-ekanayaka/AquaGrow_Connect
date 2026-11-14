@@ -46,7 +46,7 @@ void main() {
     final repo = SimControlRepository(sim, latency: Duration.zero);
     sim.applyScenario('pod-beta', SimScenario.sensorOffline);
 
-    expect(() => repo.setPump('pod-beta', on: false), throwsA(isA<DeviceFailure>()));
+    await expectLater(repo.setPump('pod-beta', on: false), throwsA(isA<DeviceFailure>()));
   });
 
   test('alert repository keeps newest first and acknowledges', () async {
