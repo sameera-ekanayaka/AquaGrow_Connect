@@ -1,19 +1,18 @@
 import 'dart:convert';
 
 import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
+import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/mocks/mock_weather_service.dart';
 import 'package:aquagrow_mobile/core/models/weather_data.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-/// Real OpenWeatherMap REST API client with automatic fallback to [MockWeatherService].
-/// Guarantees that whether an API key is available or offline, the app continues
-/// functioning with zero disruptions.
+/// Real OpenWeatherMap REST client with automatic fallback to [MockWeatherService].
+///
+/// Whether an API key is missing, the network is down or the server fails,
+/// the app keeps working with mock weather. Errors are never logged in full
+/// because the request address contains the API key.
 class WeatherService implements IWeatherService {
-  final http.Client _client;
-  final MockWeatherService _mockFallback;
-  final String? _defaultApiKey;
-
+  /// Creates the service. Pass [client] and [mockFallback] in tests.
   WeatherService({
     http.Client? client,
     MockWeatherService? mockFallback,
@@ -22,7 +21,14 @@ class WeatherService implements IWeatherService {
         _mockFallback = mockFallback ?? MockWeatherService(),
         _defaultApiKey = defaultApiKey;
 
-  static const String _baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
+  static const _log = AppLogger('weather');
+  static const String _host = 'api.openweathermap.org';
+  static const String _path = '/data/2.5/weather';
+  static const Duration _timeout = Duration(seconds: 6);
+
+  final http.Client _client;
+  final MockWeatherService _mockFallback;
+  final String? _defaultApiKey;
 
   @override
   Future<WeatherData> fetchWeather({
@@ -31,28 +37,15 @@ class WeatherService implements IWeatherService {
     String? apiKey,
   }) async {
     final key = apiKey ?? _defaultApiKey;
-
-    // If no API key is provided, transparently utilize realistic mock weather
     if (key == null || key.trim().isEmpty) {
-      debugPrint('[WeatherService] No OpenWeatherMap API key provided. Utilizing MockWeatherService.');
-      return _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
+      _log.info('No OpenWeatherMap key. Using mock weather.');
+      return _mockFallback.fetchWeather(
+          latitude: latitude, longitude: longitude);
     }
 
-    try {
-      final uri = Uri.parse('$_baseUrl?lat=$latitude&lon=$longitude&units=metric&appid=$key');
-      final response = await _client.get(uri).timeout(const Duration(seconds: 6));
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
-        return WeatherData.fromOpenWeatherMapJson(data);
-      } else {
-        debugPrint('[WeatherService] OpenWeatherMap returned HTTP ${response.statusCode}: ${response.body}. Using fallback.');
-        return await _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
-      }
-    } catch (e) {
-      debugPrint('[WeatherService] Network or decoding error: $e. Using fallback.');
-      return _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
-    }
+    final live = await _request({'lat': '$latitude', 'lon': '$longitude'}, key);
+    return live ??
+        _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
   }
 
   @override
@@ -61,26 +54,35 @@ class WeatherService implements IWeatherService {
     String? apiKey,
   }) async {
     final key = apiKey ?? _defaultApiKey;
-
     if (key == null || key.trim().isEmpty) {
-      debugPrint('[WeatherService] No API key provided for city query. Utilizing MockWeatherService.');
+      _log.info('No OpenWeatherMap key. Using mock weather.');
       return _mockFallback.fetchWeatherByCity(cityName: cityName);
     }
 
+    final live = await _request({'q': cityName}, key);
+    return live ?? _mockFallback.fetchWeatherByCity(cityName: cityName);
+  }
+
+  /// Calls the API and returns the parsed weather, or `null` on any failure.
+  Future<WeatherData?> _request(Map<String, String> query, String key) async {
     try {
-      final uri = Uri.parse('$_baseUrl?q=$cityName&units=metric&appid=$key');
-      final response = await _client.get(uri).timeout(const Duration(seconds: 6));
+      final uri = Uri.https(_host, _path, {
+        ...query,
+        'units': 'metric',
+        'appid': key,
+      });
+      final response = await _client.get(uri).timeout(_timeout);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
         return WeatherData.fromOpenWeatherMapJson(data);
-      } else {
-        debugPrint('[WeatherService] HTTP ${response.statusCode} for $cityName. Using fallback.');
-        return await _mockFallback.fetchWeatherByCity(cityName: cityName);
       }
-    } catch (e) {
-      debugPrint('[WeatherService] Network error for city $cityName: $e. Using fallback.');
-      return _mockFallback.fetchWeatherByCity(cityName: cityName);
+      _log.warning(
+          'OpenWeatherMap returned HTTP ${response.statusCode}. Using fallback.');
+    } catch (_) {
+      // The error object can contain the request address and the key.
+      _log.warning('Weather request failed. Using fallback.');
     }
+    return null;
   }
 }
