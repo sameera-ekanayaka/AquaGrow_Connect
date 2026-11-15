@@ -131,5 +131,53 @@ void main() {
 
       detector.dispose();
     });
+
+    test('supports start, pause, resume, reset, and stop lifecycle', () async {
+      final detector = ShakeDetector(
+        sensorStream: streamController.stream,
+        clock: () => currentTime,
+        onShake: () => shakeTimestamps.add(currentTime),
+      );
+
+      expect(detector.isListening, isFalse);
+      expect(detector.isPaused, isFalse);
+
+      detector.start();
+      expect(detector.isListening, isTrue);
+
+      // Double start does not throw or double-subscribe
+      detector.start();
+      expect(detector.isListening, isTrue);
+
+      // Pause stops event delivery
+      detector.pause();
+      expect(detector.isPaused, isTrue);
+      streamController.add(makeEvent(0, 0, ShakeMath.standardGravity * 3.0));
+      await pumpEventQueue();
+      expect(shakeTimestamps, isEmpty);
+
+      // Resume continues listening
+      detector.resume();
+      expect(detector.isPaused, isFalse);
+      streamController.add(makeEvent(0, 0, ShakeMath.standardGravity * 3.0));
+      await pumpEventQueue();
+      expect(shakeTimestamps, hasLength(1));
+
+      // Reset clears throttle history
+      expect(detector.lastShakeTime, equals(currentTime));
+      detector.reset();
+      expect(detector.lastShakeTime, isNull);
+
+      // Stop cancels subscription
+      detector.stop();
+      expect(detector.isListening, isFalse);
+
+      // Subsequent events after stop do nothing
+      streamController.add(makeEvent(0, 0, ShakeMath.standardGravity * 3.0));
+      await pumpEventQueue();
+      expect(shakeTimestamps, hasLength(1));
+
+      detector.dispose();
+    });
   });
 }

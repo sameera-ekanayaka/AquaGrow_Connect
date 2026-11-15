@@ -18,6 +18,7 @@ class ShakeDetector {
 
   StreamSubscription<AccelerometerEvent>? _subscription;
   DateTime? _lastShakeTime;
+  bool _isPaused = false;
 
   /// Creates a [ShakeDetector] instance.
   ///
@@ -30,30 +31,49 @@ class ShakeDetector {
   })  : _injectedStream = sensorStream,
         _clock = clock ?? DateTime.now;
 
-  /// Whether the detector is actively listening to accelerometer events.
+  /// Whether the detector has an active stream subscription.
   bool get isListening => _subscription != null;
+
+  /// Whether the detector is currently paused.
+  bool get isPaused => _isPaused;
+
+  /// The timestamp of the most recent registered shake, or null if none registered yet.
+  DateTime? get lastShakeTime => _lastShakeTime;
 
   /// Starts listening to sensor events.
   void start() {
     if (_subscription != null) return;
     final stream = _injectedStream ?? accelerometerEventStream();
     _subscription = stream.listen(_onAccelerometerEvent);
+    _isPaused = false;
   }
 
   /// Stops listening and cancels sensor stream subscription.
   void stop() {
     _subscription?.cancel();
     _subscription = null;
+    _isPaused = false;
   }
 
   /// Pauses event listening without canceling subscription.
   void pause() {
-    _subscription?.pause();
+    if (_subscription != null && !_isPaused) {
+      _subscription?.pause();
+      _isPaused = true;
+    }
   }
 
   /// Resumes event listening.
   void resume() {
-    _subscription?.resume();
+    if (_subscription != null && _isPaused) {
+      _subscription?.resume();
+      _isPaused = false;
+    }
+  }
+
+  /// Resets the shake throttle state.
+  void reset() {
+    _lastShakeTime = null;
   }
 
   /// Disposes resources held by the detector.
