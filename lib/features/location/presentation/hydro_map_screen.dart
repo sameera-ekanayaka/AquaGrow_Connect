@@ -55,29 +55,44 @@ class HydroMapScreen extends ConsumerWidget {
 
           // Search Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+            padding: const EdgeInsets.fromLTRB(
+              AgSpace.screen,
+              AgSpace.s12,
+              AgSpace.screen,
+              AgSpace.s8,
+            ),
             child: TextField(
-              onChanged: (val) => ref.read(supplierSearchQueryProvider.notifier).state = val,
+              onChanged: (val) =>
+                  ref.read(supplierSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search nutrient buffers, rockwool, seeds...',
-                hintStyle: TextStyle(fontSize: 13, color: secondaryTextColor),
-                prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.mintAccent),
+                hintStyle: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: colors.textSecondary),
+                prefixIcon: Icon(Icons.search, size: 20, color: colors.brand),
                 suffixIcon: ref.watch(supplierSearchQueryProvider).isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 18),
-                        onPressed: () => ref.read(supplierSearchQueryProvider.notifier).state = '',
+                        onPressed: () =>
+                            ref
+                                .read(supplierSearchQueryProvider.notifier)
+                                .state = '',
                       )
                     : null,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: AgSpace.s16,
+                ),
                 filled: true,
-                fillColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                fillColor: colors.surface,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                  borderRadius: AgRadius.all(AgRadius.r16),
+                  borderSide: BorderSide(color: colors.border),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                  borderRadius: AgRadius.all(AgRadius.r16),
+                  borderSide: BorderSide(color: colors.border),
                 ),
               ),
             ),
