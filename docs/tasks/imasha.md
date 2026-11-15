@@ -60,7 +60,7 @@ Tests: geo service fallback when denied (with a fake).
 Restyle `hydro_map_screen.dart` and `supplier_pin_modal.dart` to the Figma theme. List suppliers
 nearest first with distance (`ListView.builder`), with search and category chips (exists, just restyle).
 
-### 5. SHOULD: Shake to refresh (`feature/imasha-shake`)
+### 5. [x] SHOULD: Shake to refresh (`feature/imasha-shake`)
 
 `lib/features/insights/application/shake_detector.dart` with `sensors_plus` accelerometer:
 a shake (g-force above 2.7, at most once per second) refreshes the Insights data and shows
