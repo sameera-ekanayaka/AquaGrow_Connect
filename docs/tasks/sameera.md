@@ -64,6 +64,8 @@ Done when: turn on flight mode, wait 20 s, turn it off: the SnackBar shows readi
 
 ### 3. MUST: Release APK (Monday, `chore/sameera-release`)
 
+- [x] Moved to Tharindu (task 8 in `docs/tasks/tharindu.md`). Steps written in `docs/RELEASE.md`.
+
 - Create an upload keystore (outside the repo), write `android/key.properties` (git-ignored).
 - `flutter build apk --release`, install on the demo phone, run the whole demo once on it.
 - Write the steps in `docs/RELEASE.md` without any passwords.
