@@ -118,8 +118,8 @@ class GeoService implements IGeoService {
       return LocationResult.granted(geoPos);
     } catch (e) {
       _log.error('Error acquiring location: $e. Falling back to default.');
-      return LocationResult.serviceDisabled(
-        reason: 'GPS unavailable. Showing Colombo weather.',
+      return LocationResult.denied(
+        reason: 'GPS signal timed out. Showing Colombo weather.',
       );
     }
   }
