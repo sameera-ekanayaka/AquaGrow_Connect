@@ -98,14 +98,17 @@ class HydroMapScreen extends ConsumerWidget {
             ),
           ),
 
-          // Horizontal Category Filter Pills
+          // Horizontal Category Filter Chips
           SizedBox(
             height: 48,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AgSpace.screen,
+                vertical: AgSpace.s8,
+              ),
               itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, __) => const SizedBox(width: AgSpace.s8),
               itemBuilder: (context, index) {
                 final category = categories[index];
                 final isSelected = category == selectedCategory;
@@ -113,18 +116,20 @@ class HydroMapScreen extends ConsumerWidget {
                 return FilterChip(
                   label: Text(category),
                   selected: isSelected,
-                  selectedColor: AppColors.primarySage,
-                  backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                  labelStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.white : secondaryTextColor,
-                  ),
+                  selectedColor: colors.brandSurface,
+                  backgroundColor: colors.surface,
+                  labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? colors.brand : colors.textSecondary,
+                      ),
                   side: BorderSide(
-                    color: isSelected ? AppColors.mintAccent : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    color: isSelected ? colors.brand : colors.border,
                   ),
                   onSelected: (_) {
-                    ref.read(selectedSupplierCategoryProvider.notifier).state = category;
+                    ref
+                        .read(selectedSupplierCategoryProvider.notifier)
+                        .state = category;
                   },
                 );
               },
