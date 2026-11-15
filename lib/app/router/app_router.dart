@@ -14,6 +14,8 @@ import 'package:aquagrow_mobile/features/dashboard/presentation/home_screen.dart
 import 'package:aquagrow_mobile/features/insights/presentation/insights_screen.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
 import 'package:aquagrow_mobile/features/location/presentation/microclimate_screen.dart';
+import 'package:aquagrow_mobile/features/onboarding/application/onboarding_store.dart';
+import 'package:aquagrow_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:aquagrow_mobile/features/settings/presentation/settings_screen.dart';
 import 'package:aquagrow_mobile/features/simulator/presentation/simulator_panel_screen.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +41,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   // read, not watch: the router must be built once. It re-checks the
   // redirect itself whenever the session notifies (refreshListenable).
   final session = ref.read(authSessionProvider);
+  final onboarding = ref.read(onboardingStoreProvider);
 
   final router = GoRouter(
     navigatorKey: _rootKey,
@@ -47,9 +50,13 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) => authRedirect(
       isRestored: session.isRestored,
       isSignedIn: session.isSignedIn,
+      // Read on every redirect: finishing onboarding, or "Delete my local
+      // data" in Settings, changes it without notifying the router.
+      onboardingSeen: onboarding.isSeen,
       location: state.matchedLocation,
     ),
     routes: [
+      GoRoute(path: AppRoutes.onboarding, builder: (_, __) => const OnboardingScreen()),
       GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
       GoRoute(path: AppRoutes.register, builder: (_, __) => const RegisterScreen()),
 
@@ -132,15 +139,24 @@ final routerProvider = Provider<GoRouter>((ref) {
 
 /// Where to send the user, or null to stay. Pure function, unit tested.
 ///
+/// - While the saved session is still loading, stay put (the splash shows).
+/// - First launch: the onboarding walkthrough comes before everything else.
+/// - After onboarding: signed-out users go to login, signed-in users to Home.
 /// - Signed out: only the login and register screens are reachable.
 /// - Signed in: login and register bounce to Home.
-/// - While the saved session is still loading, stay put.
 String? authRedirect({
   required bool isRestored,
   required bool isSignedIn,
   required String location,
+  bool onboardingSeen = true,
 }) {
   if (!isRestored) return null;
+  if (!onboardingSeen) {
+    return location == AppRoutes.onboarding ? null : AppRoutes.onboarding;
+  }
+  if (location == AppRoutes.onboarding) {
+    return isSignedIn ? AppRoutes.home : AppRoutes.login;
+  }
   final isPublic = AppRoutes.publicRoutes.contains(location);
   if (!isSignedIn && !isPublic) return AppRoutes.login;
   if (isSignedIn && isPublic) return AppRoutes.home;
