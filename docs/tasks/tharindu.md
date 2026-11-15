@@ -65,6 +65,8 @@ Done when: with the app in the background, a pH crash shows a system notificatio
 
 ### 3. SHOULD: Alerts screen polish (`feature/tharindu-alerts-ui`)
 
+- [x] Done: Today and Earlier groups, severity colour bar, swipe to mark read, "Mark all read" only when unread. Hive-backed alerts not done (optional).
+
 Group into `Today` and `Earlier`, severity colour bar, swipe to mark read. Ask Osanda for a quick
 UX review. Optionally keep alerts across restarts with a Hive-backed `IAlertRepository`.
 
