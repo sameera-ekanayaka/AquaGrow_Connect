@@ -1,4 +1,3 @@
-import 'package:aquagrow_mobile/core/constants/app_colors.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
@@ -19,10 +18,6 @@ class HydroMapScreen extends ConsumerWidget {
     final selectedCategory = ref.watch(selectedSupplierCategoryProvider);
     final positionAsync = ref.watch(currentPositionProvider);
     final colors = context.ag;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
     final userPos = positionAsync.value;
 
     final categories = [
@@ -74,10 +69,9 @@ class HydroMapScreen extends ConsumerWidget {
                 suffixIcon: ref.watch(supplierSearchQueryProvider).isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 18),
-                        onPressed: () =>
-                            ref
-                                .read(supplierSearchQueryProvider.notifier)
-                                .state = '',
+                        onPressed: () => ref
+                            .read(supplierSearchQueryProvider.notifier)
+                            .state = '',
                       )
                     : null,
                 contentPadding: const EdgeInsets.symmetric(
@@ -127,9 +121,8 @@ class HydroMapScreen extends ConsumerWidget {
                     color: isSelected ? colors.brand : colors.border,
                   ),
                   onSelected: (_) {
-                    ref
-                        .read(selectedSupplierCategoryProvider.notifier)
-                        .state = category;
+                    ref.read(selectedSupplierCategoryProvider.notifier).state =
+                        category;
                   },
                 );
               },
@@ -143,11 +136,17 @@ class HydroMapScreen extends ConsumerWidget {
             child: suppliers.isEmpty
                 ? _EmptyState()
                 : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AgSpace.screen,
+                      vertical: AgSpace.s8,
+                    ),
                     itemCount: suppliers.length,
                     itemBuilder: (context, index) {
                       final supplier = suppliers[index];
-                      return _buildSupplierCard(context, supplier, userPos, isDark);
+                      return _SupplierCard(
+                        supplier: supplier,
+                        userPos: userPos,
+                      );
                     },
                   ),
           ),
@@ -155,203 +154,10 @@ class HydroMapScreen extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _buildSupplierCard(
-    BuildContext context,
-    HydroSupplier supplier,
-    GeoPosition? userPos,
-    bool isDark,
-  ) {
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
-
-    final double? distanceKm = userPos != null
-        ? supplier.distanceInKmFrom(userPos.latitude, userPos.longitude)
-        : null;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 1,
-        ),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          SupplierPinModal.show(
-            context,
-            supplier: supplier,
-            userLatitude: userPos?.latitude,
-            userLongitude: userPos?.longitude,
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title & Distance
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            supplier.name,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: primaryTextColor,
-                            ),
-                          ),
-                        ),
-                        if (supplier.isVerified) ...[
-                          const SizedBox(width: 6),
-                          const Icon(Icons.verified, color: AppColors.mintAccent, size: 16),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (distanceKm != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppColors.primarySage.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${distanceKm.toStringAsFixed(1)} km',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.mintAccent,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-              const SizedBox(height: 4),
-
-              Text(
-                '${supplier.category} • ${supplier.city}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.mintAccent,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                supplier.address,
-                style: TextStyle(fontSize: 12, color: secondaryTextColor),
-              ),
-
-              const SizedBox(height: 10),
-
-              // Product Tags Preview
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: supplier.featuredProducts.take(3).map((prod) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      prod,
-                      style: TextStyle(fontSize: 10, color: secondaryTextColor),
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 12),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, size: 14, color: Color(0xFFF4A261)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${supplier.rating}',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryTextColor),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(Icons.schedule, size: 14, color: AppColors.mintAccent),
-                      const SizedBox(width: 4),
-                      Text(
-                        supplier.openHours,
-                        style: TextStyle(fontSize: 11, color: secondaryTextColor),
-                      ),
-                    ],
-                  ),
-                  const Row(
-                    children: [
-                      Text(
-                        'Details',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.mintAccent),
-                      ),
-                      Icon(Icons.chevron_right, size: 16, color: AppColors.mintAccent),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
-/// Empty state shown when the filtered supplier list has no results.
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.ag;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.store_mall_directory_outlined,
-            size: 48,
-            color: colors.textSecondary,
-          ),
-          const SizedBox(height: AgSpace.s12),
-          Text(
-            'No hydroponic suppliers found',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colors.text,
-                ),
-          ),
-          const SizedBox(height: AgSpace.s4),
-          Text(
-            'Try clearing search filters or changing category',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: colors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
+/// GPS coordinates status bar shown at the top of [HydroMapScreen].
+class _GpsStatusBar extends StatelessWidget {
   /// Creates a [_GpsStatusBar] with the given [userPos].
   const _GpsStatusBar({required this.userPos});
 
@@ -404,6 +210,231 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Empty state shown when the filtered supplier list has no results.
+class _EmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ag;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.store_mall_directory_outlined,
+            size: 48,
+            color: colors.textSecondary,
+          ),
+          const SizedBox(height: AgSpace.s12),
+          Text(
+            'No hydroponic suppliers found',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colors.text,
+                ),
+          ),
+          const SizedBox(height: AgSpace.s4),
+          Text(
+            'Try clearing search filters or changing category',
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: colors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A single supplier card in the [HydroMapScreen] list.
+class _SupplierCard extends StatelessWidget {
+  /// Creates a [_SupplierCard] for the given [supplier].
+  const _SupplierCard({
+    required this.supplier,
+    required this.userPos,
+  });
+
+  /// The hydroponic supplier to display.
+  final HydroSupplier supplier;
+
+  /// Current user GPS position for distance calculation, or `null`.
+  final GeoPosition? userPos;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ag;
+    final double? distanceKm = userPos != null
+        ? supplier.distanceInKmFrom(userPos!.latitude, userPos!.longitude)
+        : null;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AgSpace.s12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AgRadius.all(AgRadius.r16),
+        border: Border.all(color: colors.border),
+      ),
+      child: InkWell(
+        borderRadius: AgRadius.all(AgRadius.r16),
+        onTap: () {
+          SupplierPinModal.show(
+            context,
+            supplier: supplier,
+            userLatitude: userPos?.latitude,
+            userLongitude: userPos?.longitude,
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(AgSpace.s16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Name, Verified Badge & Distance
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            supplier.name,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.text,
+                                ),
+                          ),
+                        ),
+                        if (supplier.isVerified) ...[
+                          const SizedBox(width: AgSpace.s8),
+                          Icon(Icons.verified, color: colors.brand, size: 16),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (distanceKm != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AgSpace.s8,
+                        vertical: AgSpace.s4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.brandSurface,
+                        borderRadius: AgRadius.all(AgRadius.r16),
+                      ),
+                      child: Text(
+                        '${distanceKm.toStringAsFixed(1)} km',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colors.brand,
+                            ),
+                      ),
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: AgSpace.s4),
+
+              Text(
+                '${supplier.category} • ${supplier.city}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: colors.brand,
+                    ),
+              ),
+
+              const SizedBox(height: AgSpace.s8),
+
+              Text(
+                supplier.address,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: colors.textSecondary),
+              ),
+
+              const SizedBox(height: AgSpace.s12),
+
+              // Product Tags Preview (up to 3)
+              Wrap(
+                spacing: AgSpace.s8,
+                runSpacing: AgSpace.s4,
+                children: supplier.featuredProducts.take(3).map((prod) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AgSpace.s8,
+                      vertical: AgSpace.s4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.subtle,
+                      borderRadius: AgRadius.all(AgRadius.r16),
+                    ),
+                    child: Text(
+                      prod,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(color: colors.textSecondary),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: AgSpace.s12),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      // Star colour is amber/orange — no exact design token;
+                      // colors.warning is the closest warm accent in the token set.
+                      Icon(Icons.star, size: 14, color: colors.warning),
+                      const SizedBox(width: AgSpace.s4),
+                      Text(
+                        '${supplier.rating}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colors.text,
+                            ),
+                      ),
+                      const SizedBox(width: AgSpace.s12),
+                      Icon(Icons.schedule, size: 14, color: colors.brand),
+                      const SizedBox(width: AgSpace.s4),
+                      Text(
+                        supplier.openHours,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: colors.textSecondary),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'Details',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colors.brand,
+                            ),
+                      ),
+                      Icon(Icons.chevron_right, size: 16, color: colors.brand),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
