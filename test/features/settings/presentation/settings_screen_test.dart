@@ -57,8 +57,8 @@ void main() {
 
   /// Scrolls to the delete button and taps it.
   Future<void> tapDelete(WidgetTester tester) async {
-    final button = find.widgetWithText(OutlinedButton, 'Delete my local data');
-    await tester.ensureVisible(button);
+    final button = find.text('Delete my local data');
+    await tester.scrollUntilVisible(button, 200);
     await tester.pumpAndSettle();
     await tester.tap(button);
   }
