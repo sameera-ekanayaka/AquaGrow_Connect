@@ -55,7 +55,7 @@ that switching to `7 days` asks for a 7-day range.
 
 Tests: geo service fallback when denied (with a fake).
 
-### 4. MUST: Supplier map in Care (`feature/imasha-suppliers`)
+### 4. [x] MUST: Supplier map in Care (`feature/imasha-suppliers`)
 
 Restyle `hydro_map_screen.dart` and `supplier_pin_modal.dart` to the Figma theme. List suppliers
 nearest first with distance (`ListView.builder`), with search and category chips (exists, just restyle).
