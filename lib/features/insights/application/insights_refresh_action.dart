@@ -1,5 +1,5 @@
 import 'package:aquagrow_mobile/features/insights/application/history_providers.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Refreshes all telemetry and microclimate datasets presented on the Insights screen.
@@ -19,4 +19,3 @@ void refreshInsightsWithContainer(ProviderContainer container) {
   container.invalidate(weatherDataProvider);
   container.invalidate(locationResultProvider);
 }
-

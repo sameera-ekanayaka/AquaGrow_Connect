@@ -2,8 +2,8 @@ import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/features/insights/application/history_providers.dart';
 import 'package:aquagrow_mobile/features/insights/application/insights_refresh_action.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

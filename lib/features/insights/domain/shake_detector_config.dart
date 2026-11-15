@@ -55,4 +55,3 @@ class ShakeDetectorConfig {
     return 'ShakeDetectorConfig(thresholdG: $thresholdG, throttleMs: $throttleMs, gravity: $gravity)';
   }
 }
-
