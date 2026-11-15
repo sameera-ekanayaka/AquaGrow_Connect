@@ -9,6 +9,7 @@ import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/data/local/preferences_store.dart';
 import 'package:aquagrow_mobile/features/alerts/application/notification_service.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
+import 'package:aquagrow_mobile/features/onboarding/application/onboarding_store.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -84,7 +85,8 @@ class FakeAuthRepository implements IAuthRepository {
 /// - a simulator that does NOT tick on its own (call `sim.tick()` yourself),
 /// - always online,
 /// - a [FakeNotificationService] (pass your own to check notifications),
-/// - preferences kept in memory.
+/// - preferences kept in memory, with onboarding already seen (pass
+///   `onboardingSeen: false` to test the first-launch walkthrough).
 ///
 /// ```dart
 /// final sim = PodSimulator(clock: () => DateTime(2026, 11, 15, 10));
@@ -96,7 +98,12 @@ Widget testApp({
   UserProfile? user,
   bool signedIn = true,
   FakeNotificationService? notifications,
+  bool onboardingSeen = true,
 }) {
+  final preferences = InMemoryPreferencesStore();
+  if (onboardingSeen) {
+    unawaited(preferences.setBool(OnboardingStore.seenKey, value: true));
+  }
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(
@@ -107,7 +114,7 @@ Widget testApp({
       notificationServiceProvider.overrideWithValue(
         notifications ?? FakeNotificationService(),
       ),
-      preferencesStoreProvider.overrideWithValue(InMemoryPreferencesStore()),
+      preferencesStoreProvider.overrideWithValue(preferences),
     ],
     child: const AquaGrowApp(),
   );
