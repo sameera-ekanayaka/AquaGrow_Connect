@@ -53,7 +53,7 @@ void main() {
 
     // 2. Home shows both pods with live readings.
     expect(find.text('Your garden'), findsOneWidget);
-    expect(find.text('Pod Alpha · Kitchen'), findsOneWidget);
+    expect(find.text('Pod Alpha'), findsOneWidget);
     expect(bell, findsOneWidget);
     expect(badgeCount('1'), findsNothing);
     for (var i = 0; i < 3; i++) {
