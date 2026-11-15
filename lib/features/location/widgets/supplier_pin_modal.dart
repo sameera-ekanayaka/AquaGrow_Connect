@@ -1,4 +1,3 @@
-import 'package:aquagrow_mobile/core/constants/app_colors.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:flutter/material.dart';
@@ -45,9 +44,6 @@ class SupplierPinModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.ag;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
 
     final double? distanceKm = (userLatitude != null && userLongitude != null)
         ? supplier.distanceInKmFrom(userLatitude!, userLongitude!)
@@ -84,7 +80,7 @@ class SupplierPinModal extends StatelessWidget {
               ),
             ),
 
-            // Header Title & Verification Badge
+            // Header: Name, Verified Badge, Distance Badge
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -148,140 +144,147 @@ class SupplierPinModal extends StatelessWidget {
               ],
             ),
 
-          const SizedBox(height: AgSpace.s16),
-          const Divider(height: 1),
-          const SizedBox(height: AgSpace.s16),
+            const SizedBox(height: AgSpace.s16),
+            const Divider(height: 1),
+            const SizedBox(height: AgSpace.s16),
 
-          // Rating, Open Hours & Address
-          Row(
-            children: [
-              // Star colour is amber/orange — no exact design token;
-              // colors.warning is the closest warm accent in the token set.
-              Icon(Icons.star, color: colors.warning, size: 18),
-              const SizedBox(width: AgSpace.s8),
-              Text(
-                '${supplier.rating} / 5.0',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colors.text,
-                    ),
-              ),
-              const SizedBox(width: AgSpace.s20),
-              Icon(Icons.schedule, color: colors.brand, size: 18),
-              const SizedBox(width: AgSpace.s8),
-              Text(
-                supplier.openHours,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: colors.textSecondary),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: AgSpace.s12),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.pin_drop_outlined, color: colors.brand, size: 18),
-              const SizedBox(width: AgSpace.s8),
-              Expanded(
-                child: Text(
-                  supplier.address,
+            // Rating, Open Hours & Address
+            Row(
+              children: [
+                // Star colour is amber/orange — no exact design token;
+                // colors.warning is the closest warm accent in the token set.
+                Icon(Icons.star, color: colors.warning, size: 18),
+                const SizedBox(width: AgSpace.s8),
+                Text(
+                  '${supplier.rating} / 5.0',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colors.text,
+                      ),
+                ),
+                const SizedBox(width: AgSpace.s20),
+                Icon(Icons.schedule, color: colors.brand, size: 18),
+                const SizedBox(width: AgSpace.s8),
+                Text(
+                  supplier.openHours,
                   style: Theme.of(context)
                       .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: colors.text),
+                      .bodySmall
+                      ?.copyWith(color: colors.textSecondary),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          // Stocked Supplies Badges
-          Text(
-            'Verified In-Stock Hydroponic Inventory',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-              color: secondaryTextColor,
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
 
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: supplier.featuredProducts.map((product) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-                    width: 0.8,
+            const SizedBox(height: AgSpace.s12),
+
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.pin_drop_outlined, color: colors.brand, size: 18),
+                const SizedBox(width: AgSpace.s8),
+                Expanded(
+                  child: Text(
+                    supplier.address,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: colors.text),
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.check_circle_outline, size: 14, color: AppColors.mintAccent),
-                    const SizedBox(width: 6),
-                    Text(
-                      product,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: primaryTextColor,
-                        fontWeight: FontWeight.w500,
+              ],
+            ),
+
+            const SizedBox(height: AgSpace.s20),
+
+            // Stocked Supplies Badges
+            Text(
+              'Verified In-Stock Hydroponic Inventory',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    color: colors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: AgSpace.s12),
+
+            Wrap(
+              spacing: AgSpace.s8,
+              runSpacing: AgSpace.s8,
+              children: supplier.featuredProducts.map((product) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AgSpace.s12,
+                    vertical: AgSpace.s8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.subtle,
+                    borderRadius: AgRadius.all(AgRadius.r16),
+                    border: Border.all(color: colors.border, width: 0.8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 14,
+                        color: colors.brand,
+                      ),
+                      const SizedBox(width: AgSpace.s8),
+                      Text(
+                        product,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colors.text,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+
+            const SizedBox(height: AgSpace.s24),
+
+            // Action Buttons: Call & Navigate
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Dialing ${supplier.phone}...')),
+                      );
+                    },
+                    icon: const Icon(Icons.phone, size: 18),
+                    label: Text(supplier.phone),
+                    style: OutlinedButton.styleFrom(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AgSpace.s12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AgRadius.all(AgRadius.r16),
                       ),
                     ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Action Buttons: Call & Navigate
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Dialing ${supplier.phone}...')),
-                    );
-                  },
-                  icon: const Icon(Icons.phone, size: 18),
-                  label: Text(supplier.phone),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Navigating to ${supplier.name}...')),
-                    );
-                  },
-                  icon: const Icon(Icons.directions, size: 18),
-                  label: const Text('Directions'),
+                const SizedBox(width: AgSpace.s12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Navigating to ${supplier.name}...'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.directions, size: 18),
+                    label: const Text('Directions'),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
