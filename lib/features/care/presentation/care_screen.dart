@@ -19,9 +19,6 @@ class CareScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AgSpace.screen),
         children: [
           const TabHeader(overline: 'LOOK AFTER YOUR PODS', title: 'Care'),
-          const SizedBox(height: AgSpace.s12),
-          const CareRemindersCard(),
-          const SizedBox(height: AgSpace.s16),
           _CareTile(
             icon: Icons.storefront_outlined,
             title: 'Hydroponic suppliers',
@@ -46,6 +43,8 @@ class CareScreen extends StatelessWidget {
             subtitle: 'Demo tools: trigger pH crashes, low water and more',
             onTap: () => context.push(AppRoutes.simulator),
           ),
+          const SizedBox(height: AgSpace.s12),
+          const CareRemindersCard(),
         ],
       ),
     );
