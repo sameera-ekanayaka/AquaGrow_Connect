@@ -10,8 +10,7 @@ abstract final class AppInfo {
   static const versionLabel = '$version (build $buildNumber)';
 
   /// The university module this app was built for.
-  // TODO(tharindu): add the module code once confirmed.
-  static const module = 'Mobile Application Development';
+  static const module = 'INTE 22283 · Mobile Applications Development';
 
   /// The team, in task-file order.
   static const team = ['Tharindu', 'Osanda', 'Sameera', 'Imasha', 'Udeshika'];
