@@ -4,6 +4,9 @@
 /// - `go` replaces the current location (switching tabs, after login).
 /// - `push` opens a screen on top, with a back arrow (alerts, detail screens).
 abstract final class AppRoutes {
+  // First launch
+  static const onboarding = '/onboarding';
+
   // Signed out
   static const login = '/login';
   static const register = '/register';
