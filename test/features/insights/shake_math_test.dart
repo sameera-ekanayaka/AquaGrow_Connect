@@ -3,6 +3,28 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ShakeMath', () {
+    test('computeMagnitude computes Pythagorean length of 3D vector', () {
+      expect(ShakeMath.computeMagnitude(0, 0, 0), equals(0.0));
+      expect(ShakeMath.computeMagnitude(3, 4, 0), equals(5.0));
+      expect(ShakeMath.computeMagnitude(1, 2, 2), equals(3.0));
+    });
+
+    test('computeDelta calculates distance between two acceleration vectors',
+        () {
+      expect(
+        ShakeMath.computeDelta(0, 0, 0, 3, 4, 0),
+        equals(5.0),
+      );
+      expect(
+        ShakeMath.computeDelta(1, 1, 1, 1, 1, 1),
+        equals(0.0),
+      );
+      expect(
+        ShakeMath.computeDelta(1, 2, 3, 2, 4, 5),
+        equals(3.0),
+      );
+    });
+
     test('computeGForce calculates correct g-force for zero acceleration', () {
       final gForce = ShakeMath.computeGForce(0, 0, 0);
       expect(gForce, equals(0.0));
