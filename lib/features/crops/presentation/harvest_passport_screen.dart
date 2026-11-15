@@ -28,7 +28,7 @@ class HarvestPassportScreen extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: const Text('Harvest Passport')),
       body: SafeArea(
         child: AsyncValueView<List<Pod>>(
           value: podsAsync,
