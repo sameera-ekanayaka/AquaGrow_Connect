@@ -136,29 +136,12 @@ class HydroMapScreen extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: AgSpace.s8),
 
-          // Suppliers List
+          // Suppliers List or Empty State
           Expanded(
             child: suppliers.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.store_mall_directory_outlined, size: 48, color: AppColors.textDarkSecondary),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No hydroponic suppliers found',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: primaryTextColor),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Try clearing search filters or changing category',
-                          style: TextStyle(fontSize: 12, color: secondaryTextColor),
-                        ),
-                      ],
-                    ),
-                  )
+                ? _EmptyState()
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: suppliers.length,
@@ -334,8 +317,41 @@ class HydroMapScreen extends ConsumerWidget {
   }
 }
 
-/// GPS coordinates status bar shown at the top of [HydroMapScreen].
-class _GpsStatusBar extends StatelessWidget {
+/// Empty state shown when the filtered supplier list has no results.
+class _EmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ag;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.store_mall_directory_outlined,
+            size: 48,
+            color: colors.textSecondary,
+          ),
+          const SizedBox(height: AgSpace.s12),
+          Text(
+            'No hydroponic suppliers found',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colors.text,
+                ),
+          ),
+          const SizedBox(height: AgSpace.s4),
+          Text(
+            'Try clearing search filters or changing category',
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: colors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
   /// Creates a [_GpsStatusBar] with the given [userPos].
   const _GpsStatusBar({required this.userPos});
 
