@@ -99,6 +99,9 @@ future work. Rehearse `docs/DEMO.md` twice. Record a backup screen video.
 
 ### 8. MUST (Monday, by 10 PM): Release APK (moved from Sameera's task 3)
 
+> **Handing over to Osanda** (Tharindu is not available on demo day). Waiting for Osanda to
+> agree and for the task to be added to `docs/tasks/osanda.md`. Until then it stays listed here.
+
 On the laptop with Android Studio and the demo phone, follow `docs/RELEASE.md`:
 
 - Create the upload keystore **outside the repo** and write `android/key.properties` (git-ignored).
