@@ -42,12 +42,12 @@ void main() {
       expect(find.text('Genovese Basil'), findsAtLeast(1));
       expect(find.text('Growth Stages'), findsOneWidget);
       expect(find.text('Progress'), findsOneWidget);
-      expect(find.text('Recipe Targets'), findsOneWidget);
-      expect(find.text("Today's Average (24h)"), findsOneWidget);
-      expect(find.text('Harvest Crop'), findsOneWidget);
+      expect(find.text('Recipe targets'), findsOneWidget);
+      expect(find.text("Today's average (24h)"), findsOneWidget);
+      expect(find.text('Harvest crop'), findsOneWidget);
     });
 
-    testWidgets('shows confirmation dialog when Harvest Crop is tapped',
+    testWidgets('shows confirmation dialog when Harvest crop is tapped',
         (tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -67,7 +67,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      final harvestBtn = find.text('Harvest Crop');
+      final harvestBtn = find.text('Harvest crop');
       await tester.ensureVisible(harvestBtn);
       await tester.tap(harvestBtn);
       await tester.pumpAndSettle();

@@ -69,10 +69,10 @@ class CropDetailScreen extends ConsumerWidget {
                 const SizedBox(height: AgSpace.s16),
                 _ProgressCard(batch: batch, now: now),
                 const SizedBox(height: AgSpace.s20),
-                const SectionHeader(title: 'Recipe Targets'),
+                const SectionHeader(title: 'Recipe targets'),
                 _RecipeTargetsCard(recipe: recipe),
                 const SizedBox(height: AgSpace.s20),
-                const SectionHeader(title: "Today's Average (24h)"),
+                const SectionHeader(title: "Today's average (24h)"),
                 _TodayAverageCard(todayTelemetry: todayTelemetry),
                 const SizedBox(height: AgSpace.s24),
                 FilledButton.icon(
@@ -83,7 +83,7 @@ class CropDetailScreen extends ConsumerWidget {
                   label: Text(
                     currentStage == GrowthStage.harvested
                         ? 'Already Harvested'
-                        : 'Harvest Crop',
+                        : 'Harvest crop',
                   ),
                 ),
                 const SizedBox(height: AgSpace.s16),
@@ -196,6 +196,7 @@ class _StageTimelineCard extends StatelessWidget {
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
+                              softWrap: false,
                             ),
                           ],
                         ),
@@ -248,7 +249,7 @@ class _ProgressCard extends StatelessWidget {
                 Text('Progress', style: text.titleMedium),
                 Text(
                   '${(batch.progress(now) * 100).toInt()}%',
-                  style: text.labelLarge?.copyWith(color: c.brand),
+                  style: text.labelLarge?.copyWith(color: c.text),
                 ),
               ],
             ),
