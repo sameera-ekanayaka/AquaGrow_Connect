@@ -139,4 +139,14 @@ void main() {
   test('unknown pod id throws', () {
     expect(() => sim.latest('nope'), throwsArgumentError);
   });
+
+  test('both demo pods have a crop photo that ships with the app', () {
+    for (final seed in SimPodSeed.demo) {
+      expect(
+        seed.imageAsset,
+        startsWith('assets/images/crops/'),
+        reason: seed.id,
+      );
+    }
+  });
 }
