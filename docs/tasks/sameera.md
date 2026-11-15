@@ -89,6 +89,8 @@ Return them from the `DataMode.live` branches in `data_providers.dart`. Add a mi
 
 ### 6. SHOULD: Remove legacy code
 
+- [x] Done: removed `biophilic_theme.dart`, `app_colors.dart`, `mock_sensor_repository.dart` and `i_sensor_repository.dart` (#45).
+
 When no screen imports them any more, delete `lib/core/constants/app_colors.dart`,
 `lib/core/theme/biophilic_theme.dart`, `lib/core/mocks/mock_sensor_repository.dart` and
 `lib/core/interfaces/i_sensor_repository.dart` in one `refactor` commit. Check with the group first.
