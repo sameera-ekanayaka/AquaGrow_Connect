@@ -96,7 +96,7 @@ void main() {
       expect(reading.vpdKpa, lessThanOrEqualTo(1.20));
       expect(reading.zone, equals(VpdZone.optimalVegetative));
       expect(reading.isOptimal, isTrue);
-      expect(reading.statusTitle, contains('Ideal Vegetative'));
+      expect(reading.statusTitle, contains('Just right'));
     });
 
     test('Identifies Ideal Generative / Flowering zone (1.20 - 1.60 kPa)', () {

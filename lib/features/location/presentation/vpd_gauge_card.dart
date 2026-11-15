@@ -131,7 +131,7 @@ class VpdGaugeCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Good for leafy greens',
+                      _getZoneAdviceSubtitle(vpd.zone),
                       style: textTheme.labelSmall?.copyWith(
                         color: colors.textSecondary,
                       ),
@@ -366,6 +366,21 @@ class VpdGaugeCard extends ConsumerWidget {
           primary: colors.critical,
           surface: colors.criticalSurface,
         );
+    }
+  }
+
+  String _getZoneAdviceSubtitle(VpdZone zone) {
+    switch (zone) {
+      case VpdZone.underTranspiration:
+        return 'Too humid for leafy greens';
+      case VpdZone.earlyVegetative:
+        return 'Gentle for young seedlings';
+      case VpdZone.optimalVegetative:
+        return 'Good for leafy greens';
+      case VpdZone.optimalGenerative:
+        return 'Good for flowering crops';
+      case VpdZone.overTranspirationStress:
+        return 'Too dry for leafy greens';
     }
   }
 }

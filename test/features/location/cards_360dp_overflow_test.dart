@@ -35,7 +35,7 @@ void main() {
       saturationVpKpa: 3.78,
       actualVpKpa: 2.84,
       zone: VpdZone.optimalVegetative,
-      statusTitle: 'Ideal Vegetative Transpiration',
+      statusTitle: 'Just right',
       actionableAdvice: 'Perfect transpiration rate for leafy greens.',
       calculatedAt: DateTime(2026, 11, 15, 12, 0),
     );
