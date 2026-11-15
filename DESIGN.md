@@ -33,9 +33,10 @@ Container(color: c.warningSurface, child: Text('Water needs attention', style: T
 
 ## 2. Type (line height 1.4)
 
-Figma uses **Inter**. Until the Inter font files are bundled in `assets/fonts/`, the app uses
-the Android system font (Roboto). Never load fonts from the internet at runtime: the demo
-phone may be offline.
+Figma uses **Inter**. It is bundled in `assets/fonts/` (Regular, Medium, SemiBold, Bold, OFL
+licence in `OFL.txt`) and set once in `AppTheme` (`fontFamily: 'Inter'`), so every
+`textTheme` style uses it. Never set a font family in a feature, and never load fonts from the
+internet at runtime: the demo phone may be offline.
 
 | Figma style | Flutter | Size / weight | Example |
 | --- | --- | --- | --- |

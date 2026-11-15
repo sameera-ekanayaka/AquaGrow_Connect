@@ -20,6 +20,9 @@ import 'package:flutter/material.dart';
 /// Use `Theme.of(context).textTheme.titleLarge` and so on. Never build a
 /// `TextStyle` with a raw font size inside a feature.
 abstract final class AppTheme {
+  /// Inter, bundled in `assets/fonts/` and declared in pubspec.yaml.
+  static const fontFamily = 'Inter';
+
   static ThemeData get light => _build(AgColors.light, Brightness.light);
   static ThemeData get dark => _build(AgColors.dark, Brightness.dark);
 
@@ -53,6 +56,7 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: c.background,
+      fontFamily: fontFamily,
       textTheme: textTheme,
       extensions: [c],
       appBarTheme: AppBarTheme(
