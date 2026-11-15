@@ -1,6 +1,7 @@
 import 'package:aquagrow_mobile/app/router/app_routes.dart';
 import 'package:aquagrow_mobile/app/shell/tab_header.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
+import 'package:aquagrow_mobile/features/care/presentation/widgets/care_reminders_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -42,6 +43,8 @@ class CareScreen extends StatelessWidget {
             subtitle: 'Demo tools: trigger pH crashes, low water and more',
             onTap: () => context.push(AppRoutes.simulator),
           ),
+          const SizedBox(height: AgSpace.s12),
+          const CareRemindersCard(),
         ],
       ),
     );
