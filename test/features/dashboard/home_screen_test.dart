@@ -6,6 +6,7 @@ import 'package:aquagrow_mobile/data/local/preferences_store.dart';
 import 'package:aquagrow_mobile/features/alerts/application/notification_service.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
 import 'package:aquagrow_mobile/features/dashboard/application/home_clock.dart';
+import 'package:aquagrow_mobile/features/onboarding/application/onboarding_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,8 +38,11 @@ void main() {
           isOfflineProvider.overrideWith((ref) => Stream.value(false)),
           notificationServiceProvider
               .overrideWithValue(FakeNotificationService()),
-          preferencesStoreProvider
-              .overrideWithValue(InMemoryPreferencesStore()),
+          // Onboarding already seen, so the app opens on Home.
+          preferencesStoreProvider.overrideWithValue(
+            InMemoryPreferencesStore()
+              ..setBool(OnboardingStore.seenKey, value: true),
+          ),
           homeClockProvider.overrideWithValue(() => _now),
         ],
         child: const AquaGrowApp(),
