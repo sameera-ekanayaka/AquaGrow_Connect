@@ -98,8 +98,10 @@ class WeatherSummaryCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: AgSpace.s8),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AgSpace.s8,
+                      vertical: AgSpace.s4,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.brandSurface,
                       borderRadius: AgRadius.all(AgRadius.pill),
@@ -235,7 +237,10 @@ class WeatherSummaryCard extends ConsumerWidget {
 
         // Solar Daylight Bar
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AgSpace.s12,
+            vertical: AgSpace.s8,
+          ),
           decoration: BoxDecoration(
             color: colors.subtle,
             borderRadius: AgRadius.all(AgRadius.r16),
@@ -313,7 +318,7 @@ class WeatherSummaryCard extends ConsumerWidget {
             color: colors.text,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AgSpace.s4),
         Text(
           label,
           style: textTheme.labelSmall?.copyWith(
