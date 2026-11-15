@@ -50,7 +50,7 @@ const onboardingSlides = [
     title: "Get alerted before it's too late",
     body: 'AquaGrow tells you what needs doing, and asks before it changes '
         'anything.',
-    imageAsset: 'assets/images/crops/basil-plants.jpg',
+    imageAsset: 'assets/images/crops/basil-plants.webp',
     badge: SlideBadge.alertRow,
   ),
 ];
