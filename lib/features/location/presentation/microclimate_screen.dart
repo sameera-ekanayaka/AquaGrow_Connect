@@ -140,7 +140,7 @@ class MicroclimateScreen extends ConsumerWidget {
                   '${photoperiod.targetLightHours.toStringAsFixed(0)}h TARGET',
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: colors.brand,
+                    color: colors.text,
                   ),
                 ),
               ),

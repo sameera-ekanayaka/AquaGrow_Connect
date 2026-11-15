@@ -90,15 +90,15 @@ class VpdCalculator {
   static String _getStatusTitle(VpdZone zone) {
     switch (zone) {
       case VpdZone.underTranspiration:
-        return 'Under-Transpiration (High Fungal Risk)';
+        return 'Too humid';
       case VpdZone.earlyVegetative:
-        return 'Gentle Transpiration (Seedling Zone)';
+        return 'A bit humid';
       case VpdZone.optimalVegetative:
-        return 'Ideal Vegetative Transpiration';
+        return 'Just right';
       case VpdZone.optimalGenerative:
-        return 'Ideal Generative Transpiration';
+        return 'A bit dry';
       case VpdZone.overTranspirationStress:
-        return 'Air is too dry (leaf dehydration)';
+        return 'Too dry';
     }
   }
 

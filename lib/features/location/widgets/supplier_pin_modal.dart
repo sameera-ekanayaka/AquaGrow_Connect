@@ -137,7 +137,7 @@ class SupplierPinModal extends StatelessWidget {
                       '${distanceKm.toStringAsFixed(1)} km',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: colors.brand,
+                            color: colors.text,
                           ),
                     ),
                   ),

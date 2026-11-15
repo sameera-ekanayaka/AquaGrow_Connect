@@ -151,7 +151,7 @@ class WeatherSummaryCard extends ConsumerWidget {
                           'C',
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: colors.brand,
+                            color: colors.text,
                           ),
                         ),
                       ),

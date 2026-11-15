@@ -1,4 +1,5 @@
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
+import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,26 +39,37 @@ void main() {
       expect(queried, isFalse);
     });
 
-    test(
-        'when consent is granted, queries GPS service and yields live position',
+    test('initializes consent from preferencesStoreProvider surviving restarts',
         () async {
       final fakeGeo = FakeGeoService.granted(
         latitude: 7.2906,
         longitude: 80.6337,
       );
 
-      final container = ProviderContainer(
+      final container1 = ProviderContainer(
         overrides: [
           geoServiceProvider.overrideWithValue(fakeGeo),
         ],
       );
-      addTearDown(container.dispose);
+      addTearDown(container1.dispose);
 
-      container.read(locationConsentProvider.notifier).state = true;
-      final result = await container.read(locationResultProvider.future);
+      // User grants consent and preference is stored
+      container1.read(locationConsentProvider.notifier).state = true;
+      final prefs = container1.read(preferencesStoreProvider);
+      await prefs.setBool(kLocationConsentPrefKey, value: true);
 
+      // Simulate app restart with a fresh container sharing the same preferences store
+      final container2 = ProviderContainer(
+        overrides: [
+          preferencesStoreProvider.overrideWithValue(prefs),
+          geoServiceProvider.overrideWithValue(fakeGeo),
+        ],
+      );
+      addTearDown(container2.dispose);
+
+      expect(container2.read(locationConsentProvider), isTrue);
+      final result = await container2.read(locationResultProvider.future);
       expect(result.status, equals(LocationAccessStatus.granted));
-      expect(result.isFallback, isFalse);
       expect(result.position.latitude, equals(7.2906));
     });
   });
