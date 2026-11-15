@@ -1,5 +1,3 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
 import 'package:aquagrow_mobile/core/mocks/mock_weather_service.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
@@ -9,45 +7,59 @@ import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
 import 'package:aquagrow_mobile/core/services/weather_service.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Member 3: Tetens Equation & Psychrometric Science Tests', () {
-    test('Calculates Saturation Vapor Pressure according to standard psychrometric tables', () {
+    test(
+        'Calculates Saturation Vapor Pressure according to standard psychrometric tables',
+        () {
       // Reference standard: At 25°C, saturation vapor pressure of pure water is ~3.167 kPa
-      final double vpSat25 = VpdCalculator.calculateSaturationVaporPressure(25.0);
+      final double vpSat25 =
+          VpdCalculator.calculateSaturationVaporPressure(25.0);
       expect(vpSat25, closeTo(3.167, 0.05));
 
       // Reference standard: At 30°C, saturation vapor pressure is ~4.24 kPa
-      final double vpSat30 = VpdCalculator.calculateSaturationVaporPressure(30.0);
+      final double vpSat30 =
+          VpdCalculator.calculateSaturationVaporPressure(30.0);
       expect(vpSat30, closeTo(4.24, 0.05));
 
       // Reference standard: At 20°C, saturation vapor pressure is ~2.34 kPa
-      final double vpSat20 = VpdCalculator.calculateSaturationVaporPressure(20.0);
+      final double vpSat20 =
+          VpdCalculator.calculateSaturationVaporPressure(20.0);
       expect(vpSat20, closeTo(2.34, 0.05));
     });
 
-    test('Calculates Actual Vapor Pressure accurately based on Relative Humidity', () {
+    test(
+        'Calculates Actual Vapor Pressure accurately based on Relative Humidity',
+        () {
       // At 25°C and 50% RH: Actual VP should be exactly 50% of saturation VP
       final double vpSat = VpdCalculator.calculateSaturationVaporPressure(25.0);
-      final double vpAct = VpdCalculator.calculateActualVaporPressure(25.0, 50.0);
+      final double vpAct =
+          VpdCalculator.calculateActualVaporPressure(25.0, 50.0);
 
       expect(vpAct, closeTo(vpSat * 0.5, 0.001));
     });
 
     test('Clamps humidity strictly between 0% and 100%', () {
-      final double vpActOver = VpdCalculator.calculateActualVaporPressure(25.0, 150.0);
+      final double vpActOver =
+          VpdCalculator.calculateActualVaporPressure(25.0, 150.0);
       final double vpSat = VpdCalculator.calculateSaturationVaporPressure(25.0);
       expect(vpActOver, closeTo(vpSat, 0.001));
 
-      final double vpActNegative = VpdCalculator.calculateActualVaporPressure(25.0, -20.0);
+      final double vpActNegative =
+          VpdCalculator.calculateActualVaporPressure(25.0, -20.0);
       expect(vpActNegative, closeTo(0.0, 0.001));
     });
   });
 
   group('Member 3: VPD Physiological Zone & Horticultural Action Tests', () {
-    test('Identifies Under-Transpiration / High Fungal Risk condition (< 0.40 kPa)', () {
+    test(
+        'Identifies Under-Transpiration / High Fungal Risk condition (< 0.40 kPa)',
+        () {
       // 25°C with 95% relative humidity creates saturated air with minimal drying power
       final VpdReading reading = VpdCalculator.calculateVpd(
         airTempC: 25.0,
@@ -72,7 +84,9 @@ void main() {
       expect(reading.isOptimal, isTrue);
     });
 
-    test('Identifies Ideal Vegetative Transpiration zone (0.80 - 1.20 kPa) for leafy greens', () {
+    test(
+        'Identifies Ideal Vegetative Transpiration zone (0.80 - 1.20 kPa) for leafy greens',
+        () {
       final VpdReading reading = VpdCalculator.calculateVpd(
         airTempC: 27.0,
         humidityPct: 65.0,
@@ -97,7 +111,8 @@ void main() {
       expect(reading.isOptimal, isTrue);
     });
 
-    test('Identifies High Transpiration Stress / Dehydration zone (> 1.60 kPa)', () {
+    test('Identifies High Transpiration Stress / Dehydration zone (> 1.60 kPa)',
+        () {
       // Hot and dry air: 35°C with 30% RH
       final VpdReading reading = VpdCalculator.calculateVpd(
         airTempC: 35.0,
@@ -112,9 +127,11 @@ void main() {
   });
 
   group('Member 3: Circadian Photoperiod & Solar Automation Tests', () {
-    test('Calculates supplemental grow-light hours and symmetric pre-dawn/post-dusk schedule', () {
+    test(
+        'Calculates supplemental grow-light hours and symmetric pre-dawn/post-dusk schedule',
+        () {
       final sunrise = DateTime(2026, 10, 1, 6, 0); // 06:00
-      final sunset = DateTime(2026, 10, 1, 18, 0);  // 18:00
+      final sunset = DateTime(2026, 10, 1, 18, 0); // 18:00
       // 12.0 hours natural daylight, target is 14.0 hours => 2.0 hours supplement required
       final schedule = VpdCalculator.calculatePhotoperiodSchedule(
         sunrise: sunrise,
@@ -134,7 +151,9 @@ void main() {
       expect(schedule.solarNoon.hour, equals(12));
     });
 
-    test('Handles natural daylight exceeding target hours without negative supplement', () {
+    test(
+        'Handles natural daylight exceeding target hours without negative supplement',
+        () {
       final sunrise = DateTime(2026, 10, 1, 5, 30);
       final sunset = DateTime(2026, 10, 1, 18, 30); // 13.0 hours daylight
       final schedule = VpdCalculator.calculatePhotoperiodSchedule(
@@ -154,7 +173,12 @@ void main() {
       final sampleOwmJson = {
         'coord': {'lon': 79.8612, 'lat': 6.9271},
         'weather': [
-          {'id': 801, 'main': 'Clouds', 'description': 'few clouds', 'icon': '02d'}
+          {
+            'id': 801,
+            'main': 'Clouds',
+            'description': 'few clouds',
+            'icon': '02d',
+          },
         ],
         'main': {
           'temp': 29.8,
@@ -171,7 +195,8 @@ void main() {
         'name': 'Colombo',
       };
 
-      final WeatherData weather = WeatherData.fromOpenWeatherMapJson(sampleOwmJson);
+      final WeatherData weather =
+          WeatherData.fromOpenWeatherMapJson(sampleOwmJson);
 
       expect(weather.cityName, equals('Colombo'));
       expect(weather.countryCode, equals('LK'));
@@ -183,7 +208,9 @@ void main() {
       expect(weather.iconCode, equals('02d'));
     });
 
-    test('MockWeatherService executes offline with realistic coordinates and diurnal temperatures', () async {
+    test(
+        'MockWeatherService executes offline with realistic coordinates and diurnal temperatures',
+        () async {
       final IWeatherService mockService = MockWeatherService(seed: 100);
       final WeatherData weather = await mockService.fetchWeather(
         latitude: 6.9271,
@@ -198,7 +225,9 @@ void main() {
       expect(weather.sunriseTime.isBefore(weather.sunsetTime), isTrue);
     });
 
-    test('WeatherService safely delegates to MockWeatherService when API key is null or empty', () async {
+    test(
+        'WeatherService safely delegates to MockWeatherService when API key is null or empty',
+        () async {
       final weatherService = WeatherService(defaultApiKey: null);
       final weather = await weatherService.fetchWeather(
         latitude: 7.2906,
@@ -211,7 +240,8 @@ void main() {
   });
 
   group('Member 3: GPS Geolocation & Haversine Distance Tests', () {
-    test('GeoService falls back to default Colombo position without crashing', () async {
+    test('GeoService falls back to default Colombo position without crashing',
+        () async {
       final geoService = GeoService();
       final position = await geoService.getCurrentPosition();
 
@@ -220,7 +250,9 @@ void main() {
       expect(position.isSimulated, isTrue);
     });
 
-    test('GeoService accepts injected mock coordinates for deterministic testing', () async {
+    test(
+        'GeoService accepts injected mock coordinates for deterministic testing',
+        () async {
       final geoService = GeoService();
       geoService.setMockLocation(GeoPosition.defaultKandy);
 
@@ -230,7 +262,9 @@ void main() {
       expect(position.locationSource, contains('Kandy'));
     });
 
-    test('Calculates Haversine distance between Colombo and Kandy accurately (~95-115 km)', () {
+    test(
+        'Calculates Haversine distance between Colombo and Kandy accurately (~95-115 km)',
+        () {
       final geoService = GeoService();
       final double distanceKm = geoService.distanceBetween(
         startLatitude: 6.9271,
@@ -243,7 +277,8 @@ void main() {
     });
 
     test('HydroSupplier computes correct distance from user coordinates', () {
-      final supplier = HydroSupplier.defaultSuppliers.first; // Nugegoda supplier
+      final supplier =
+          HydroSupplier.defaultSuppliers.first; // Nugegoda supplier
       // User at Colombo Fort (6.9350, 79.8450) to Nugegoda (6.8710, 79.8970)
       final double dist = supplier.distanceInKmFrom(6.9350, 79.8450);
 
@@ -253,7 +288,9 @@ void main() {
   });
 
   group('Member 3: Riverpod State Providers & Supplier Filtering Tests', () {
-    test('VPD provider reacts dynamically to ambient temperature and humidity state updates', () {
+    test(
+        'VPD provider reacts dynamically to ambient temperature and humidity state updates',
+        () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -278,10 +315,12 @@ void main() {
 
       // Default: All categories
       final allSuppliers = container.read(sortedSuppliersProvider);
-      expect(allSuppliers.length, equals(HydroSupplier.defaultSuppliers.length));
+      expect(
+          allSuppliers.length, equals(HydroSupplier.defaultSuppliers.length));
 
       // Filter by Nutrients & Buffers
-      container.read(selectedSupplierCategoryProvider.notifier).state = 'Nutrients & Buffers';
+      container.read(selectedSupplierCategoryProvider.notifier).state =
+          'Nutrients & Buffers';
       final nutrientSuppliers = container.read(sortedSuppliersProvider);
 
       expect(nutrientSuppliers.length, equals(1));
@@ -294,7 +333,10 @@ void main() {
       final rockwoolSuppliers = container.read(sortedSuppliersProvider);
 
       expect(rockwoolSuppliers.isNotEmpty, isTrue);
-      expect(rockwoolSuppliers.first.featuredProducts.any((p) => p.toLowerCase().contains('rockwool')), isTrue);
+      expect(
+          rockwoolSuppliers.first.featuredProducts
+              .any((p) => p.toLowerCase().contains('rockwool')),
+          isTrue);
     });
   });
 }
