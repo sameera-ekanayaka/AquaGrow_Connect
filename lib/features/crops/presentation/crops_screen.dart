@@ -16,6 +16,9 @@ import 'package:go_router/go_router.dart';
 class CropsScreen extends ConsumerWidget {
   const CropsScreen({super.key});
 
+  /// Height of one pod card in the 2-column layout.
+  static const double _wideCardHeight = 370;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final podsAsync = ref.watch(podsProvider);
@@ -60,7 +63,7 @@ class CropsScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: AgSpace.s16,
                         mainAxisSpacing: AgSpace.s16,
-                        mainAxisExtent: 370,
+                        mainAxisExtent: _wideCardHeight,
                       ),
                       itemCount: pods.length,
                       itemBuilder: (context, index) {
@@ -70,7 +73,7 @@ class CropsScreen extends ConsumerWidget {
                   const SizedBox(height: AgSpace.s20),
                   SizedBox(
                     width: double.infinity,
-                    child: FilledButton.icon(
+                    child: OutlinedButton.icon(
                       onPressed: () => _showAddPodDialog(context),
                       icon: const Icon(Icons.add_rounded),
                       label: const Text('Add a pod'),
