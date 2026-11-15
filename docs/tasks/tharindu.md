@@ -82,6 +82,8 @@ UX review. Optionally keep alerts across restarts with a Hive-backed `IAlertRepo
 
 ### 5. SHOULD: Bundle the Inter font (`feature/tharindu-inter-font`)
 
+- [x] Done: Inter 4.1 Regular, Medium, SemiBold, Bold with OFL licence, set in `AppTheme`.
+
 Add Inter Regular, Medium, SemiBold and Bold (`.ttf`, OFL licence) to `assets/fonts/`, declare the
 family in `pubspec.yaml`, set `fontFamily: 'Inter'` in `AppTheme`, update DESIGN.md.
 
