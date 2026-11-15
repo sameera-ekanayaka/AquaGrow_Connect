@@ -33,6 +33,9 @@ class InsightsScreen extends ConsumerStatefulWidget {
 class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   ShakeDetector? _shakeDetector;
 
+  /// True while this tab is the one on screen.
+  bool _tabVisible = true;
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +56,25 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
       clock: clock,
       onShake: _handleShake,
     );
-    _shakeDetector?.start();
+    _syncShakeWithVisibility();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tabVisible = TickerMode.of(context);
+    _syncShakeWithVisibility();
+  }
+
+  /// Listens for shakes only while the Insights tab is visible.
+  void _syncShakeWithVisibility() {
+    final detector = _shakeDetector;
+    if (detector == null) return;
+    if (_tabVisible) {
+      detector.start();
+    } else {
+      detector.stop();
+    }
   }
 
   void _handleShake() {
