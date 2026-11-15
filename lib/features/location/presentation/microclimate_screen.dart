@@ -233,7 +233,7 @@ class MicroclimateScreen extends ConsumerWidget {
             color: colors.text,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AgSpace.s4),
         Text(
           label,
           style: textTheme.labelSmall?.copyWith(color: colors.textSecondary),
@@ -329,7 +329,7 @@ class MicroclimateScreen extends ConsumerWidget {
                     color: colors.text,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AgSpace.s4),
                 Text(
                   'Find verified local retailers for nutrients, media, and probes with GPS distance.',
                   style: textTheme.labelSmall?.copyWith(

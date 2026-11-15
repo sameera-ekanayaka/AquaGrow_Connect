@@ -71,8 +71,10 @@ class VpdGaugeCard extends ConsumerWidget {
               ),
               const SizedBox(width: AgSpace.s8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AgSpace.s8,
+                  vertical: AgSpace.s4,
+                ),
                 decoration: BoxDecoration(
                   color: zoneTone.surface,
                   borderRadius: AgRadius.all(AgRadius.pill),
@@ -129,7 +131,7 @@ class VpdGaugeCard extends ConsumerWidget {
                       textAlign: TextAlign.end,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AgSpace.s4),
                     Text(
                       _getZoneAdviceSubtitle(vpd.zone),
                       style: textTheme.labelSmall?.copyWith(
@@ -153,7 +155,10 @@ class VpdGaugeCard extends ConsumerWidget {
 
           // Live Ambient Telemetry Reading Info Row
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AgSpace.s12,
+              vertical: AgSpace.s8,
+            ),
             decoration: BoxDecoration(
               color: colors.subtle,
               borderRadius: AgRadius.all(AgRadius.r16),
@@ -165,7 +170,7 @@ class VpdGaugeCard extends ConsumerWidget {
                   child: Row(
                     children: [
                       Icon(Icons.thermostat, size: 16, color: colors.brand),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AgSpace.s4),
                       Flexible(
                         child: Text(
                           'Air Temp: ${vpd.airTemperatureC.toStringAsFixed(1)}°C',
@@ -183,7 +188,7 @@ class VpdGaugeCard extends ConsumerWidget {
                 Row(
                   children: [
                     Icon(Icons.water_drop, size: 16, color: colors.brand),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AgSpace.s4),
                     Text(
                       'RH: ${vpd.relativeHumidityPct.toStringAsFixed(0)}%',
                       style: textTheme.bodySmall?.copyWith(
@@ -284,7 +289,7 @@ class VpdGaugeCard extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AgSpace.s4),
 
             // Pin Marker
             SizedBox(

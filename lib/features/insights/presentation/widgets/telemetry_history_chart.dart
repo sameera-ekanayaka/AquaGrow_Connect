@@ -112,8 +112,10 @@ class TelemetryHistoryChart extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AgSpace.s8,
+                  vertical: AgSpace.s4,
+                ),
                 decoration: BoxDecoration(
                   color: colors.brandSurface,
                   borderRadius: AgRadius.all(AgRadius.pill),
