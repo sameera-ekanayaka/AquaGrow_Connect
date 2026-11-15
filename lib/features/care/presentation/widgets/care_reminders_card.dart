@@ -1,5 +1,6 @@
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/care/application/care_reminders_provider.dart';
+import 'package:aquagrow_mobile/features/care/domain/care_reminder.dart';
 import 'package:aquagrow_mobile/features/care/presentation/widgets/care_reminder_item_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,16 +93,59 @@ class CareRemindersCard extends ConsumerWidget {
                 final reminder = reminders[index];
                 return CareReminderItemTile(
                   reminder: reminder,
-                  onToggle: (_) {
-                    ref
-                        .read(careRemindersProvider.notifier)
-                        .toggle(reminder.id);
-                  },
+                  onToggle: (_) => _handleToggle(context, ref, reminder),
                 );
               },
             ),
         ],
       ),
     );
+  }
+
+  void _handleToggle(
+    BuildContext context,
+    WidgetRef ref,
+    CareReminder reminder,
+  ) {
+    final willComplete = !reminder.isCompleted;
+    ref.read(careRemindersProvider.notifier).toggle(reminder.id);
+
+    if (willComplete) {
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) return;
+      final colors = context.ag;
+
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: colors.brand,
+                size: 18,
+              ),
+              const SizedBox(width: AgSpace.s8),
+              Expanded(
+                child: Text(
+                  'Completed "${reminder.title}" · Due in ${reminder.intervalDays}d',
+                  style: TextStyle(
+                    color: colors.text,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: colors.surface,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: AgRadius.all(AgRadius.r16),
+            side: BorderSide(color: colors.border),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }

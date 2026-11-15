@@ -58,6 +58,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('2 of 2 done'), findsOneWidget);
+      expect(
+        find.textContaining('Completed "Clean the filter"'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows empty placeholder when reminder list is empty',
