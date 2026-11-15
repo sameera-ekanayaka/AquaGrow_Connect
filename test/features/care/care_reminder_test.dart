@@ -33,6 +33,39 @@ void main() {
       expect(nextDue, equals(DateTime(2026, 11, 17)));
     });
 
+    test('handles year boundaries and leap intervals correctly', () {
+      final yearEnd = DateTime(2026, 12, 28);
+      const reminder = CareReminder(
+        id: 'r1',
+        title: 'Year end maintenance',
+        frequencyLabel: 'weekly',
+        intervalDays: 7,
+      );
+
+      // Null lastCompletedAt falls back to supplied reference date
+      final nextYearDue = reminder.nextDueDate(yearEnd);
+      expect(nextYearDue, equals(DateTime(2026, 12, 28)));
+
+      final completedYearEnd = reminder.copyWith(lastCompletedAt: yearEnd);
+      final nextDue = completedYearEnd.nextDueDate();
+      expect(nextDue, equals(DateTime(2027, 1, 4)));
+    });
+
+    test('supports quarterly and long interval cadences', () {
+      final start = DateTime(2026, 1, 1);
+      final quarterly = CareReminder(
+        id: 'q1',
+        title: 'Deep clean plumbing',
+        frequencyLabel: 'quarterly',
+        intervalDays: 90,
+        lastCompletedAt: start,
+      );
+
+      final nextDue = quarterly.nextDueDate();
+      expect(nextDue, equals(DateTime(2026, 4, 1)));
+      expect(quarterly.daysRemaining(DateTime(2026, 3, 22)), equals(10));
+    });
+
     test('daysRemaining, isDueToday, and isOverdue evaluate accurately', () {
       final completed = DateTime(2026, 11, 5);
       final reminder = CareReminder(
