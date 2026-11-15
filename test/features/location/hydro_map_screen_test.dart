@@ -280,5 +280,28 @@ void main() {
       // GPS bar always shows (even if still loading).
       expect(find.byType(HydroMapScreen), findsOneWidget);
     });
+
+    testWidgets('typing and tapping clear button resets search field and query',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_buildScreen());
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextField), 'rockwool');
+      await tester.pump();
+
+      expect(find.text('rockwool'), findsOneWidget);
+      expect(find.byTooltip('Clear search'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Clear search'));
+      await tester.pump();
+
+      expect(find.text('rockwool'), findsNothing);
+      expect(find.byTooltip('Clear search'), findsNothing);
+    });
   });
 }

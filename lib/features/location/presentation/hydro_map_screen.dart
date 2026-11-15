@@ -6,28 +6,56 @@ import 'package:aquagrow_mobile/features/location/widgets/supplier_pin_modal.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Interactive Hydro-Hub supply directory screen with GPS distance computation,
-/// category filtering, product search, and verified supplier details.
-class HydroMapScreen extends ConsumerWidget {
+/// Interactive hydroponic supplier directory with GPS distance, category
+/// filters, product search and verified supplier details.
+class HydroMapScreen extends ConsumerStatefulWidget {
   /// Creates the [HydroMapScreen].
   const HydroMapScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HydroMapScreen> createState() => _HydroMapScreenState();
+}
+
+class _HydroMapScreenState extends ConsumerState<HydroMapScreen> {
+  static const _categories = [
+    'All',
+    'Nutrients & Buffers',
+    'Rockwool & Growing Media',
+    'LED Lights & Aeration Pumps',
+    'Seeds & Genetics',
+    'Full Systems & Sensors',
+  ];
+
+  /// Owns the search text so rotation keeps it and Clear can empty it.
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(
+      text: ref.read(supplierSearchQueryProvider),
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    ref.read(supplierSearchQueryProvider.notifier).state = '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final suppliers = ref.watch(sortedSuppliersProvider);
     final selectedCategory = ref.watch(selectedSupplierCategoryProvider);
     final positionAsync = ref.watch(currentPositionProvider);
+    final hasQuery = ref.watch(supplierSearchQueryProvider).isNotEmpty;
     final colors = context.ag;
     final userPos = positionAsync.value;
-
-    final categories = [
-      'All',
-      'Nutrients & Buffers',
-      'Rockwool & Growing Media',
-      'LED Lights & Aeration Pumps',
-      'Seeds & Genetics',
-      'Full Systems & Sensors',
-    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -35,20 +63,15 @@ class HydroMapScreen extends ConsumerWidget {
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Refresh GPS & Suppliers',
+            tooltip: 'Refresh GPS and suppliers',
             icon: const Icon(Icons.my_location),
-            onPressed: () {
-              ref.invalidate(currentPositionProvider);
-            },
+            onPressed: () => ref.invalidate(currentPositionProvider),
           ),
         ],
       ),
       body: Column(
         children: [
-          // GPS Location Status Bar
           _GpsStatusBar(userPos: userPos),
-
-          // Search Bar
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AgSpace.screen,
@@ -57,6 +80,7 @@ class HydroMapScreen extends ConsumerWidget {
               AgSpace.s8,
             ),
             child: TextField(
+              controller: _searchController,
               onChanged: (val) =>
                   ref.read(supplierSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
@@ -66,12 +90,11 @@ class HydroMapScreen extends ConsumerWidget {
                     .bodyMedium
                     ?.copyWith(color: colors.textSecondary),
                 prefixIcon: Icon(Icons.search, size: 20, color: colors.brand),
-                suffixIcon: ref.watch(supplierSearchQueryProvider).isNotEmpty
+                suffixIcon: hasQuery
                     ? IconButton(
+                        tooltip: 'Clear search',
                         icon: const Icon(Icons.clear, size: 18),
-                        onPressed: () => ref
-                            .read(supplierSearchQueryProvider.notifier)
-                            .state = '',
+                        onPressed: _clearSearch,
                       )
                     : null,
                 contentPadding: const EdgeInsets.symmetric(
@@ -91,20 +114,18 @@ class HydroMapScreen extends ConsumerWidget {
               ),
             ),
           ),
-
-          // Horizontal Category Filter Chips
           SizedBox(
-            height: 48,
+            height: kMinTouchTarget,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(
                 horizontal: AgSpace.screen,
                 vertical: AgSpace.s8,
               ),
-              itemCount: categories.length,
+              itemCount: _categories.length,
               separatorBuilder: (_, __) => const SizedBox(width: AgSpace.s8),
               itemBuilder: (context, index) {
-                final category = categories[index];
+                final category = _categories[index];
                 final isSelected = category == selectedCategory;
 
                 return FilterChip(
@@ -115,7 +136,7 @@ class HydroMapScreen extends ConsumerWidget {
                   labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? colors.brand : colors.textSecondary,
+                        color: isSelected ? colors.text : colors.textSecondary,
                       ),
                   side: BorderSide(
                     color: isSelected ? colors.brand : colors.border,
@@ -128,10 +149,7 @@ class HydroMapScreen extends ConsumerWidget {
               },
             ),
           ),
-
           const SizedBox(height: AgSpace.s8),
-
-          // Suppliers List or Empty State
           Expanded(
             child: suppliers.isEmpty
                 ? _EmptyState()
@@ -142,9 +160,8 @@ class HydroMapScreen extends ConsumerWidget {
                     ),
                     itemCount: suppliers.length,
                     itemBuilder: (context, index) {
-                      final supplier = suppliers[index];
                       return _SupplierCard(
-                        supplier: supplier,
+                        supplier: suppliers[index],
                         userPos: userPos,
                       );
                     },
