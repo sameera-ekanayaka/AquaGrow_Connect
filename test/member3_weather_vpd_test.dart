@@ -316,7 +316,9 @@ void main() {
       // Default: All categories
       final allSuppliers = container.read(sortedSuppliersProvider);
       expect(
-          allSuppliers.length, equals(HydroSupplier.defaultSuppliers.length));
+        allSuppliers.length,
+        equals(HydroSupplier.defaultSuppliers.length),
+      );
 
       // Filter by Nutrients & Buffers
       container.read(selectedSupplierCategoryProvider.notifier).state =
@@ -334,9 +336,10 @@ void main() {
 
       expect(rockwoolSuppliers.isNotEmpty, isTrue);
       expect(
-          rockwoolSuppliers.first.featuredProducts
-              .any((p) => p.toLowerCase().contains('rockwool')),
-          isTrue);
+        rockwoolSuppliers.first.featuredProducts
+            .any((p) => p.toLowerCase().contains('rockwool')),
+        isTrue,
+      );
     });
   });
 }

@@ -1,5 +1,6 @@
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
+import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/widgets/location_status_banner.dart';
@@ -50,7 +51,7 @@ void main() {
       expect(find.text('Enable GPS'), findsNothing);
     });
 
-    testWidgets('shows Try again button when permission is denied',
+    testWidgets('shows Use my location button when permission is denied',
         (tester) async {
       tester.view.physicalSize = const Size(800, 1400);
       tester.view.devicePixelRatio = 1.0;
@@ -61,11 +62,14 @@ void main() {
       await tester.pumpWidget(buildBanner(result));
       await tester.pump();
 
-      expect(find.text('Try again'), findsOneWidget);
+      expect(find.text('Use my location'), findsOneWidget);
       expect(find.textContaining('Colombo'), findsOneWidget);
+
+      final btnSize = tester.getSize(find.byType(TextButton));
+      expect(btnSize.height, greaterThanOrEqualTo(kMinTouchTarget));
     });
 
-    testWidgets('tapping Try again shows LocationRationaleDialog',
+    testWidgets('tapping Use my location shows LocationRationaleDialog',
         (tester) async {
       tester.view.physicalSize = const Size(800, 1400);
       tester.view.devicePixelRatio = 1.0;
@@ -76,7 +80,7 @@ void main() {
       await tester.pumpWidget(buildBanner(result));
       await tester.pump();
 
-      await tester.tap(find.text('Try again'));
+      await tester.tap(find.text('Use my location'));
       await tester.pumpAndSettle();
 
       expect(find.text('Allow Location Access'), findsOneWidget);

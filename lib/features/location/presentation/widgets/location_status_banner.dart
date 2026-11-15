@@ -37,12 +37,12 @@ class LocationStatusBanner extends ConsumerWidget {
     ) = switch (result.status) {
       LocationAccessStatus.denied => (
           Icons.location_off_outlined,
-          result.fallbackReason ??
-              'Location permission denied. Showing Colombo weather.',
-          'Try again',
+          result.fallbackReason ?? 'GPS unavailable, showing Colombo',
+          'Use my location',
           () async {
             final allow = await LocationRationaleDialog.show(context);
             if (allow) {
+              ref.read(locationConsentProvider.notifier).state = true;
               ref.invalidate(locationResultProvider);
             }
           },
@@ -106,8 +106,7 @@ class LocationStatusBanner extends ConsumerWidget {
                 horizontal: AgSpace.s8,
                 vertical: AgSpace.s4,
               ),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              minimumSize: const Size(0, kMinTouchTarget),
             ),
             child: Text(
               actionLabel,

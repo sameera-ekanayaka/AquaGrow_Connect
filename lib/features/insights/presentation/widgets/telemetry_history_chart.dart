@@ -183,9 +183,8 @@ class TelemetryHistoryChart extends StatelessWidget {
                           axisSide: meta.axisSide,
                           child: Text(
                             metric.format(value),
-                            style: textTheme.bodySmall?.copyWith(
+                            style: textTheme.labelSmall?.copyWith(
                               color: colors.textSecondary,
-                              fontSize: 10,
                             ),
                           ),
                         );
@@ -211,9 +210,8 @@ class TelemetryHistoryChart extends StatelessWidget {
                           axisSide: meta.axisSide,
                           child: Text(
                             label,
-                            style: textTheme.bodySmall?.copyWith(
+                            style: textTheme.labelSmall?.copyWith(
                               color: colors.textSecondary,
-                              fontSize: 10,
                             ),
                           ),
                         );

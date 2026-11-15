@@ -31,7 +31,7 @@ class HydroMapScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hydro-Hub Supply Network'),
+        title: const Text('Hydroponic suppliers'),
         elevation: 0,
         actions: [
           IconButton(
@@ -180,11 +180,11 @@ class _GpsStatusBar extends StatelessWidget {
           const SizedBox(width: AgSpace.s8),
           Expanded(
             child: Text(
-              userPos != null
-                  ? '${userPos!.locationSource}: '
-                      '${userPos!.latitude.toStringAsFixed(4)}°, '
-                      '${userPos!.longitude.toStringAsFixed(4)}°'
-                  : 'Acquiring GPS Fix...',
+              userPos == null ||
+                      userPos!.isSimulated ||
+                      userPos!.locationSource.contains('Fallback')
+                  ? 'Showing suppliers near Colombo'
+                  : 'GPS Active (${userPos!.latitude.toStringAsFixed(2)}°, ${userPos!.longitude.toStringAsFixed(2)}°)',
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
@@ -347,7 +347,7 @@ class _SupplierCard extends StatelessWidget {
                 '${supplier.category} • ${supplier.city}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: colors.brand,
+                      color: colors.textSecondary,
                     ),
               ),
 
@@ -424,10 +424,14 @@ class _SupplierCard extends StatelessWidget {
                         'Details',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: colors.brand,
+                              color: colors.text,
                             ),
                       ),
-                      Icon(Icons.chevron_right, size: 16, color: colors.brand),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 16,
+                        color: colors.textSecondary,
+                      ),
                     ],
                   ),
                 ],

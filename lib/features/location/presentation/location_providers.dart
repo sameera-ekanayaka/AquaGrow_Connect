@@ -71,11 +71,21 @@ final weatherServiceProvider = Provider<IWeatherService>((ref) {
 /// Tracks whether the location rationale dialog has been shown in this session.
 final locationRationaleShownProvider = StateProvider<bool>((ref) => false);
 
+/// Tracks whether the user has given consent to query device GPS location.
+/// Defaults to false so no OS permission prompt appears until user consents.
+final locationConsentProvider = StateProvider<bool>((ref) => false);
+
 /// Asynchronous location acquisition result, including permission status.
 ///
 /// Returns a [LocationResult] that callers can inspect for [LocationResult.isFallback]
 /// and [LocationResult.status] to decide what banner or action to present.
 final locationResultProvider = FutureProvider<LocationResult>((ref) async {
+  final hasConsent = ref.watch(locationConsentProvider);
+  if (!hasConsent) {
+    return LocationResult.denied(
+      reason: 'GPS unavailable, showing Colombo',
+    );
+  }
   final geoService = ref.watch(geoServiceProvider);
   return await geoService.getPosition();
 });
