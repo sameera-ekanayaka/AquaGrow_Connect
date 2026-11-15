@@ -1,3 +1,4 @@
+import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
@@ -12,6 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Restyled strictly to Figma design tokens (`context.ag`, `AgSpace`, `AgRadius`).
 /// Displays a [LocationStatusBanner] whenever GPS or permission is degraded.
 class WeatherSummaryCard extends ConsumerWidget {
+  static const _logger = AppLogger('weather');
+
   /// Creates a [WeatherSummaryCard].
   const WeatherSummaryCard({super.key});
 
@@ -49,8 +52,11 @@ class WeatherSummaryCard extends ConsumerWidget {
                 child: CircularProgressIndicator(color: colors.brand),
               ),
             ),
-            error: (error, _) =>
-                _buildErrorContent(context, ref, error.toString()),
+            error: (error, stackTrace) {
+              _logger.warning(
+                  'Failed to load weather: $error', error, stackTrace);
+              return _buildErrorContent(context, ref);
+            },
           ),
         ],
       ),
@@ -322,7 +328,7 @@ class WeatherSummaryCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorContent(BuildContext context, WidgetRef ref, String error) {
+  Widget _buildErrorContent(BuildContext context, WidgetRef ref) {
     final colors = context.ag;
     final textTheme = Theme.of(context).textTheme;
 
@@ -339,7 +345,7 @@ class WeatherSummaryCard extends ConsumerWidget {
         ),
         const SizedBox(height: AgSpace.s4),
         Text(
-          error,
+          'Could not load the weather. Check your connection.',
           style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
           textAlign: TextAlign.center,
         ),
