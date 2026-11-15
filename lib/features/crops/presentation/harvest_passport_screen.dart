@@ -109,18 +109,22 @@ class HarvestPassportScreen extends ConsumerWidget {
                             children: [
                               const Icon(Icons.water_drop_rounded),
                               const SizedBox(width: AgSpace.s12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${passport.waterSavedLitres.toStringAsFixed(1)} L',
-                                    style: text.titleLarge,
-                                  ),
-                                  Text(
-                                    'water saved compared with soil',
-                                    style: text.bodySmall,
-                                  ),
-                                ],
+                              // Expanded lets the caption wrap on narrow
+                              // phones instead of overflowing the card.
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${passport.waterSavedLitres.toStringAsFixed(1)} L',
+                                      style: text.titleLarge,
+                                    ),
+                                    Text(
+                                      'water saved compared with soil',
+                                      style: text.bodySmall,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
