@@ -31,8 +31,10 @@ void main() {
       final result = await container.read(locationResultProvider.future);
       expect(result.status, equals(LocationAccessStatus.denied));
       expect(result.isFallback, isTrue);
-      expect(result.position.latitude,
-          equals(GeoPosition.defaultColombo.latitude));
+      expect(
+        result.position.latitude,
+        equals(GeoPosition.defaultColombo.latitude),
+      );
       expect(queried, isFalse);
     });
 

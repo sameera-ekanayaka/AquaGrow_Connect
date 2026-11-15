@@ -427,8 +427,11 @@ class _SupplierCard extends StatelessWidget {
                               color: colors.text,
                             ),
                       ),
-                      Icon(Icons.chevron_right,
-                          size: 16, color: colors.textSecondary),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 16,
+                        color: colors.textSecondary,
+                      ),
                     ],
                   ),
                 ],

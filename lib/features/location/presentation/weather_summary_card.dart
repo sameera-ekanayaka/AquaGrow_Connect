@@ -53,8 +53,7 @@ class WeatherSummaryCard extends ConsumerWidget {
               ),
             ),
             error: (error, stackTrace) {
-              _logger.warning(
-                  'Failed to load weather: $error', error, stackTrace);
+              _logger.warning('Failed to load weather: $error', error);
               return _buildErrorContent(context, ref);
             },
           ),

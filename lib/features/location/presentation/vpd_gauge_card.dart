@@ -77,7 +77,8 @@ class VpdGaugeCard extends ConsumerWidget {
                   color: zoneTone.surface,
                   borderRadius: AgRadius.all(AgRadius.pill),
                   border: Border.all(
-                      color: zoneTone.primary.withValues(alpha: 0.4)),
+                    color: zoneTone.primary.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Text(
                   vpd.isOptimal ? 'OPTIMAL' : 'ATTENTION',
@@ -258,21 +259,27 @@ class VpdGaugeCard extends ConsumerWidget {
                   children: [
                     // Under-transpiration: 0 - 0.4
                     Expanded(
-                        flex: 18,
-                        child: Container(
-                            color: colors.warning.withValues(alpha: 0.6))),
+                      flex: 18,
+                      child: Container(
+                        color: colors.warning.withValues(alpha: 0.6),
+                      ),
+                    ),
                     // Early veg: 0.4 - 0.8
                     Expanded(
-                        flex: 18,
-                        child: Container(
-                            color: colors.brand.withValues(alpha: 0.7))),
+                      flex: 18,
+                      child: Container(
+                        color: colors.brand.withValues(alpha: 0.7),
+                      ),
+                    ),
                     // Ideal veg: 0.8 - 1.2
                     Expanded(flex: 18, child: Container(color: colors.brand)),
                     // Ideal generative: 1.2 - 1.6
                     Expanded(flex: 18, child: Container(color: colors.warning)),
                     // Over-transpiration: 1.6+
                     Expanded(
-                        flex: 28, child: Container(color: colors.critical)),
+                      flex: 28,
+                      child: Container(color: colors.critical),
+                    ),
                   ],
                 ),
               ),
@@ -342,17 +349,23 @@ class VpdGaugeCard extends ConsumerWidget {
     switch (zone) {
       case VpdZone.underTranspiration:
         return _ZoneTone(
-            primary: colors.warning, surface: colors.warningSurface);
+          primary: colors.warning,
+          surface: colors.warningSurface,
+        );
       case VpdZone.earlyVegetative:
         return _ZoneTone(primary: colors.brand, surface: colors.brandSurface);
       case VpdZone.optimalVegetative:
         return _ZoneTone(primary: colors.brand, surface: colors.brandSurface);
       case VpdZone.optimalGenerative:
         return _ZoneTone(
-            primary: colors.warning, surface: colors.warningSurface);
+          primary: colors.warning,
+          surface: colors.warningSurface,
+        );
       case VpdZone.overTranspirationStress:
         return _ZoneTone(
-            primary: colors.critical, surface: colors.criticalSurface);
+          primary: colors.critical,
+          surface: colors.criticalSurface,
+        );
     }
   }
 }
