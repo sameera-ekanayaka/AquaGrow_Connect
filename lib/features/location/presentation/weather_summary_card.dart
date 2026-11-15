@@ -72,39 +72,44 @@ class WeatherSummaryCard extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: colors.brand,
-                  size: 20,
-                ),
-                const SizedBox(width: AgSpace.s8),
-                Text(
-                  '${weather.cityName}, ${weather.countryCode}',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colors.text,
+            Expanded(
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: colors.brand,
+                    size: 20,
                   ),
-                ),
-                const SizedBox(width: AgSpace.s8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: colors.brandSurface,
-                    borderRadius: AgRadius.all(AgRadius.pill),
-                  ),
-                  child: Text(
-                    '${weather.latitude.toStringAsFixed(2)}°, ${weather.longitude.toStringAsFixed(2)}°',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colors.textSecondary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                  const SizedBox(width: AgSpace.s8),
+                  Flexible(
+                    child: Text(
+                      '${weather.cityName}, ${weather.countryCode}',
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colors.text,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: AgSpace.s8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: colors.brandSurface,
+                      borderRadius: AgRadius.all(AgRadius.pill),
+                    ),
+                    child: Text(
+                      '${weather.latitude.toStringAsFixed(2)}°, ${weather.longitude.toStringAsFixed(2)}°',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colors.textSecondary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             IconButton(
               tooltip: 'Refresh Weather',
@@ -121,44 +126,48 @@ class WeatherSummaryCard extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${weather.temperatureC.toStringAsFixed(1)}°',
-                      style: textTheme.displaySmall?.copyWith(
-                        color: colors.text,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 42,
-                        height: 1.0,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: AgSpace.s4),
-                      child: Text(
-                        'C',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colors.brand,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${weather.temperatureC.toStringAsFixed(1)}°',
+                        style: textTheme.displaySmall?.copyWith(
+                          color: colors.text,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 42,
+                          height: 1.0,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AgSpace.s4),
-                Text(
-                  weather.weatherDescription.toUpperCase(),
-                  style: textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.1,
-                    color: colors.textSecondary,
+                      Padding(
+                        padding: const EdgeInsets.only(top: AgSpace.s4),
+                        child: Text(
+                          'C',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colors.brand,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: AgSpace.s4),
+                  Text(
+                    weather.weatherDescription.toUpperCase(),
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.1,
+                      color: colors.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: AgSpace.s8),
 
             // Weather Condition Badge Icon
             Container(
@@ -232,35 +241,47 @@ class WeatherSummaryCard extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.wb_twilight, color: colors.warning, size: 18),
-                  const SizedBox(width: AgSpace.s8),
-                  Text(
-                    'Sunrise: ${_formatTime(weather.sunriseTime)}',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: colors.textSecondary,
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(Icons.wb_twilight, color: colors.warning, size: 18),
+                    const SizedBox(width: AgSpace.s8),
+                    Flexible(
+                      child: Text(
+                        'Sunrise: ${_formatTime(weather.sunriseTime)}',
+                        style: textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: colors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              Row(
-                children: [
-                  Icon(
-                    Icons.nightlight_round,
-                    color: colors.textSecondary,
-                    size: 16,
-                  ),
-                  const SizedBox(width: AgSpace.s8),
-                  Text(
-                    'Sunset: ${_formatTime(weather.sunsetTime)}',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
+              const SizedBox(width: AgSpace.s8),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.nightlight_round,
                       color: colors.textSecondary,
+                      size: 16,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AgSpace.s8),
+                    Flexible(
+                      child: Text(
+                        'Sunset: ${_formatTime(weather.sunsetTime)}',
+                        style: textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: colors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

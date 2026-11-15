@@ -32,44 +32,53 @@ class VpdGaugeCard extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AgSpace.s8),
-                    decoration: BoxDecoration(
-                      color: zoneTone.surface,
-                      borderRadius: AgRadius.all(AgRadius.r16),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(AgSpace.s8),
+                      decoration: BoxDecoration(
+                        color: zoneTone.surface,
+                        borderRadius: AgRadius.all(AgRadius.r16),
+                      ),
+                      child: Icon(Icons.eco, color: zoneTone.primary, size: 20),
                     ),
-                    child: Icon(Icons.eco, color: zoneTone.primary, size: 20),
-                  ),
-                  const SizedBox(width: AgSpace.s12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Vapor Pressure Deficit (VPD)',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: colors.text,
-                        ),
+                    const SizedBox(width: AgSpace.s12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Vapor Pressure Deficit (VPD)',
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: colors.text,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Canopy Transpiration Physics',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colors.textSecondary,
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      Text(
-                        'Canopy Transpiration Physics',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: AgSpace.s8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: zoneTone.surface,
                   borderRadius: AgRadius.all(AgRadius.pill),
-                  border: Border.all(color: zoneTone.primary.withValues(alpha: 0.4)),
+                  border: Border.all(
+                      color: zoneTone.primary.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   vpd.isOptimal ? 'OPTIMAL' : 'ATTENTION',
@@ -108,26 +117,32 @@ class VpdGaugeCard extends ConsumerWidget {
                   color: colors.textSecondary,
                 ),
               ),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    vpd.statusTitle,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colors.text,
+              const SizedBox(width: AgSpace.s8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      vpd.statusTitle,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colors.text,
+                      ),
+                      textAlign: TextAlign.end,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Leaf Sat: ${vpd.saturationVpKpa} kPa | Air: ${vpd.actualVpKpa} kPa',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 11,
-                      color: colors.textSecondary,
+                    const SizedBox(height: 2),
+                    Text(
+                      'Leaf Sat: ${vpd.saturationVpKpa} kPa | Air: ${vpd.actualVpKpa} kPa',
+                      style: textTheme.bodySmall?.copyWith(
+                        fontSize: 11,
+                        color: colors.textSecondary,
+                      ),
+                      textAlign: TextAlign.end,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -149,19 +164,25 @@ class VpdGaugeCard extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.thermostat, size: 16, color: colors.brand),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Air Temp: ${vpd.airTemperatureC.toStringAsFixed(1)}°C',
-                      style: textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colors.text,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.thermostat, size: 16, color: colors.brand),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          'Air Temp: ${vpd.airTemperatureC.toStringAsFixed(1)}°C',
+                          style: textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colors.text,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: AgSpace.s8),
                 Row(
                   children: [
                     Icon(Icons.water_drop, size: 16, color: colors.brand),
@@ -187,7 +208,8 @@ class VpdGaugeCard extends ConsumerWidget {
             decoration: BoxDecoration(
               color: zoneTone.surface,
               borderRadius: AgRadius.all(AgRadius.r16),
-              border: Border.all(color: zoneTone.primary.withValues(alpha: 0.3)),
+              border:
+                  Border.all(color: zoneTone.primary.withValues(alpha: 0.3)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,15 +261,22 @@ class VpdGaugeCard extends ConsumerWidget {
                 child: Row(
                   children: [
                     // Under-transpiration: 0 - 0.4
-                    Expanded(flex: 18, child: Container(color: colors.warning.withValues(alpha: 0.6))),
+                    Expanded(
+                        flex: 18,
+                        child: Container(
+                            color: colors.warning.withValues(alpha: 0.6))),
                     // Early veg: 0.4 - 0.8
-                    Expanded(flex: 18, child: Container(color: colors.brand.withValues(alpha: 0.7))),
+                    Expanded(
+                        flex: 18,
+                        child: Container(
+                            color: colors.brand.withValues(alpha: 0.7))),
                     // Ideal veg: 0.8 - 1.2
                     Expanded(flex: 18, child: Container(color: colors.brand)),
                     // Ideal generative: 1.2 - 1.6
                     Expanded(flex: 18, child: Container(color: colors.warning)),
                     // Over-transpiration: 1.6+
-                    Expanded(flex: 28, child: Container(color: colors.critical)),
+                    Expanded(
+                        flex: 28, child: Container(color: colors.critical)),
                   ],
                 ),
               ),
@@ -275,26 +304,37 @@ class VpdGaugeCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '0.0 (High Mold Risk)',
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    color: colors.textSecondary,
+                Flexible(
+                  child: Text(
+                    '0.0 (Low)',
+                    style: textTheme.bodySmall?.copyWith(
+                      fontSize: 10,
+                      color: colors.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Text(
-                  '0.8–1.2 (Ideal)',
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    color: colors.text,
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    '0.8–1.2 (Ideal)',
+                    style: textTheme.bodySmall?.copyWith(
+                      fontSize: 10,
+                      color: colors.text,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Text(
-                  '1.6+ (Stressed)',
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    color: colors.textSecondary,
+                Flexible(
+                  child: Text(
+                    '1.6+ (Dry)',
+                    style: textTheme.bodySmall?.copyWith(
+                      fontSize: 10,
+                      color: colors.textSecondary,
+                    ),
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -308,15 +348,18 @@ class VpdGaugeCard extends ConsumerWidget {
   _ZoneTone _getZoneColors(VpdZone zone, AgColors colors) {
     switch (zone) {
       case VpdZone.underTranspiration:
-        return _ZoneTone(primary: colors.warning, surface: colors.warningSurface);
+        return _ZoneTone(
+            primary: colors.warning, surface: colors.warningSurface);
       case VpdZone.earlyVegetative:
         return _ZoneTone(primary: colors.brand, surface: colors.brandSurface);
       case VpdZone.optimalVegetative:
         return _ZoneTone(primary: colors.brand, surface: colors.brandSurface);
       case VpdZone.optimalGenerative:
-        return _ZoneTone(primary: colors.warning, surface: colors.warningSurface);
+        return _ZoneTone(
+            primary: colors.warning, surface: colors.warningSurface);
       case VpdZone.overTranspirationStress:
-        return _ZoneTone(primary: colors.critical, surface: colors.criticalSurface);
+        return _ZoneTone(
+            primary: colors.critical, surface: colors.criticalSurface);
     }
   }
 }
