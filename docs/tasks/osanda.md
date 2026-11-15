@@ -134,6 +134,8 @@ remembered in Hive `app_preferences`. Ask Tharindu to add the route and the firs
 Show the selected pod's live pH, water level and temperature at the top of the panel so the
 presenter sees the change happen. Group scenarios as Water, Nutrients, Device.
 
+- [x] Done: live pH, water level and water temp tiles at the top of the panel, scenarios grouped as Water, Nutrients and Device, and a reset-to-healthy button.
+
 ## Demo lines you present (about 1.5 minutes)
 
 "This is Home, built from our Figma design. Pod Alpha is live. I'll crash the pH from the
