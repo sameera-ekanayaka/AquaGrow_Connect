@@ -59,6 +59,7 @@ class SimPodSeed {
       cropName: 'Baby Spinach',
       plantedDaysAgo: 3,
       daysToHarvest: 35,
+      imageAsset: 'assets/images/crops/spinach.png',
       ph: 6.0,
       ec: 1.6,
       waterTemp: 20.5,
