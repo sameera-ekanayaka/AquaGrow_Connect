@@ -117,7 +117,7 @@ class SupplierPinModal extends StatelessWidget {
                         '${supplier.category} • ${supplier.city}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
-                              color: colors.brand,
+                              color: colors.textSecondary,
                             ),
                       ),
                     ],

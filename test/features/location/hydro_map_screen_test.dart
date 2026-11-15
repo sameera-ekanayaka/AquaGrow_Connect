@@ -89,7 +89,7 @@ void main() {
       await tester.pumpWidget(_buildScreen());
       await tester.pump();
 
-      expect(find.text('Hydro-Hub Supply Network'), findsOneWidget);
+      expect(find.text('Hydroponic suppliers'), findsOneWidget);
     });
 
     testWidgets('renders first supplier name and category', (tester) async {
