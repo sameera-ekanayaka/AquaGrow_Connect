@@ -1,5 +1,5 @@
-import 'package:aquagrow_mobile/core/constants/app_colors.dart';
 import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
+import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
@@ -7,7 +7,8 @@ import 'package:aquagrow_mobile/features/location/presentation/weather_summary_c
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Master command center for Member 3: GPS Geolocation & Microclimate Services.
+/// Microclimate and outdoor telemetry screen.
+///
 /// Integrates GPS coordinate ingestion, hyper-local OpenWeatherMap telemetry,
 /// Vapor Pressure Deficit (VPD) transpiration diagnostics, and circadian photoperiod automation.
 class MicroclimateScreen extends ConsumerWidget {
@@ -15,9 +16,7 @@ class MicroclimateScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
+    final colors = context.ag;
     final photoperiod = ref.watch(photoperiodScheduleProvider);
 
     return Scaffold(
@@ -25,7 +24,7 @@ class MicroclimateScreen extends ConsumerWidget {
         title: const Text('Microclimate & Location'),
         actions: [
           IconButton(
-            tooltip: 'Open Hydro-Hub Suppliers',
+            tooltip: 'Open Hydroponic Suppliers',
             icon: const Icon(Icons.storefront_outlined),
             onPressed: () {
               Navigator.of(context).push(
@@ -36,14 +35,14 @@ class MicroclimateScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        color: AppColors.mintAccent,
+        color: colors.brand,
         onRefresh: () async {
           ref.invalidate(currentPositionProvider);
           ref.invalidate(weatherDataProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: AgSpace.s8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -55,12 +54,12 @@ class MicroclimateScreen extends ConsumerWidget {
 
               // 3. Circadian Photoperiod & Light Sync Card
               if (photoperiod != null)
-                _buildPhotoperiodCard(context, ref, photoperiod, isDark, primaryTextColor, secondaryTextColor),
+                _buildPhotoperiodCard(context, ref, photoperiod),
 
-              // 4. Hydro-Hub Supply Directory Banner
-              _buildHydroHubBanner(context, isDark, primaryTextColor, secondaryTextColor),
+              // 4. Hydroponic Suppliers Directory Banner
+              _buildSuppliersBanner(context),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AgSpace.s24),
             ],
           ),
         ),
@@ -72,61 +71,56 @@ class MicroclimateScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     PhotoperiodSchedule photoperiod,
-    bool isDark,
-    Color primaryTextColor,
-    Color secondaryTextColor,
   ) {
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.all(20.0),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AgSpace.screen,
+        vertical: AgSpace.s8,
+      ),
+      padding: const EdgeInsets.all(AgSpace.s16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.25 : 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: colors.surface,
+        borderRadius: AgRadius.all(AgRadius.r20),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AgSpace.s8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF4A261).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10),
+                      color: colors.warningSurface,
+                      borderRadius: AgRadius.all(AgRadius.r16),
                     ),
-                    child: const Icon(Icons.wb_sunny_outlined, color: Color(0xFFF4A261), size: 20),
+                    child: Icon(
+                      Icons.wb_sunny_outlined,
+                      color: colors.warning,
+                      size: 20,
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AgSpace.s8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Circadian Photoperiod Sync',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: primaryTextColor,
-                            ),
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colors.text,
+                        ),
                       ),
                       Text(
                         'Solar Curve & LED Scheduling',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: secondaryTextColor,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -134,87 +128,82 @@ class MicroclimateScreen extends ConsumerWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AgSpace.s8,
+                  vertical: AgSpace.s4,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySage.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  color: colors.brandSurface,
+                  borderRadius: AgRadius.all(AgRadius.pill),
                 ),
                 child: Text(
                   '${photoperiod.targetLightHours.toStringAsFixed(0)}h TARGET',
-                  style: const TextStyle(
-                    fontSize: 11,
+                  style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.mintAccent,
+                    color: colors.brand,
                   ),
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 18),
-
-          // Daylight vs Supplement Metrics
+          const SizedBox(height: AgSpace.s16),
           Row(
             children: [
               Expanded(
                 child: _buildMetricTile(
+                  context: context,
                   icon: Icons.light_mode,
                   label: 'Natural Daylight',
                   value: '${photoperiod.naturalDaylightHours} hrs',
-                  color: const Color(0xFFF4A261),
-                  primaryTextColor: primaryTextColor,
-                  secondaryTextColor: secondaryTextColor,
+                  color: colors.warning,
                 ),
               ),
               Expanded(
                 child: _buildMetricTile(
+                  context: context,
                   icon: Icons.bolt,
                   label: 'LED Supplement',
                   value: '${photoperiod.supplementalHoursNeeded} hrs',
-                  color: AppColors.mintAccent,
-                  primaryTextColor: primaryTextColor,
-                  secondaryTextColor: secondaryTextColor,
+                  color: colors.brand,
                 ),
               ),
               Expanded(
                 child: _buildMetricTile(
+                  context: context,
                   icon: Icons.wb_twilight,
                   label: 'Solar Noon',
                   value: _formatTime(photoperiod.solarNoon),
-                  color: const Color(0xFF457B9D),
-                  primaryTextColor: primaryTextColor,
-                  secondaryTextColor: secondaryTextColor,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 18),
-          const Divider(height: 1),
-          const SizedBox(height: 14),
-
-          // Smart Automation Timeline
+          const SizedBox(height: AgSpace.s16),
+          Divider(height: 1, color: colors.border),
+          const SizedBox(height: AgSpace.s12),
           Text(
             'Recommended Grow-Light Automation Schedule',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: secondaryTextColor),
+            style: textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colors.textSecondary,
+            ),
           ),
-          const SizedBox(height: 10),
-
+          const SizedBox(height: AgSpace.s8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildScheduleBadge(
+                context: context,
                 title: 'LED ON (Pre-Dawn)',
                 time: _formatTime(photoperiod.growLightOnTime),
                 icon: Icons.timer,
-                isDark: isDark,
               ),
-              const Icon(Icons.arrow_forward, size: 16, color: AppColors.mintAccent),
+              Icon(Icons.arrow_forward, size: 16, color: colors.brand),
               _buildScheduleBadge(
+                context: context,
                 title: 'LED OFF (Post-Dusk)',
                 time: _formatTime(photoperiod.growLightOffTime),
                 icon: Icons.nightlight,
-                isDark: isDark,
               ),
             ],
           ),
@@ -224,64 +213,73 @@ class MicroclimateScreen extends ConsumerWidget {
   }
 
   Widget _buildMetricTile({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
     required Color color,
-    required Color primaryTextColor,
-    required Color secondaryTextColor,
   }) {
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       children: [
         Icon(icon, size: 22, color: color),
-        const SizedBox(height: 6),
+        const SizedBox(height: AgSpace.s4),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 14,
+          style: textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: primaryTextColor,
+            color: colors.text,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: secondaryTextColor),
+          style: textTheme.labelSmall?.copyWith(color: colors.textSecondary),
         ),
       ],
     );
   }
 
   Widget _buildScheduleBadge({
+    required BuildContext context,
     required String title,
     required String time,
     required IconData icon,
-    required bool isDark,
   }) {
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AgSpace.s12,
+        vertical: AgSpace.s8,
+      ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 0.8,
-        ),
+        color: colors.subtle,
+        borderRadius: AgRadius.all(AgRadius.r16),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.mintAccent),
-          const SizedBox(width: 8),
+          Icon(icon, size: 16, color: colors.brand),
+          const SizedBox(width: AgSpace.s8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 10, color: AppColors.textDarkSecondary),
+                style: textTheme.labelSmall?.copyWith(
+                  color: colors.textSecondary,
+                ),
               ),
               Text(
                 time,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colors.text,
+                ),
               ),
             ],
           ),
@@ -290,67 +288,64 @@ class MicroclimateScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHydroHubBanner(
-    BuildContext context,
-    bool isDark,
-    Color primaryTextColor,
-    Color secondaryTextColor,
-  ) {
+  Widget _buildSuppliersBanner(BuildContext context) {
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: const EdgeInsets.all(18.0),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AgSpace.screen,
+        vertical: AgSpace.s8,
+      ),
+      padding: const EdgeInsets.all(AgSpace.s16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [AppColors.forestDepth, AppColors.darkSurfaceElevated]
-              : [AppColors.lightMintBackground, AppColors.lightSurfaceElevated],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primarySage.withOpacity(0.3)),
+        color: colors.surface,
+        borderRadius: AgRadius.all(AgRadius.r20),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AgSpace.s12),
             decoration: BoxDecoration(
-              color: AppColors.primarySage.withOpacity(0.2),
+              color: colors.brandSurface,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.map_outlined, color: AppColors.mintAccent, size: 28),
+            child: Icon(
+              Icons.storefront_outlined,
+              color: colors.brand,
+              size: 24,
+            ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: AgSpace.s12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hydro-Hub Supply Network',
-                  style: TextStyle(
-                    fontSize: 15,
+                  'Hydroponic suppliers',
+                  style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: primaryTextColor,
+                    color: colors.text,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Find verified local retailers for MasterBlend, rockwool, and probes with GPS distance.',
-                  style: TextStyle(fontSize: 11, color: secondaryTextColor),
+                  'Find verified local retailers for nutrients, media, and probes with GPS distance.',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: colors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AgSpace.s8),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const HydroMapScreen()),
               );
             },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            ),
             child: const Text('Explore'),
           ),
         ],
