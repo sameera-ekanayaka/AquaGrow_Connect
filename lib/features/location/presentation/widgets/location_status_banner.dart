@@ -1,4 +1,5 @@
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
+import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/widgets/location_rationale_dialog.dart';
@@ -43,6 +44,10 @@ class LocationStatusBanner extends ConsumerWidget {
             final allow = await LocationRationaleDialog.show(context);
             if (allow) {
               ref.read(locationConsentProvider.notifier).state = true;
+              await ref.read(preferencesStoreProvider).setBool(
+                    kLocationConsentPrefKey,
+                    value: true,
+                  );
               ref.invalidate(locationResultProvider);
             }
           },

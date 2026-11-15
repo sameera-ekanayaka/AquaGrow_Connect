@@ -71,9 +71,15 @@ final weatherServiceProvider = Provider<IWeatherService>((ref) {
 /// Tracks whether the location rationale dialog has been shown in this session.
 final locationRationaleShownProvider = StateProvider<bool>((ref) => false);
 
+/// Key for persisting user location query consent in app preferences.
+const String kLocationConsentPrefKey = 'location_consent_granted';
+
 /// Tracks whether the user has given consent to query device GPS location.
-/// Defaults to false so no OS permission prompt appears until user consents.
-final locationConsentProvider = StateProvider<bool>((ref) => false);
+/// Initialized from persistent preferences so consent survives app restarts.
+final locationConsentProvider = StateProvider<bool>((ref) {
+  final prefs = ref.watch(preferencesStoreProvider);
+  return prefs.getBool(kLocationConsentPrefKey, fallback: false);
+});
 
 /// Asynchronous location acquisition result, including permission status.
 ///
