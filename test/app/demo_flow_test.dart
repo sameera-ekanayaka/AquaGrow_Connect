@@ -53,6 +53,7 @@ void main() {
 
     // 2. Home shows both pods with live readings.
     expect(find.text('Your garden'), findsOneWidget);
+    // The pod selector shows the name, then "Kitchen · updated ...".
     expect(find.text('Pod Alpha'), findsOneWidget);
     expect(find.textContaining('Kitchen · '), findsOneWidget);
     expect(bell, findsOneWidget);

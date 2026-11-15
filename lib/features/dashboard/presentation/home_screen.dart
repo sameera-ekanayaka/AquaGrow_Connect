@@ -6,6 +6,7 @@ import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
+import 'package:aquagrow_mobile/features/controls/presentation/pod_controls_card.dart';
 import 'package:aquagrow_mobile/features/dashboard/application/home_clock.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/priority_task.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/time_ago.dart';
@@ -19,10 +20,10 @@ import 'package:go_router/go_router.dart';
 const _log = AppLogger('dashboard');
 
 /// Home tab, from the Figma frame "Home · Light", top to bottom: header,
-/// pod selector, the most urgent task, the crop hero, growing conditions
-/// and the plants in every pod.
+/// pod selector, the most urgent task, the crop hero, growing conditions,
+/// pod controls and the plants in every pod.
 ///
-/// OWNER: Osanda (see docs/tasks/osanda.md). Pod controls join in task 3.
+/// OWNER: Osanda (see docs/tasks/osanda.md).
 class HomeScreen extends ConsumerWidget {
   /// Creates the Home tab.
   const HomeScreen({super.key});
@@ -103,6 +104,9 @@ class _PodHome extends ConsumerWidget {
           caption: online ? 'Updated $ago' : 'Last reading $ago',
         ),
         _ReadingsGrid(podId: pod.id, online: online),
+        const SizedBox(height: AgSpace.s32),
+        const SectionHeader(title: 'Pod controls'),
+        PodControlsCard(pod: pod),
         const SizedBox(height: AgSpace.s32),
         _YourPlants(now: now),
       ],
