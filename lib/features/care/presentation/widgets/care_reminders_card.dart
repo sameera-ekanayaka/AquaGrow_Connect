@@ -62,13 +62,12 @@ class CareRemindersCard extends ConsumerWidget {
                 ),
                 child: Text(
                   '$completedCount of $totalCount done',
-                  style: TextStyle(
-                    color: completedCount == totalCount && totalCount > 0
-                        ? colors.brand
-                        : colors.textSecondary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: completedCount == totalCount && totalCount > 0
+                            ? colors.brand
+                            : colors.textSecondary,
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
               ),
             ],
@@ -80,7 +79,9 @@ class CareRemindersCard extends ConsumerWidget {
               child: Center(
                 child: Text(
                   'No care reminders scheduled',
-                  style: TextStyle(color: colors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colors.textSecondary,
+                      ),
                 ),
               ),
             )

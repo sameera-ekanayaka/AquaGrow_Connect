@@ -1,9 +1,8 @@
-import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/care/domain/care_reminder.dart';
-import 'package:flutter/material.dart';
 
 /// Urgency classification for a care reminder relative to current date.
 ///
+/// Pure logic domain enum with no Flutter imports.
 /// OWNER: Imasha (see docs/tasks/imasha.md).
 enum ReminderUrgency {
   overdue,
@@ -34,34 +33,6 @@ enum ReminderUrgency {
         return daysRemaining == 1
             ? 'Due tomorrow'
             : 'Due in $daysRemaining days';
-    }
-  }
-
-  /// Resolves the badge background color from theme tokens.
-  Color backgroundColor(AgColors colors) {
-    switch (this) {
-      case ReminderUrgency.completed:
-        return colors.brandSurface;
-      case ReminderUrgency.overdue:
-        return colors.criticalSurface;
-      case ReminderUrgency.dueToday:
-        return colors.warningSurface;
-      case ReminderUrgency.upcoming:
-        return colors.subtle;
-    }
-  }
-
-  /// Resolves the badge text and icon color from theme tokens.
-  Color foregroundColor(AgColors colors) {
-    switch (this) {
-      case ReminderUrgency.completed:
-        return colors.brand;
-      case ReminderUrgency.overdue:
-        return colors.critical;
-      case ReminderUrgency.dueToday:
-        return colors.warning;
-      case ReminderUrgency.upcoming:
-        return colors.textSecondary;
     }
   }
 }

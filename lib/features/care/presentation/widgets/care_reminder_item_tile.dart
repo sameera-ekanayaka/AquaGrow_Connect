@@ -94,11 +94,10 @@ class CareReminderItemTile extends StatelessWidget {
                 ),
                 child: Text(
                   urgency.label(days),
-                  style: TextStyle(
-                    color: urgency.foregroundColor(colors),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: urgency.foregroundColor(colors),
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
               ),
             ],
@@ -106,5 +105,36 @@ class CareReminderItemTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Visual presentation extensions for [ReminderUrgency].
+extension ReminderUrgencyPresentation on ReminderUrgency {
+  /// Resolves the badge background color from theme tokens.
+  Color backgroundColor(AgColors colors) {
+    switch (this) {
+      case ReminderUrgency.completed:
+        return colors.brandSurface;
+      case ReminderUrgency.overdue:
+        return colors.criticalSurface;
+      case ReminderUrgency.dueToday:
+        return colors.warningSurface;
+      case ReminderUrgency.upcoming:
+        return colors.subtle;
+    }
+  }
+
+  /// Resolves the badge text and icon color from theme tokens.
+  Color foregroundColor(AgColors colors) {
+    switch (this) {
+      case ReminderUrgency.completed:
+        return colors.brand;
+      case ReminderUrgency.overdue:
+        return colors.critical;
+      case ReminderUrgency.dueToday:
+        return colors.warning;
+      case ReminderUrgency.upcoming:
+        return colors.textSecondary;
+    }
   }
 }

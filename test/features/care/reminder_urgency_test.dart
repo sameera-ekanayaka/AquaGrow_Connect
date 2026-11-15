@@ -2,6 +2,7 @@ import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/care/domain/care_reminder.dart';
 import 'package:aquagrow_mobile/features/care/domain/reminder_urgency.dart';
+import 'package:aquagrow_mobile/features/care/presentation/widgets/care_reminder_item_tile.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -82,4 +83,3 @@ void main() {
     });
   });
 }
-
