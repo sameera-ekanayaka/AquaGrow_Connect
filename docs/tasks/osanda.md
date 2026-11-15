@@ -60,6 +60,8 @@ in WhatsApp. Sameera then merges PR #4 and everyone starts.
 
 ### 1. MUST, by Sunday 11 AM: Shared crop widgets (`feature/osanda-crop-widgets`)
 
+- [x] Done: `CropTile`, `CropHero`, `PodCard` and `CropPhoto` from the minimal Figma file (PR #9).
+
 Udeshika (My Pods) and your own Home screen need these. Build them in `lib/shared/widgets/`
 from the Figma components, export them in `widgets.dart`, and add a widget test for each:
 
@@ -75,6 +77,8 @@ Post in WhatsApp as soon as it is merged. If you will miss 11 AM, tell Udeshika 
 gets built inside `lib/features/crops/` instead.
 
 ### 2. MUST: Home screen to Figma (`feature/osanda-home`)
+
+- [x] Done: `PodSelector` + "Choose a pod" sheet, `priorityTaskFor` + `PriorityTaskCard` (refill with confirm), `CropHero`, "Updated 12s ago", Your plants, offline state. Pod controls join in task 3.
 
 Match "Home / Opaque / Refined", top to bottom:
 

@@ -50,7 +50,9 @@ void main() {
       await tester.pump();
 
       expect(find.text('Your garden'), findsOneWidget);
-      expect(find.text('Pod Alpha · Kitchen'), findsOneWidget);
+      // The pod selector shows the name, then "Kitchen · updated ...".
+      expect(find.text('Pod Alpha'), findsOneWidget);
+      expect(find.textContaining('Kitchen · '), findsOneWidget);
       expect(find.text('pH'), findsOneWidget);
       expect(find.text('6.2'), findsOneWidget);
     });
