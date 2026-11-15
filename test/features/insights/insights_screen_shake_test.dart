@@ -136,6 +136,131 @@ void main() {
         expect(find.text('Refreshed'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'multi-axis combined acceleration exceeding 2.7g triggers refresh',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        var historyFetches = 0;
+        final sim = PodSimulator(clock: () => fixedClock);
+
+        final container = ProviderContainer(
+          overrides: [
+            podSimulatorProvider.overrideWithValue(sim),
+            clockProvider.overrideWithValue(() => fixedClock),
+            selectedPodProvider.overrideWithValue(demoPod),
+            shakeDetectorStreamProvider.overrideWithValue(
+              sensorController.stream,
+            ),
+            shakeDetectorClockProvider.overrideWithValue(() => fixedClock),
+            historyProvider.overrideWith((ref) {
+              historyFetches++;
+              return [];
+            }),
+            weatherDataProvider.overrideWith((ref) => sampleWeather),
+            locationResultProvider.overrideWith(
+              (ref) => LocationResult.granted(GeoPosition.defaultColombo),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              theme: AppTheme.light,
+              home: const Scaffold(body: InsightsScreen()),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(historyFetches, equals(1));
+
+        // Combined 3D vector: x = 16 m/s^2, y = 16 m/s^2, z = 16 m/s^2
+        // sqrt(256 * 3) = sqrt(768) ≈ 27.71 m/s^2
+        // 27.71 / 9.80665 ≈ 2.82g > 2.7g
+        sensorController.add(AccelerometerEvent(16.0, 16.0, 16.0));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(historyFetches, equals(2));
+        expect(find.text('Refreshed'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'cancels shake detector subscription cleanly when screen is unmounted',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        var historyFetches = 0;
+        final sim = PodSimulator(clock: () => fixedClock);
+
+        final container = ProviderContainer(
+          overrides: [
+            podSimulatorProvider.overrideWithValue(sim),
+            clockProvider.overrideWithValue(() => fixedClock),
+            selectedPodProvider.overrideWithValue(demoPod),
+            shakeDetectorStreamProvider.overrideWithValue(
+              sensorController.stream,
+            ),
+            shakeDetectorClockProvider.overrideWithValue(() => fixedClock),
+            historyProvider.overrideWith((ref) {
+              historyFetches++;
+              return [];
+            }),
+            weatherDataProvider.overrideWith((ref) => sampleWeather),
+            locationResultProvider.overrideWith(
+              (ref) => LocationResult.granted(GeoPosition.defaultColombo),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              theme: AppTheme.light,
+              home: const Scaffold(body: InsightsScreen()),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(historyFetches, equals(1));
+
+        // Unmount InsightsScreen by replacing widget tree
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: const MaterialApp(
+              home: Scaffold(body: Text('Different Screen')),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        // Shaking now must not trigger any further history fetches
+        sensorController.add(
+          AccelerometerEvent(0, 0, ShakeMath.standardGravity * 4.0),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(historyFetches, equals(1));
+      },
+    );
   });
 }
-
