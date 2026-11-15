@@ -18,6 +18,7 @@ class HydroMapScreen extends ConsumerWidget {
     final suppliers = ref.watch(sortedSuppliersProvider);
     final selectedCategory = ref.watch(selectedSupplierCategoryProvider);
     final positionAsync = ref.watch(currentPositionProvider);
+    final colors = context.ag;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
@@ -49,38 +50,8 @@ class HydroMapScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // GPS Location Status Banner
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated,
-            child: Row(
-              children: [
-                const Icon(Icons.satellite_alt_outlined, size: 18, color: AppColors.mintAccent),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    userPos != null
-                        ? '${userPos.locationSource}: ${userPos.latitude.toStringAsFixed(4)}°, ${userPos.longitude.toStringAsFixed(4)}°'
-                        : 'Acquiring GPS Fix...',
-                    style: TextStyle(fontSize: 12, color: secondaryTextColor),
-                  ),
-                ),
-                if (userPos != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.mintAccent.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      '±${userPos.accuracyMeters.toStringAsFixed(0)}m',
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.mintAccent),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+          // GPS Location Status Bar
+          _GpsStatusBar(userPos: userPos),
 
           // Search Bar
           Padding(
@@ -338,6 +309,65 @@ class HydroMapScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// GPS coordinates status bar shown at the top of [HydroMapScreen].
+class _GpsStatusBar extends StatelessWidget {
+  /// Creates a [_GpsStatusBar] with the given [userPos].
+  const _GpsStatusBar({required this.userPos});
+
+  /// Current GPS position, or `null` while acquiring.
+  final GeoPosition? userPos;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ag;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AgSpace.screen,
+        vertical: AgSpace.s8,
+      ),
+      color: colors.subtle,
+      child: Row(
+        children: [
+          Icon(Icons.satellite_alt_outlined, size: 18, color: colors.brand),
+          const SizedBox(width: AgSpace.s8),
+          Expanded(
+            child: Text(
+              userPos != null
+                  ? '${userPos!.locationSource}: '
+                      '${userPos!.latitude.toStringAsFixed(4)}°, '
+                      '${userPos!.longitude.toStringAsFixed(4)}°'
+                  : 'Acquiring GPS Fix...',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: colors.textSecondary),
+            ),
+          ),
+          if (userPos != null)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AgSpace.s8,
+                vertical: AgSpace.s4,
+              ),
+              decoration: BoxDecoration(
+                color: colors.brandSurface,
+                borderRadius: AgRadius.all(AgRadius.r16),
+              ),
+              child: Text(
+                '±${userPos!.accuracyMeters.toStringAsFixed(0)}m',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colors.brand,
+                    ),
+              ),
+            ),
+        ],
       ),
     );
   }
