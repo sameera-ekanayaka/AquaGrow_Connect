@@ -5,6 +5,10 @@ import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/insights/application/history_providers.dart';
+import 'package:aquagrow_mobile/features/insights/application/insights_refresh_action.dart';
+import 'package:aquagrow_mobile/features/insights/application/shake_detector.dart';
+import 'package:aquagrow_mobile/features/insights/application/shake_detector_provider.dart';
+import 'package:aquagrow_mobile/features/insights/presentation/widgets/shake_feedback.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/widgets/telemetry_history_chart.dart';
 import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
 import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
@@ -15,12 +19,57 @@ import 'package:go_router/go_router.dart';
 
 /// Insights tab: charts of past readings, plus weather and VPD advice.
 ///
+/// Supports shake-to-refresh: vigorous shaking (g-force > 2.7g) re-queries
+/// telemetry, ambient weather, and location state.
+///
 /// OWNER: Imasha (see docs/tasks/imasha.md).
-class InsightsScreen extends ConsumerWidget {
+class InsightsScreen extends ConsumerStatefulWidget {
   const InsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InsightsScreen> createState() => _InsightsScreenState();
+}
+
+class _InsightsScreenState extends ConsumerState<InsightsScreen> {
+  ShakeDetector? _shakeDetector;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _initShakeDetector();
+    });
+  }
+
+  void _initShakeDetector() {
+    final config = ref.read(shakeDetectorConfigProvider);
+    final stream = ref.read(shakeDetectorStreamProvider);
+    final clock = ref.read(shakeDetectorClockProvider);
+
+    _shakeDetector = ShakeDetector(
+      config: config,
+      sensorStream: stream,
+      clock: clock,
+      onShake: _handleShake,
+    );
+    _shakeDetector?.start();
+  }
+
+  void _handleShake() {
+    if (!mounted) return;
+    refreshInsightsData(ref);
+    ShakeFeedback.show(context);
+  }
+
+  @override
+  void dispose() {
+    _shakeDetector?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.ag;
     final selectedPod = ref.watch(selectedPodProvider);
     final selectedMetric = ref.watch(historyMetricProvider);
