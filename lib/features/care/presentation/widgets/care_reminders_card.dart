@@ -64,7 +64,7 @@ class CareRemindersCard extends ConsumerWidget {
                   '$completedCount of $totalCount done',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: completedCount == totalCount && totalCount > 0
-                            ? colors.brand
+                            ? colors.text
                             : colors.textSecondary,
                         fontWeight: FontWeight.w700,
                       ),

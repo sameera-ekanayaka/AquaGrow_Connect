@@ -72,7 +72,7 @@ class CareReminderItemTile extends StatelessWidget {
                                 : null,
                           ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AgSpace.s4),
                     Text(
                       reminder.frequencyLabel,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
