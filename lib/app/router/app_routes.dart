@@ -26,6 +26,10 @@ abstract final class AppRoutes {
   static String cropDetail(String podId) => '/crops/$podId';
   static const cropDetailPattern = '/crops/:podId';
 
+  /// Harvest Passport (QR) for one pod, opened after a confirmed harvest:
+  /// `context.push(AppRoutes.harvestPassport('pod-alpha'))`.
+  static String harvestPassport(String podId) => '/crops/$podId/passport';
+
   /// Routes reachable without signing in.
   static const publicRoutes = {login, register};
 }

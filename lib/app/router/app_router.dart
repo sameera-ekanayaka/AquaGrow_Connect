@@ -9,6 +9,7 @@ import 'package:aquagrow_mobile/features/auth/presentation/register_screen.dart'
 import 'package:aquagrow_mobile/features/care/presentation/care_screen.dart';
 import 'package:aquagrow_mobile/features/crops/presentation/crop_detail_screen.dart';
 import 'package:aquagrow_mobile/features/crops/presentation/crops_screen.dart';
+import 'package:aquagrow_mobile/features/crops/presentation/harvest_passport_screen.dart';
 import 'package:aquagrow_mobile/features/dashboard/presentation/home_screen.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/insights_screen.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
@@ -70,6 +71,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: _rootKey,
                     builder: (_, state) =>
                         CropDetailScreen(podId: state.pathParameters['podId']!),
+                    routes: [
+                      GoRoute(
+                        path: 'passport',
+                        parentNavigatorKey: _rootKey,
+                        builder: (_, state) => HarvestPassportScreen(
+                          podId: state.pathParameters['podId']!,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

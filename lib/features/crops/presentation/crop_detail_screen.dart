@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:aquagrow_mobile/app/router/app_routes.dart';
 import 'package:aquagrow_mobile/core/models/crop_batch.dart';
 import 'package:aquagrow_mobile/core/models/crop_recipe.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
@@ -111,7 +114,7 @@ class CropDetailScreen extends ConsumerWidget {
     );
 
     if (confirmed && context.mounted) {
-      context.push('/crops/$podId/passport');
+      unawaited(context.push(AppRoutes.harvestPassport(podId)));
     }
   }
 }
