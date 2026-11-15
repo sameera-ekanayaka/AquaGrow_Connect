@@ -1,7 +1,7 @@
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/widgets/location_rationale_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -7,7 +7,7 @@ import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/insights/application/history_providers.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/insights_screen.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
 import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
 import 'package:flutter/material.dart';

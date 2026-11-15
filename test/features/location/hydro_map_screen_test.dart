@@ -1,9 +1,9 @@
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

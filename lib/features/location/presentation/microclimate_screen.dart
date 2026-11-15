@@ -1,7 +1,7 @@
 import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
 import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
 import 'package:flutter/material.dart';

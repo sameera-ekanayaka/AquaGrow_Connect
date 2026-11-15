@@ -19,4 +19,3 @@ final shakeDetectorStreamProvider =
 final shakeDetectorClockProvider = Provider<DateTime Function()>((ref) {
   return DateTime.now;
 });
-

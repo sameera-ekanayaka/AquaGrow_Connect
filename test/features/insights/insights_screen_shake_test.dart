@@ -10,8 +10,8 @@ import 'package:aquagrow_mobile/features/insights/application/history_providers.
 import 'package:aquagrow_mobile/features/insights/application/shake_detector_provider.dart';
 import 'package:aquagrow_mobile/features/insights/domain/shake_math.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/insights_screen.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
