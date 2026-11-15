@@ -40,12 +40,17 @@ class WeatherService implements IWeatherService {
     if (key == null || key.trim().isEmpty) {
       _log.info('No OpenWeatherMap key. Using mock weather.');
       return _mockFallback.fetchWeather(
-          latitude: latitude, longitude: longitude);
+        latitude: latitude,
+        longitude: longitude,
+      );
     }
 
     final live = await _request({'lat': '$latitude', 'lon': '$longitude'}, key);
     return live ??
-        _mockFallback.fetchWeather(latitude: latitude, longitude: longitude);
+        _mockFallback.fetchWeather(
+          latitude: latitude,
+          longitude: longitude,
+        );
   }
 
   @override
@@ -78,7 +83,8 @@ class WeatherService implements IWeatherService {
         return WeatherData.fromOpenWeatherMapJson(data);
       }
       _log.warning(
-          'OpenWeatherMap returned HTTP ${response.statusCode}. Using fallback.');
+        'OpenWeatherMap returned HTTP ${response.statusCode}. Using fallback.',
+      );
     } catch (_) {
       // The error object can contain the request address and the key.
       _log.warning('Weather request failed. Using fallback.');
