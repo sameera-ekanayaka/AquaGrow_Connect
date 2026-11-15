@@ -1,6 +1,8 @@
 import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
+import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
+import 'package:aquagrow_mobile/features/location/presentation/widgets/location_status_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,12 +10,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// atmospheric pressure, UV index, and solar daylight schedule.
 ///
 /// Restyled strictly to Figma design tokens (`context.ag`, `AgSpace`, `AgRadius`).
+/// Displays a [LocationStatusBanner] whenever GPS or permission is degraded.
 class WeatherSummaryCard extends ConsumerWidget {
+  /// Creates a [WeatherSummaryCard].
   const WeatherSummaryCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsync = ref.watch(weatherDataProvider);
+    final locationResultAsync = ref.watch(locationResultProvider);
     final colors = context.ag;
 
     return Container(
@@ -23,15 +28,31 @@ class WeatherSummaryCard extends ConsumerWidget {
         borderRadius: AgRadius.all(AgRadius.r20),
         border: Border.all(color: colors.border),
       ),
-      child: weatherAsync.when(
-        data: (weather) => _buildWeatherContent(context, ref, weather),
-        loading: () => Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AgSpace.s32),
-            child: CircularProgressIndicator(color: colors.brand),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Location permission status banner (hidden when GPS granted)
+          locationResultAsync.when(
+            data: (result) => LocationStatusBanner(result: result),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => LocationStatusBanner(
+              result: LocationResult.serviceDisabled(),
+            ),
           ),
-        ),
-        error: (error, _) => _buildErrorContent(context, ref, error.toString()),
+
+          // Weather content
+          weatherAsync.when(
+            data: (weather) => _buildWeatherContent(context, ref, weather),
+            loading: () => Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AgSpace.s32),
+                child: CircularProgressIndicator(color: colors.brand),
+              ),
+            ),
+            error: (error, _) =>
+                _buildErrorContent(context, ref, error.toString()),
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'package:aquagrow_mobile/core/interfaces/i_geo_service.dart';
+import 'package:aquagrow_mobile/core/logging/app_logger.dart';
+import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:geolocator/geolocator.dart';
 
 /// Structured GPS coordinate model with location source metadata.
@@ -44,43 +46,59 @@ class GeoPosition {
       };
 }
 
-/// Service managing hardware GPS coordinate acquisition, runtime permissions,
-/// and fallback coordinates for academic viva demonstrations.
-class GeoService {
-  GeoPosition? _mockOverridePosition;
+/// Hardware GPS service implementing [IGeoService].
+///
+/// Requests runtime location permissions, handles all denial states, and
+/// always returns a [LocationResult] — never throwing. When permission is
+/// denied or GPS is unavailable the result carries Colombo fallback coordinates
+/// and a human-readable [LocationResult.fallbackReason].
+class GeoService implements IGeoService {
+  static const _log = AppLogger('location');
 
-  /// Injects a fixed geographic coordinate for automated testing or viva demo.
-  void setMockLocation(GeoPosition? position) {
-    _mockOverridePosition = position;
+  LocationResult? _mockOverrideResult;
+
+  /// Injects a fixed [LocationResult] for automated testing or viva demo.
+  void setMockResult(LocationResult? result) {
+    _mockOverrideResult = result;
   }
 
-  /// Determines the current position of the device.
-  /// When location services are unavailable, permission is denied, or running in an
-  /// emulator, safely falls back to default Colombo coordinates without throwing.
+  /// Injects a fixed geographic coordinate for backward compatibility.
+  void setMockLocation(GeoPosition? position) {
+    _mockOverrideResult =
+        position == null ? null : LocationResult.granted(position);
+  }
+
+  /// Backward-compatible coordinate acquisition returning raw [GeoPosition].
   Future<GeoPosition> getCurrentPosition() async {
-    if (_mockOverridePosition != null) {
-      return _mockOverridePosition!;
+    final result = await getPosition();
+    return result.position;
+  }
+
+  @override
+  Future<LocationResult> getPosition() async {
+    if (_mockOverrideResult != null) {
+      return _mockOverrideResult!;
     }
 
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        debugPrint('[GeoService] Location services disabled on device. Using Colombo default.');
-        return GeoPosition.defaultColombo;
+        _log.warning('Location services disabled on device.');
+        return LocationResult.serviceDisabled();
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          debugPrint('[GeoService] Location permission denied. Using Colombo default.');
-          return GeoPosition.defaultColombo;
+          _log.warning('Location permission denied by user.');
+          return LocationResult.denied();
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        debugPrint('[GeoService] Location permission permanently denied. Using Colombo default.');
-        return GeoPosition.defaultColombo;
+        _log.warning('Location permission permanently denied.');
+        return LocationResult.permanentlyDenied();
       }
 
       final Position position = await Geolocator.getCurrentPosition(
@@ -88,20 +106,25 @@ class GeoService {
         timeLimit: const Duration(seconds: 8),
       );
 
-      return GeoPosition(
+      final geoPos = GeoPosition(
         latitude: position.latitude,
         longitude: position.longitude,
         accuracyMeters: position.accuracy,
         isSimulated: position.isMocked,
-        locationSource: position.isMocked ? 'Mock GPS Provider' : 'Hardware GPS Sensor',
+        locationSource:
+            position.isMocked ? 'Mock GPS Provider' : 'Hardware GPS Sensor',
       );
+
+      return LocationResult.granted(geoPos);
     } catch (e) {
-      debugPrint('[GeoService] Error acquiring location: $e. Falling back to default.');
-      return GeoPosition.defaultColombo;
+      _log.error('Error acquiring location: $e. Falling back to default.');
+      return LocationResult.serviceDisabled(
+        reason: 'GPS unavailable. Showing Colombo weather.',
+      );
     }
   }
 
-  /// Computes distance in kilometers between two geographic coordinate points.
+  @override
   double distanceBetween({
     required double startLatitude,
     required double startLongitude,
