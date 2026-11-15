@@ -66,7 +66,7 @@ nearest first with distance (`ListView.builder`), with search and category chips
 a shake (g-force above 2.7, at most once per second) refreshes the Insights data and shows
 `Refreshed`. Put the threshold maths in a pure function and unit test it.
 
-### 6. STRETCH: Care reminders
+### 6. [x] STRETCH: Care reminders
 
 A simple list in Care: "Clean the filter (weekly)", "Top up nutrients (every 10 days)", with
 next-due dates and a tick to complete.
