@@ -70,6 +70,8 @@ UX review. Optionally keep alerts across restarts with a Hive-backed `IAlertRepo
 
 ### 4. MUST: Settings and privacy (`feature/tharindu-settings`)
 
+- [x] Done: `/settings`, theme saved in Hive, data mode and version, privacy note with delete, About. Module code is a placeholder in `AppInfo.module`.
+
 `lib/features/settings/presentation/settings_screen.dart`, route `/settings`, a "Settings" tile in Care:
 
 - Theme: Light / Dark / System (`themeModeProvider`), remembered in Hive `app_preferences`.
@@ -84,6 +86,8 @@ Add Inter Regular, Medium, SemiBold and Bold (`.ttf`, OFL licence) to `assets/fo
 family in `pubspec.yaml`, set `fontFamily: 'Inter'` in `AppTheme`, update DESIGN.md.
 
 ### 6. MUST: Demo-flow widget test (`test/app/demo_flow_test.dart`)
+
+- [x] Done: sign in, Home, pH crash, bell and Alerts, notification, Crops, Insights.
 
 One widget test that walks the demo: sign in, Home shows pods, simulator pH crash, alert appears,
 open Crops, open Insights. Uses `testApp()` and `sim.tick()`.

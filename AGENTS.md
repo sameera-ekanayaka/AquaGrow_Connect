@@ -129,6 +129,7 @@ If you cannot run `flutter`, say so plainly and do not claim the code was tested
 | `alertRepositoryProvider` / `alertsProvider` / `unreadAlertCountProvider` | Alerts |
 | `appConfigProvider` | Keys and data mode |
 | `preferencesStoreProvider` | Small device settings in Hive `app_preferences` (`getBool`, `setString`, ...) |
+| `localDataEraserProvider` | `.eraseAll()`: deletes local readings, queue and preferences (Settings > Privacy) |
 | `podSimulatorProvider` | The simulator (simulator panel only) |
 
 ## When you are unsure

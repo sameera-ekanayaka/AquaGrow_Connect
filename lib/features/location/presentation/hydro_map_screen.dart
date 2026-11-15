@@ -1,6 +1,6 @@
-import 'package:aquagrow_mobile/core/constants/app_colors.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
+import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/widgets/supplier_pin_modal.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Interactive Hydro-Hub supply directory screen with GPS distance computation,
 /// category filtering, product search, and verified supplier details.
 class HydroMapScreen extends ConsumerWidget {
+  /// Creates the [HydroMapScreen].
   const HydroMapScreen({super.key});
 
   @override
@@ -16,10 +17,7 @@ class HydroMapScreen extends ConsumerWidget {
     final suppliers = ref.watch(sortedSuppliersProvider);
     final selectedCategory = ref.watch(selectedSupplierCategoryProvider);
     final positionAsync = ref.watch(currentPositionProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
+    final colors = context.ag;
     final userPos = positionAsync.value;
 
     final categories = [
@@ -47,77 +45,64 @@ class HydroMapScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // GPS Location Status Banner
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated,
-            child: Row(
-              children: [
-                const Icon(Icons.satellite_alt_outlined, size: 18, color: AppColors.mintAccent),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    userPos != null
-                        ? '${userPos.locationSource}: ${userPos.latitude.toStringAsFixed(4)}°, ${userPos.longitude.toStringAsFixed(4)}°'
-                        : 'Acquiring GPS Fix...',
-                    style: TextStyle(fontSize: 12, color: secondaryTextColor),
-                  ),
-                ),
-                if (userPos != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.mintAccent.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      '±${userPos.accuracyMeters.toStringAsFixed(0)}m',
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.mintAccent),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+          // GPS Location Status Bar
+          _GpsStatusBar(userPos: userPos),
 
           // Search Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+            padding: const EdgeInsets.fromLTRB(
+              AgSpace.screen,
+              AgSpace.s12,
+              AgSpace.screen,
+              AgSpace.s8,
+            ),
             child: TextField(
-              onChanged: (val) => ref.read(supplierSearchQueryProvider.notifier).state = val,
+              onChanged: (val) =>
+                  ref.read(supplierSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search nutrient buffers, rockwool, seeds...',
-                hintStyle: TextStyle(fontSize: 13, color: secondaryTextColor),
-                prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.mintAccent),
+                hintStyle: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: colors.textSecondary),
+                prefixIcon: Icon(Icons.search, size: 20, color: colors.brand),
                 suffixIcon: ref.watch(supplierSearchQueryProvider).isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 18),
-                        onPressed: () => ref.read(supplierSearchQueryProvider.notifier).state = '',
+                        onPressed: () => ref
+                            .read(supplierSearchQueryProvider.notifier)
+                            .state = '',
                       )
                     : null,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: AgSpace.s16,
+                ),
                 filled: true,
-                fillColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                fillColor: colors.surface,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                  borderRadius: AgRadius.all(AgRadius.r16),
+                  borderSide: BorderSide(color: colors.border),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                  borderRadius: AgRadius.all(AgRadius.r16),
+                  borderSide: BorderSide(color: colors.border),
                 ),
               ),
             ),
           ),
 
-          // Horizontal Category Filter Pills
+          // Horizontal Category Filter Chips
           SizedBox(
             height: 48,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AgSpace.screen,
+                vertical: AgSpace.s8,
+              ),
               itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, __) => const SizedBox(width: AgSpace.s8),
               itemBuilder: (context, index) {
                 final category = categories[index];
                 final isSelected = category == selectedCategory;
@@ -125,53 +110,43 @@ class HydroMapScreen extends ConsumerWidget {
                 return FilterChip(
                   label: Text(category),
                   selected: isSelected,
-                  selectedColor: AppColors.primarySage,
-                  backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                  labelStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.white : secondaryTextColor,
-                  ),
+                  selectedColor: colors.brandSurface,
+                  backgroundColor: colors.surface,
+                  labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? colors.brand : colors.textSecondary,
+                      ),
                   side: BorderSide(
-                    color: isSelected ? AppColors.mintAccent : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    color: isSelected ? colors.brand : colors.border,
                   ),
                   onSelected: (_) {
-                    ref.read(selectedSupplierCategoryProvider.notifier).state = category;
+                    ref.read(selectedSupplierCategoryProvider.notifier).state =
+                        category;
                   },
                 );
               },
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: AgSpace.s8),
 
-          // Suppliers List
+          // Suppliers List or Empty State
           Expanded(
             child: suppliers.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.store_mall_directory_outlined, size: 48, color: AppColors.textDarkSecondary),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No hydroponic suppliers found',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: primaryTextColor),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Try clearing search filters or changing category',
-                          style: TextStyle(fontSize: 12, color: secondaryTextColor),
-                        ),
-                      ],
-                    ),
-                  )
+                ? _EmptyState()
                 : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AgSpace.screen,
+                      vertical: AgSpace.s8,
+                    ),
                     itemCount: suppliers.length,
                     itemBuilder: (context, index) {
                       final supplier = suppliers[index];
-                      return _buildSupplierCard(context, supplier, userPos, isDark);
+                      return _SupplierCard(
+                        supplier: supplier,
+                        userPos: userPos,
+                      );
                     },
                   ),
           ),
@@ -179,32 +154,133 @@ class HydroMapScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildSupplierCard(
-    BuildContext context,
-    HydroSupplier supplier,
-    GeoPosition? userPos,
-    bool isDark,
-  ) {
-    final primaryTextColor = isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary;
-    final secondaryTextColor = isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary;
+/// GPS coordinates status bar shown at the top of [HydroMapScreen].
+class _GpsStatusBar extends StatelessWidget {
+  /// Creates a [_GpsStatusBar] with the given [userPos].
+  const _GpsStatusBar({required this.userPos});
 
+  /// Current GPS position, or `null` while acquiring.
+  final GeoPosition? userPos;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ag;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AgSpace.screen,
+        vertical: AgSpace.s8,
+      ),
+      color: colors.subtle,
+      child: Row(
+        children: [
+          Icon(Icons.satellite_alt_outlined, size: 18, color: colors.brand),
+          const SizedBox(width: AgSpace.s8),
+          Expanded(
+            child: Text(
+              userPos != null
+                  ? '${userPos!.locationSource}: '
+                      '${userPos!.latitude.toStringAsFixed(4)}°, '
+                      '${userPos!.longitude.toStringAsFixed(4)}°'
+                  : 'Acquiring GPS Fix...',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: colors.textSecondary),
+            ),
+          ),
+          if (userPos != null)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AgSpace.s8,
+                vertical: AgSpace.s4,
+              ),
+              decoration: BoxDecoration(
+                color: colors.brandSurface,
+                borderRadius: AgRadius.all(AgRadius.r16),
+              ),
+              child: Text(
+                '±${userPos!.accuracyMeters.toStringAsFixed(0)}m',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colors.brand,
+                    ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Empty state shown when the filtered supplier list has no results.
+class _EmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ag;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.store_mall_directory_outlined,
+            size: 48,
+            color: colors.textSecondary,
+          ),
+          const SizedBox(height: AgSpace.s12),
+          Text(
+            'No hydroponic suppliers found',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colors.text,
+                ),
+          ),
+          const SizedBox(height: AgSpace.s4),
+          Text(
+            'Try clearing search filters or changing category',
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: colors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A single supplier card in the [HydroMapScreen] list.
+class _SupplierCard extends StatelessWidget {
+  /// Creates a [_SupplierCard] for the given [supplier].
+  const _SupplierCard({
+    required this.supplier,
+    required this.userPos,
+  });
+
+  /// The hydroponic supplier to display.
+  final HydroSupplier supplier;
+
+  /// Current user GPS position for distance calculation, or `null`.
+  final GeoPosition? userPos;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.ag;
     final double? distanceKm = userPos != null
-        ? supplier.distanceInKmFrom(userPos.latitude, userPos.longitude)
+        ? supplier.distanceInKmFrom(userPos!.latitude, userPos!.longitude)
         : null;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AgSpace.s12),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-          width: 1,
-        ),
+        color: colors.surface,
+        borderRadius: AgRadius.all(AgRadius.r16),
+        border: Border.all(color: colors.border),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AgRadius.all(AgRadius.r16),
         onTap: () {
           SupplierPinModal.show(
             context,
@@ -214,11 +290,11 @@ class HydroMapScreen extends ConsumerWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AgSpace.s16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title & Distance
+              // Name, Verified Badge & Distance
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -228,107 +304,130 @@ class HydroMapScreen extends ConsumerWidget {
                         Flexible(
                           child: Text(
                             supplier.name,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: primaryTextColor,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.text,
+                                ),
                           ),
                         ),
                         if (supplier.isVerified) ...[
-                          const SizedBox(width: 6),
-                          const Icon(Icons.verified, color: AppColors.mintAccent, size: 16),
+                          const SizedBox(width: AgSpace.s8),
+                          Icon(Icons.verified, color: colors.brand, size: 16),
                         ],
                       ],
                     ),
                   ),
                   if (distanceKm != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AgSpace.s8,
+                        vertical: AgSpace.s4,
+                      ),
                       decoration: BoxDecoration(
-                        color: AppColors.primarySage.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
+                        color: colors.brandSurface,
+                        borderRadius: AgRadius.all(AgRadius.r16),
                       ),
                       child: Text(
                         '${distanceKm.toStringAsFixed(1)} km',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.mintAccent,
-                        ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colors.brand,
+                            ),
                       ),
                     ),
                 ],
               ),
 
-              const SizedBox(height: 4),
+              const SizedBox(height: AgSpace.s4),
 
               Text(
                 '${supplier.category} • ${supplier.city}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.mintAccent,
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: colors.brand,
+                    ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: AgSpace.s8),
 
               Text(
                 supplier.address,
-                style: TextStyle(fontSize: 12, color: secondaryTextColor),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: colors.textSecondary),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: AgSpace.s12),
 
-              // Product Tags Preview
+              // Product Tags Preview (up to 3)
               Wrap(
-                spacing: 6,
-                runSpacing: 4,
+                spacing: AgSpace.s8,
+                runSpacing: AgSpace.s4,
                 children: supplier.featuredProducts.take(3).map((prod) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AgSpace.s8,
+                      vertical: AgSpace.s4,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurfaceElevated : AppColors.lightSurfaceElevated,
-                      borderRadius: BorderRadius.circular(6),
+                      color: colors.subtle,
+                      borderRadius: AgRadius.all(AgRadius.r16),
                     ),
                     child: Text(
                       prod,
-                      style: TextStyle(fontSize: 10, color: secondaryTextColor),
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(color: colors.textSecondary),
                     ),
                   );
                 }).toList(),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AgSpace.s12),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 14, color: Color(0xFFF4A261)),
-                      const SizedBox(width: 4),
+                      // Star colour is amber/orange — no exact design token;
+                      // colors.warning is the closest warm accent in the token set.
+                      Icon(Icons.star, size: 14, color: colors.warning),
+                      const SizedBox(width: AgSpace.s4),
                       Text(
                         '${supplier.rating}',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryTextColor),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colors.text,
+                            ),
                       ),
-                      const SizedBox(width: 12),
-                      const Icon(Icons.schedule, size: 14, color: AppColors.mintAccent),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AgSpace.s12),
+                      Icon(Icons.schedule, size: 14, color: colors.brand),
+                      const SizedBox(width: AgSpace.s4),
                       Text(
                         supplier.openHours,
-                        style: TextStyle(fontSize: 11, color: secondaryTextColor),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: colors.textSecondary),
                       ),
                     ],
                   ),
-                  const Row(
+                  Row(
                     children: [
                       Text(
                         'Details',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.mintAccent),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colors.brand,
+                            ),
                       ),
-                      Icon(Icons.chevron_right, size: 16, color: AppColors.mintAccent),
+                      Icon(Icons.chevron_right, size: 16, color: colors.brand),
                     ],
                   ),
                 ],

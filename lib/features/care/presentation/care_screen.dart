@@ -26,9 +26,15 @@ class CareScreen extends StatelessWidget {
           ),
           _CareTile(
             icon: Icons.person_outline,
-            title: 'Profile and settings',
-            subtitle: 'Account, theme and sign out',
+            title: 'Profile',
+            subtitle: 'Account and sign out',
             onTap: () => context.push(AppRoutes.profile),
+          ),
+          _CareTile(
+            icon: Icons.settings_outlined,
+            title: 'Settings',
+            subtitle: 'Theme, privacy and about',
+            onTap: () => context.push(AppRoutes.settings),
           ),
           _CareTile(
             icon: Icons.science_outlined,
