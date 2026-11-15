@@ -248,7 +248,7 @@ class _ProgressCard extends StatelessWidget {
                 Text('Progress', style: text.titleMedium),
                 Text(
                   '${(batch.progress(now) * 100).toInt()}%',
-                  style: text.labelLarge?.copyWith(color: c.brand),
+                  style: text.labelLarge?.copyWith(color: c.text),
                 ),
               ],
             ),
