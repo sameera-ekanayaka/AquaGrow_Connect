@@ -6,6 +6,7 @@ import 'package:aquagrow_mobile/features/crops/domain/harvest_passport.dart';
 import 'package:aquagrow_mobile/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 /// Harvest Passport: the facts about a harvest and a QR code that proves them.
@@ -18,7 +19,7 @@ class HarvestPassportScreen extends ConsumerWidget {
   /// The pod being harvested.
   final String podId;
 
-  static const double _qrSize = 220;
+  static const double _qrSize = 160;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +28,7 @@ class HarvestPassportScreen extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Harvest Passport')),
+      appBar: AppBar(),
       body: SafeArea(
         child: AsyncValueView<List<Pod>>(
           value: podsAsync,
@@ -54,69 +55,100 @@ class HarvestPassportScreen extends ConsumerWidget {
               avgPh: averages?.avgPh,
               avgEc: averages?.avgEc,
             );
+            final facts = passport.toFacts();
 
             return ListView(
               padding: const EdgeInsets.all(AgSpace.screen),
               children: [
+                Text('Harvest passport', style: text.headlineMedium),
+                const SizedBox(height: AgSpace.s8),
+                Text(
+                  'Scan the code with any phone camera to read where this '
+                  '${passport.crop.toLowerCase()} came from.',
+                  style: text.bodyMedium?.copyWith(color: c.textSecondary),
+                ),
+                const SizedBox(height: AgSpace.s20),
                 Card(
                   elevation: 0,
-                  color: c.surface,
+                  color: c.subtle,
                   shape: RoundedRectangleBorder(
                     borderRadius: AgRadius.all(AgRadius.r20),
-                    side: BorderSide(color: c.border),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(AgSpace.s16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(passport.crop, style: text.titleLarge),
+                        Center(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: AgRadius.all(AgRadius.r16),
+                            ),
+                            padding: const EdgeInsets.all(AgSpace.s16),
+                            child: QrImageView(
+                              data: passport.qrData,
+                              size: _qrSize,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AgSpace.s8),
+                        Text(
+                          'Code ${passport.shortHash}',
+                          style:
+                              text.bodySmall?.copyWith(color: c.textSecondary),
+                        ),
                         const SizedBox(height: AgSpace.s16),
-                        _Fact('Pod', passport.pod),
-                        _Fact(
-                          'Planted',
-                          passport.toFacts()['plantedAt']! as String,
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AgSpace.s16),
+                          decoration: BoxDecoration(
+                            color: c.brand,
+                            borderRadius: AgRadius.all(AgRadius.r16),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.water_drop_rounded),
+                              const SizedBox(width: AgSpace.s12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${passport.waterSavedLitres.toStringAsFixed(1)} L',
+                                    style: text.titleLarge,
+                                  ),
+                                  Text(
+                                    'water saved compared with soil',
+                                    style: text.bodySmall,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        _Fact(
-                          'Harvested',
-                          passport.toFacts()['harvestedAt']! as String,
-                        ),
+                        const SizedBox(height: AgSpace.s16),
+                        _Fact('Crop', passport.crop),
+                        _Fact('Pod', '${pod.name}, ${pod.room}'),
+                        _Fact('Planted', facts['plantedAt']! as String),
+                        _Fact('Harvested', facts['harvestedAt']! as String),
                         _Fact('Days grown', '${passport.daysGrown}'),
                         _Fact(
                           'Average pH',
-                          passport.avgPh?.toStringAsFixed(2) ?? '--',
+                          passport.avgPh?.toStringAsFixed(1) ?? '--',
                         ),
                         _Fact(
                           'Average EC',
                           passport.avgEc == null
                               ? '--'
-                              : '${passport.avgEc!.toStringAsFixed(2)} mS/cm',
-                        ),
-                        _Fact(
-                          'Water saved',
-                          '${passport.waterSavedLitres.toStringAsFixed(1)} L',
+                              : '${passport.avgEc!.toStringAsFixed(1)} mS/cm',
                         ),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: AgSpace.s20),
-                Center(
-                  child: Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.all(AgSpace.s12),
-                    child: QrImageView(
-                      data: passport.qrData,
-                      size: _qrSize,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AgSpace.s12),
-                Center(
-                  child: Text(
-                    'Hash: ${passport.shortHash}',
-                    style: text.bodySmall?.copyWith(color: c.textSecondary),
-                  ),
+                FilledButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Done'),
                 ),
               ],
             );
@@ -135,13 +167,14 @@ class _Fact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.ag;
     final text = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: AgSpace.s8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: text.bodyMedium),
+          Text(label, style: text.bodyMedium?.copyWith(color: c.textSecondary)),
           Text(value, style: text.titleSmall),
         ],
       ),
