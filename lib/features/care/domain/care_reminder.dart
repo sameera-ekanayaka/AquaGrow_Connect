@@ -30,6 +30,35 @@ class CareReminder {
     this.isCompleted = false,
   }) : assert(intervalDays > 0, 'intervalDays must be greater than zero');
 
+  /// Computes the next scheduled due date based on [lastCompletedAt] or [fallbackReferenceDate].
+  DateTime nextDueDate([DateTime? fallbackReferenceDate]) {
+    final base = lastCompletedAt ?? fallbackReferenceDate ?? DateTime.now();
+    if (lastCompletedAt == null) {
+      return DateTime(base.year, base.month, base.day);
+    }
+    final next = base.add(Duration(days: intervalDays));
+    return DateTime(next.year, next.month, next.day);
+  }
+
+  /// Computes the number of calendar days remaining until the next due date.
+  int daysRemaining(DateTime now) {
+    final target = nextDueDate(now);
+    final today = DateTime(now.year, now.month, now.day);
+    return target.difference(today).inDays;
+  }
+
+  /// Whether the reminder is overdue relative to [now].
+  bool isOverdue(DateTime now) {
+    if (isCompleted) return false;
+    return daysRemaining(now) < 0;
+  }
+
+  /// Whether the reminder is due today relative to [now].
+  bool isDueToday(DateTime now) {
+    if (isCompleted) return false;
+    return daysRemaining(now) == 0;
+  }
+
   /// Returns a copy of this reminder with updated fields.
   CareReminder copyWith({
     String? id,
