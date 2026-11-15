@@ -97,6 +97,17 @@ open Crops, open Insights. Uses `testApp()` and `sim.tick()`.
 Slides: problem, Figma flow, architecture diagram, lecture coverage, security, testing, demo,
 future work. Rehearse `docs/DEMO.md` twice. Record a backup screen video.
 
+### 8. MUST (Monday, by 10 PM): Release APK (moved from Sameera's task 3)
+
+On the laptop with Android Studio and the demo phone, follow `docs/RELEASE.md`:
+
+- Create the upload keystore **outside the repo** and write `android/key.properties` (git-ignored).
+  Never commit either, and never put the password in a commit, PR or chat.
+- `flutter build apk --release` (simulation mode, as `docs/DEMO.md` expects), check the signature,
+  `adb install -r` on the demo phone.
+- Run the whole of `docs/DEMO.md` once on the installed APK and tick the checklist at the end of
+  `docs/RELEASE.md`. Sameera can help with `android/` signing questions.
+
 ## Demo lines you present (about 1.5 minutes)
 
 Opening: the problem, the pod, the Figma design, why Flutter in Android Studio. Closing: the MVVM
