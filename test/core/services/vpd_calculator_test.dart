@@ -6,7 +6,7 @@ import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
 import 'package:aquagrow_mobile/core/services/weather_service.dart';
-import 'package:aquagrow_mobile/features/location/presentation/location_providers.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
