@@ -61,6 +61,8 @@ void main() {
     expect(find.text('Updated just now'), findsOneWidget);
     expect(find.text('6.2'), findsOneWidget);
     expect(find.text('View crops'), findsOneWidget);
+    expect(find.text('Pod controls'), findsOneWidget);
+    expect(find.text('Water pump'), findsOneWidget);
   });
 
   testWidgets('no task card while every reading is in range', (tester) async {
@@ -132,5 +134,9 @@ void main() {
     expect(find.text('Offline'), findsOneWidget);
     expect(find.text('Last known value'), findsNWidgets(4));
     expect(find.textContaining('Last reading'), findsOneWidget);
+    expect(
+      find.text('Controls come back when Pod Alpha reconnects.'),
+      findsOneWidget,
+    );
   });
 }
