@@ -13,6 +13,7 @@ import 'package:aquagrow_mobile/features/dashboard/presentation/home_screen.dart
 import 'package:aquagrow_mobile/features/insights/presentation/insights_screen.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
 import 'package:aquagrow_mobile/features/location/presentation/microclimate_screen.dart';
+import 'package:aquagrow_mobile/features/settings/presentation/settings_screen.dart';
 import 'package:aquagrow_mobile/features/simulator/presentation/simulator_panel_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,6 +112,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.alerts, builder: (_, __) => const AlertsScreen()),
       GoRoute(path: AppRoutes.profile, builder: (_, __) => const ProfileScreen()),
       GoRoute(path: AppRoutes.simulator, builder: (_, __) => const SimulatorPanelScreen()),
+      GoRoute(path: AppRoutes.settings, builder: (_, __) => const SettingsScreen()),
     ],
   );
 
