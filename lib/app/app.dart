@@ -5,8 +5,8 @@ import 'package:aquagrow_mobile/features/settings/application/theme_mode_control
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Root widget: theme and router. Shows the splash screen until the saved
-/// sign-in session is restored, so the user never sees the wrong screen flash.
+/// Root widget: theme and router. Covers the app with the splash screen until
+/// the saved sign-in session is restored, so the wrong screen never flashes.
 class AquaGrowApp extends ConsumerWidget {
   const AquaGrowApp({super.key});
 
@@ -20,8 +20,15 @@ class AquaGrowApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: ref.watch(themeModeProvider),
       routerConfig: ref.watch(routerProvider),
-      builder: (context, child) =>
-          restored ? child ?? const SizedBox.shrink() : const SplashScreen(),
+      // The app builds underneath from the first frame, so screens start
+      // loading straight away; the splash only covers it until the saved
+      // session is restored.
+      builder: (context, child) => Stack(
+        children: [
+          child ?? const SizedBox.shrink(),
+          if (!restored) const SplashScreen(),
+        ],
+      ),
     );
   }
 }
