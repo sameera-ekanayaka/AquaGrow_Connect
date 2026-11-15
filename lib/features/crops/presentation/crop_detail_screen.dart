@@ -196,6 +196,7 @@ class _StageTimelineCard extends StatelessWidget {
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
+                              softWrap: false,
                             ),
                           ],
                         ),
