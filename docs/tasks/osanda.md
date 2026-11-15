@@ -78,7 +78,7 @@ gets built inside `lib/features/crops/` instead.
 
 ### 2. MUST: Home screen to Figma (`feature/osanda-home`)
 
-- [x] Done: `PodSelector` + "Choose a pod" sheet, `priorityTaskFor` + `PriorityTaskCard` (refill with confirm), `CropHero`, "Updated 12s ago", Your plants, offline state. Pod controls join in task 3.
+- [x] Done: `PodSelector` + "Choose a pod" sheet, `priorityTaskFor` + `PriorityTaskCard` (refill with confirm), `CropHero`, "Updated 12s ago", Your plants, offline state.
 
 Match "Home / Opaque / Refined", top to bottom:
 
@@ -97,6 +97,8 @@ Match "Home / Opaque / Refined", top to bottom:
 Offline pod: `Offline` badge, controls disabled. Loading and error states via `AsyncValueView`.
 
 ### 3. MUST: Pod controls UI (`feature/osanda-controls`)
+
+- [x] Done: `PodControlsCard` on Home (pump, light, brightness, pH down) with confirm, biometric check, busy, dosing and offline states (PR #23).
 
 `lib/features/controls/presentation/pod_controls_card.dart`, on Home under the readings.
 
