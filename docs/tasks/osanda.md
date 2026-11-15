@@ -127,6 +127,8 @@ Figma "Splash Screen" and "Onboarding Screen": logo splash, then 3 slides
 (Grow fresh food at home / Know your plants live / Get alerted before it's too late) shown once,
 remembered in Hive `app_preferences`. Ask Tharindu to add the route and the first-launch redirect.
 
+- [x] Done: `SplashScreen`, `OnboardingScreen` (3 slides, Skip, dots, Get started) and `OnboardingStore` (`onboarding_seen` in `app_preferences`). Route and first-launch redirect requested from Tharindu.
+
 ### 6. SHOULD: Simulator panel polish (`feature/osanda-simulator-ui`)
 
 Show the selected pod's live pH, water level and temperature at the top of the panel so the
