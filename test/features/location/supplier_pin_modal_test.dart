@@ -1,6 +1,6 @@
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
-import 'package:aquagrow_mobile/features/location/widgets/supplier_pin_modal.dart';
+import 'package:aquagrow_mobile/features/location/presentation/widgets/supplier_pin_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
