@@ -205,7 +205,7 @@ class _GpsStatusBar extends StatelessWidget {
                 '±${userPos!.accuracyMeters.toStringAsFixed(0)}m',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: colors.brand,
+                      color: colors.text,
                     ),
               ),
             ),
@@ -334,7 +334,7 @@ class _SupplierCard extends StatelessWidget {
                         '${distanceKm.toStringAsFixed(1)} km',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: colors.brand,
+                              color: colors.text,
                             ),
                       ),
                     ),
