@@ -148,40 +148,51 @@ class SupplierPinModal extends StatelessWidget {
               ],
             ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AgSpace.s16),
           const Divider(height: 1),
-          const SizedBox(height: 16),
+          const SizedBox(height: AgSpace.s16),
 
           // Rating, Open Hours & Address
           Row(
             children: [
-              const Icon(Icons.star, color: Color(0xFFF4A261), size: 18),
-              const SizedBox(width: 6),
+              // Star colour is amber/orange — no exact design token;
+              // colors.warning is the closest warm accent in the token set.
+              Icon(Icons.star, color: colors.warning, size: 18),
+              const SizedBox(width: AgSpace.s8),
               Text(
                 '${supplier.rating} / 5.0',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: primaryTextColor),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colors.text,
+                    ),
               ),
-              const SizedBox(width: 20),
-              const Icon(Icons.schedule, color: AppColors.mintAccent, size: 18),
-              const SizedBox(width: 6),
+              const SizedBox(width: AgSpace.s20),
+              Icon(Icons.schedule, color: colors.brand, size: 18),
+              const SizedBox(width: AgSpace.s8),
               Text(
                 supplier.openHours,
-                style: TextStyle(fontSize: 12, color: secondaryTextColor),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: colors.textSecondary),
               ),
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: AgSpace.s12),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.pin_drop_outlined, color: AppColors.mintAccent, size: 18),
-              const SizedBox(width: 6),
+              Icon(Icons.pin_drop_outlined, color: colors.brand, size: 18),
+              const SizedBox(width: AgSpace.s8),
               Expanded(
                 child: Text(
                   supplier.address,
-                  style: TextStyle(fontSize: 13, color: primaryTextColor),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: colors.text),
                 ),
               ),
             ],
