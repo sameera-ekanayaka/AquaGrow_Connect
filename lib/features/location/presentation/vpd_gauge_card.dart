@@ -57,10 +57,9 @@ class VpdGaugeCard extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            'Canopy Transpiration Physics',
-                            style: textTheme.bodySmall?.copyWith(
+                            'Air dryness for your plants',
+                            style: textTheme.labelSmall?.copyWith(
                               color: colors.textSecondary,
-                              fontSize: 11,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -82,8 +81,7 @@ class VpdGaugeCard extends ConsumerWidget {
                 ),
                 child: Text(
                   vpd.isOptimal ? 'OPTIMAL' : 'ATTENTION',
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
+                  style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
                     color: zoneTone.primary,
@@ -102,8 +100,7 @@ class VpdGaugeCard extends ConsumerWidget {
             children: [
               Text(
                 vpd.vpdKpa.toStringAsFixed(2),
-                style: textTheme.displaySmall?.copyWith(
-                  fontSize: 46,
+                style: textTheme.displayMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   color: colors.text,
                   height: 1.0,
@@ -133,9 +130,8 @@ class VpdGaugeCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Leaf Sat: ${vpd.saturationVpKpa} kPa | Air: ${vpd.actualVpKpa} kPa',
-                      style: textTheme.bodySmall?.copyWith(
-                        fontSize: 11,
+                      'Good for leafy greens',
+                      style: textTheme.labelSmall?.copyWith(
                         color: colors.textSecondary,
                       ),
                       textAlign: TextAlign.end,
@@ -307,8 +303,7 @@ class VpdGaugeCard extends ConsumerWidget {
                 Flexible(
                   child: Text(
                     '0.0 (Low)',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
+                    style: textTheme.labelSmall?.copyWith(
                       color: colors.textSecondary,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -317,8 +312,7 @@ class VpdGaugeCard extends ConsumerWidget {
                 Flexible(
                   child: Text(
                     '0.8–1.2 (Ideal)',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
+                    style: textTheme.labelSmall?.copyWith(
                       color: colors.text,
                       fontWeight: FontWeight.bold,
                     ),
@@ -329,8 +323,7 @@ class VpdGaugeCard extends ConsumerWidget {
                 Flexible(
                   child: Text(
                     '1.6+ (Dry)',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
+                    style: textTheme.labelSmall?.copyWith(
                       color: colors.textSecondary,
                     ),
                     textAlign: TextAlign.end,

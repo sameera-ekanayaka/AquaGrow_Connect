@@ -107,9 +107,8 @@ class WeatherSummaryCard extends ConsumerWidget {
                     ),
                     child: Text(
                       '${weather.latitude.toStringAsFixed(2)}°, ${weather.longitude.toStringAsFixed(2)}°',
-                      style: textTheme.bodySmall?.copyWith(
+                      style: textTheme.labelSmall?.copyWith(
                         color: colors.textSecondary,
-                        fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -141,10 +140,9 @@ class WeatherSummaryCard extends ConsumerWidget {
                     children: [
                       Text(
                         '${weather.temperatureC.toStringAsFixed(1)}°',
-                        style: textTheme.displaySmall?.copyWith(
+                        style: textTheme.displayMedium?.copyWith(
                           color: colors.text,
                           fontWeight: FontWeight.w800,
-                          fontSize: 42,
                           height: 1.0,
                         ),
                       ),
@@ -319,8 +317,7 @@ class WeatherSummaryCard extends ConsumerWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: textTheme.bodySmall?.copyWith(
-            fontSize: 11,
+          style: textTheme.labelSmall?.copyWith(
             color: colors.textSecondary,
           ),
         ),

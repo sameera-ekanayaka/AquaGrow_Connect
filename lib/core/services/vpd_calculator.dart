@@ -49,7 +49,8 @@ class VpdCalculator {
     final double leafVpSat = calculateSaturationVaporPressure(canopyTempC);
 
     // Actual vapor pressure in ambient room air
-    final double airVpActual = calculateActualVaporPressure(airTempC, clampedRh);
+    final double airVpActual =
+        calculateActualVaporPressure(airTempC, clampedRh);
 
     // VPD in kiloPascals
     double vpd = leafVpSat - airVpActual;
@@ -97,7 +98,7 @@ class VpdCalculator {
       case VpdZone.optimalGenerative:
         return 'Ideal Generative Transpiration';
       case VpdZone.overTranspirationStress:
-        return 'Stomatal Stress (Canopy Dehydration)';
+        return 'Air is too dry (leaf dehydration)';
     }
   }
 
@@ -113,7 +114,7 @@ class VpdCalculator {
       case VpdZone.earlyVegetative:
         return 'Mild transpiration gradient. Excellent for young seedlings and root formation. Maintain current canopy airflow.';
       case VpdZone.optimalVegetative:
-        return 'Perfect transpiration rate for leafy greens (Butterhead, Basil, Rocket). Stomata are fully open and nutrient absorption is optimized.';
+        return 'Perfect transpiration rate for leafy greens (Butterhead, Basil, Rocket). Leaf transpiration and nutrient absorption are ideal.';
       case VpdZone.optimalGenerative:
         return 'Robust transpiration pressure suitable for flowering or heavy vegetative foliage. Verify reservoir water level daily.';
       case VpdZone.overTranspirationStress:
@@ -139,18 +140,23 @@ class VpdCalculator {
     final int preDawnMinutes = (supplementHoursNeeded * 60 / 2).round();
     final int postDuskMinutes = (supplementHoursNeeded * 60 / 2).round();
 
-    final DateTime growLightOnTime = sunrise.subtract(Duration(minutes: preDawnMinutes));
-    final DateTime growLightOffTime = sunset.add(Duration(minutes: postDuskMinutes));
+    final DateTime growLightOnTime =
+        sunrise.subtract(Duration(minutes: preDawnMinutes));
+    final DateTime growLightOffTime =
+        sunset.add(Duration(minutes: postDuskMinutes));
 
     return PhotoperiodSchedule(
       sunrise: sunrise,
       sunset: sunset,
-      naturalDaylightHours: double.parse(naturalDaylightHours.toStringAsFixed(1)),
+      naturalDaylightHours:
+          double.parse(naturalDaylightHours.toStringAsFixed(1)),
       targetLightHours: targetTotalLightHours,
-      supplementalHoursNeeded: double.parse(supplementHoursNeeded.toStringAsFixed(1)),
+      supplementalHoursNeeded:
+          double.parse(supplementHoursNeeded.toStringAsFixed(1)),
       growLightOnTime: growLightOnTime,
       growLightOffTime: growLightOffTime,
-      solarNoon: sunrise.add(Duration(minutes: (daylightDuration.inMinutes / 2).round())),
+      solarNoon: sunrise
+          .add(Duration(minutes: (daylightDuration.inMinutes / 2).round())),
     );
   }
 }
