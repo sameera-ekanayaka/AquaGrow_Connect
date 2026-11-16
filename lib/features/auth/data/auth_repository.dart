@@ -29,6 +29,12 @@ class AuthRepository implements IAuthRepository {
         await _fetchAndEmitProfile(session.user.id, session.user.email ?? '');
         return;
       }
+      // Live mode with no Supabase session: a token left in secure storage
+      // (the iOS keychain outlives a reinstall) cannot read any data, so ask
+      // the user to sign in again instead of showing an empty garden.
+      await _secureStorage.clearAuthTokens();
+      _authStateController.add(null);
+      return;
     }
 
     // Attempt restoring cached offline session from secure storage

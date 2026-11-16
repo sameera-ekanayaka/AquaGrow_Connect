@@ -46,6 +46,10 @@ class LocalNotificationService implements NotificationService {
       _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
 
+  IOSFlutterLocalNotificationsPlugin? get _ios =>
+      _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+
   @override
   Future<void> init({required void Function() onTap}) async {
     if (_ready) return;
@@ -53,6 +57,13 @@ class LocalNotificationService implements NotificationService {
       await _plugin.initialize(
         const InitializationSettings(
           android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          // iOS asks later, from the same prompt as Android (see
+          // NotificationPermission), not on the first launch.
+          iOS: DarwinInitializationSettings(
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+          ),
         ),
         onDidReceiveNotificationResponse: (_) => onTap(),
       );
@@ -76,7 +87,11 @@ class LocalNotificationService implements NotificationService {
   @override
   Future<bool> areEnabled() async {
     try {
-      return await _android?.areNotificationsEnabled() ?? false;
+      final android = _android;
+      if (android != null) {
+        return await android.areNotificationsEnabled() ?? false;
+      }
+      return (await _ios?.checkPermissions())?.isEnabled ?? false;
     } catch (e, st) {
       _log.error('Could not read notification permission', e, st);
       return false;
@@ -86,7 +101,16 @@ class LocalNotificationService implements NotificationService {
   @override
   Future<bool> requestPermission() async {
     try {
-      return await _android?.requestNotificationsPermission() ?? false;
+      final android = _android;
+      if (android != null) {
+        return await android.requestNotificationsPermission() ?? false;
+      }
+      return await _ios?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          ) ??
+          false;
     } catch (e, st) {
       _log.error('Notification permission request failed', e, st);
       return false;
@@ -112,6 +136,10 @@ class LocalNotificationService implements NotificationService {
             importance: Importance.high,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentSound: true,
           ),
         ),
         payload: alert.id,
