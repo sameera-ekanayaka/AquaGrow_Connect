@@ -1,4 +1,3 @@
-import 'package:aquagrow_mobile/core/security/biometric_guard.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
@@ -6,23 +5,6 @@ import 'package:aquagrow_mobile/features/controls/presentation/pod_controls_card
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-/// Answers the fingerprint prompt without a plugin.
-class _FakeAuthenticator implements BiometricAuthenticator {
-  _FakeAuthenticator({required this.allow});
-
-  final bool allow;
-  int prompts = 0;
-
-  @override
-  Future<bool> isAvailable() async => true;
-
-  @override
-  Future<bool> authenticate(String reason) async {
-    prompts++;
-    return allow;
-  }
-}
 
 /// Longer than the simulated round trip to the pod.
 const _roundTrip = Duration(milliseconds: 500);
@@ -33,16 +15,11 @@ void main() {
   setUp(() => sim = PodSimulator(clock: () => DateTime(2026, 11, 15, 10)));
   tearDown(() => sim.dispose());
 
-  Future<_FakeAuthenticator> pumpCard(
-    WidgetTester tester, {
-    bool allow = true,
-  }) async {
-    final auth = _FakeAuthenticator(allow: allow);
+  Future<void> pumpCard(WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           podSimulatorProvider.overrideWithValue(sim),
-          biometricGuardProvider.overrideWithValue(BiometricGuard(auth)),
         ],
         child: MaterialApp(
           theme: AppTheme.light,
@@ -55,7 +32,6 @@ void main() {
       ),
     );
     await tester.pump();
-    return auth;
   }
 
   bool pumpOn() => sim.actuators('pod-alpha').pumpOn;
@@ -71,7 +47,7 @@ void main() {
   });
 
   testWidgets('Cancel leaves the pump running', (tester) async {
-    final auth = await pumpCard(tester);
+    await pumpCard(tester);
 
     await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
@@ -79,13 +55,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(pumpOn(), isTrue);
-    expect(auth.prompts, 0);
     expect(find.text('Running'), findsOneWidget);
   });
 
   testWidgets('Confirm turns the pump off, with a spinner meanwhile',
       (tester) async {
-    final auth = await pumpCard(tester);
+    await pumpCard(tester);
 
     await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
@@ -98,22 +73,9 @@ void main() {
     await tester.pump(_roundTrip);
     await tester.pump();
 
-    expect(auth.prompts, 1);
     expect(pumpOn(), isFalse);
     expect(find.text('Off'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-  });
-
-  testWidgets('a failed fingerprint check sends nothing', (tester) async {
-    await pumpCard(tester, allow: false);
-
-    await tester.tap(find.byType(Switch).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Turn off'));
-    await tester.pump(_roundTrip);
-    await tester.pump();
-
-    expect(pumpOn(), isTrue);
   });
 
   testWidgets('a working pH-down dose says pH lowered', (tester) async {

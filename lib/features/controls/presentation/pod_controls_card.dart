@@ -3,7 +3,6 @@ import 'package:aquagrow_mobile/core/interfaces/i_control_repository.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/models/actuator_state.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
-import 'package:aquagrow_mobile/core/security/biometric_guard.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/controls/domain/dose_note.dart';
@@ -20,8 +19,9 @@ enum _Command { pump, light, brightness, dose }
 /// "Pod controls" on Home, from the Figma frame "Home · Light": pump and
 /// grow light switches, a brightness slider and a pH-down button.
 ///
-/// Every command asks first ([showConfirmDialog]), then checks the user with
-/// [biometricGuardProvider], then goes through [controlRepositoryProvider].
+/// Every command asks first ([showConfirmDialog]), then goes through
+/// [controlRepositoryProvider]. (Who may use the app at all is decided by the
+/// optional app lock in Settings, not per command.)
 /// While a command runs, its control shows a spinner. An offline pod shows
 /// why and disables everything.
 ///
@@ -213,8 +213,6 @@ class _PodControlsCardState extends ConsumerState<PodControlsCard> {
       destructive: destructive,
     );
     if (!ok || !mounted) return;
-    if (!await ref.read(biometricGuardProvider).confirm(title)) return;
-    if (!mounted) return;
 
     setState(() => _busy.add(which));
     try {
