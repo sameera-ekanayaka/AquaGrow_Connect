@@ -15,7 +15,7 @@ Open <http://localhost:8791>, then **Supabase Live Sync**: enter the project URL
 uses. The browser remembers the URL, key and email; the password is never
 saved (the signed-in session is reused). **Forget** clears it.
 
-Needs migrations 001 to 005 on that project.
+Needs migrations 001 to 007 on that project.
 
 ## What it does once connected
 

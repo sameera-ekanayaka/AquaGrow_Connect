@@ -1,5 +1,5 @@
 -- ==============================================================================
--- 005: Live pod controls, planting and the two missing recipes
+-- 007: Live pod controls, planting and the two missing recipes
 --      (feature/osanda-live-flow)
 -- ==============================================================================
 
@@ -27,13 +27,8 @@ BEGIN
     END IF;
 END $$;
 
--- 3. Recipes: every signed-in user can read them. 001 enabled RLS but added
---    no policy, so the embedded recipe came back empty (30-day default).
-DROP POLICY IF EXISTS "Anyone signed in can read recipes" ON public.crop_recipes;
-CREATE POLICY "Anyone signed in can read recipes"
-    ON public.crop_recipes FOR SELECT
-    TO authenticated
-    USING (true);
+-- 3. Recipes are already readable by every signed-in user: 001 created
+--    "Authenticated users can read crop recipes". No second policy needed.
 
 -- 4. The app offers 7 crops; 001 seeded 5. Add the other two.
 INSERT INTO public.crop_recipes
