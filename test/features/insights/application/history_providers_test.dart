@@ -1,4 +1,5 @@
 import 'package:aquagrow_mobile/core/interfaces/i_telemetry_repository.dart';
+import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
@@ -65,6 +66,15 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           selectedPodIdProvider.overrideWith((ref) => 'pod-alpha'),
+          selectedPodProvider.overrideWith(
+            (ref) => Pod(
+              id: 'pod-alpha',
+              name: 'Pod Alpha',
+              room: 'Kitchen',
+              isOnline: true,
+              lastSeenAt: DateTime(2026, 11, 15),
+            ),
+          ),
           telemetryRepositoryProvider.overrideWithValue(fakeRepo),
           clockProvider.overrideWithValue(() => now),
         ],
@@ -87,6 +97,15 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           selectedPodIdProvider.overrideWith((ref) => 'pod-alpha'),
+          selectedPodProvider.overrideWith(
+            (ref) => Pod(
+              id: 'pod-alpha',
+              name: 'Pod Alpha',
+              room: 'Kitchen',
+              isOnline: true,
+              lastSeenAt: DateTime(2026, 11, 15),
+            ),
+          ),
           telemetryRepositoryProvider.overrideWithValue(fakeRepo),
           clockProvider.overrideWithValue(() => now),
         ],
@@ -131,6 +150,15 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           selectedPodIdProvider.overrideWith((ref) => 'pod-alpha'),
+          selectedPodProvider.overrideWith(
+            (ref) => Pod(
+              id: 'pod-alpha',
+              name: 'Pod Alpha',
+              room: 'Kitchen',
+              isOnline: true,
+              lastSeenAt: DateTime(2026, 11, 15),
+            ),
+          ),
           telemetryRepositoryProvider.overrideWithValue(fakeRepo),
           clockProvider.overrideWithValue(() => now),
         ],

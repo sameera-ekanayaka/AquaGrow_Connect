@@ -102,7 +102,7 @@ class PodPickerSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
-    final selectedId = ref.watch(selectedPodIdProvider);
+    final selectedId = ref.watch(selectedPodProvider)?.id;
 
     return SafeArea(
       child: Padding(

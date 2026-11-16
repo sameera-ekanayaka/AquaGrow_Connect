@@ -50,15 +50,19 @@ class SupabaseTelemetrySource implements TelemetrySource {
     String podId, {
     required DateTime from,
     required DateTime to,
-  }) =>
-      _client
-          .from('telemetry_logs')
-          .select()
-          .eq('device_id', podId)
-          .gte('recorded_at', from.toUtc().toIso8601String())
-          .lte('recorded_at', to.toUtc().toIso8601String())
-          .order('recorded_at')
-          .limit(kMaxHistoryRows);
+  }) async {
+    // Supabase returns at most 1000 rows, so take the newest and flip them:
+    // the chart then always reaches "now" even when a pod reports often.
+    final rows = await _client
+        .from('telemetry_logs')
+        .select()
+        .eq('device_id', podId)
+        .gte('recorded_at', from.toUtc().toIso8601String())
+        .lte('recorded_at', to.toUtc().toIso8601String())
+        .order('recorded_at', ascending: false)
+        .limit(kMaxHistoryRows);
+    return rows.reversed.toList();
+  }
 
   @override
   Stream<Map<String, dynamic>> inserts(String podId) {
