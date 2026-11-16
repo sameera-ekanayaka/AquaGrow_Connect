@@ -4,6 +4,7 @@ import 'package:aquagrow_mobile/core/errors/app_failure.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_telemetry_repository.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
+import 'package:aquagrow_mobile/data/supabase/realtime_topics.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_rows.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -66,7 +67,7 @@ class SupabaseTelemetrySource implements TelemetrySource {
     controller = StreamController<Map<String, dynamic>>(
       onListen: () {
         channel = _client
-            .channel('telemetry-$podId')
+            .channel(RealtimeTopics.unique('telemetry-$podId'))
             .onPostgresChanges(
               event: PostgresChangeEvent.insert,
               schema: 'public',
