@@ -38,7 +38,7 @@ class LocationRationaleDialog extends StatelessWidget {
         size: 36,
       ),
       title: Text(
-        'Allow Location Access',
+        'Use your location?',
         style: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,
           color: colors.text,
@@ -76,7 +76,7 @@ class LocationRationaleDialog extends StatelessWidget {
           ),
         ],
       ),
-      actionsAlignment: MainAxisAlignment.spaceEvenly,
+      actionsAlignment: MainAxisAlignment.end,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
@@ -88,13 +88,6 @@ class LocationRationaleDialog extends StatelessWidget {
           ),
         ),
         FilledButton(
-          style: FilledButton.styleFrom(
-            backgroundColor: colors.brand,
-            foregroundColor: colors.text,
-            shape: RoundedRectangleBorder(
-              borderRadius: AgRadius.all(AgRadius.r16),
-            ),
-          ),
           onPressed: () => Navigator.of(context).pop(true),
           child: const Text('Allow'),
         ),

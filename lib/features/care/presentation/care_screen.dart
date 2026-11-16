@@ -14,36 +14,61 @@ class CareScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.ag;
+    final textTheme = Theme.of(context).textTheme;
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(AgSpace.screen),
         children: [
           const TabHeader(overline: 'LOOK AFTER YOUR PODS', title: 'Care'),
-          _CareTile(
-            icon: Icons.storefront_outlined,
-            title: 'Hydroponic suppliers',
-            subtitle: 'Nutrients and parts near you',
-            onTap: () => context.push(AppRoutes.supplierMap),
+          Card(
+            child: Column(
+              children: [
+                _CareTile(
+                  icon: Icons.storefront_outlined,
+                  title: 'Hydroponic suppliers',
+                  subtitle: 'Nutrients and parts near you',
+                  onTap: () => context.push(AppRoutes.supplierMap),
+                ),
+                Divider(color: colors.border, height: 1),
+                _CareTile(
+                  icon: Icons.person_outline,
+                  title: 'Profile',
+                  subtitle: 'Account and sign out',
+                  onTap: () => context.push(AppRoutes.profile),
+                ),
+                Divider(color: colors.border, height: 1),
+                _CareTile(
+                  icon: Icons.settings_outlined,
+                  title: 'Settings',
+                  subtitle: 'Theme, privacy and about',
+                  onTap: () => context.push(AppRoutes.settings),
+                ),
+              ],
+            ),
           ),
-          _CareTile(
-            icon: Icons.person_outline,
-            title: 'Profile',
-            subtitle: 'Account and sign out',
-            onTap: () => context.push(AppRoutes.profile),
+          const SizedBox(height: AgSpace.s16),
+          Padding(
+            padding:
+                const EdgeInsets.only(left: AgSpace.s4, bottom: AgSpace.s8),
+            child: Text(
+              'Demo tools',
+              style: textTheme.titleSmall?.copyWith(
+                color: colors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          _CareTile(
-            icon: Icons.settings_outlined,
-            title: 'Settings',
-            subtitle: 'Theme, privacy and about',
-            onTap: () => context.push(AppRoutes.settings),
+          Card(
+            child: _CareTile(
+              icon: Icons.science_outlined,
+              title: 'Pod simulator',
+              subtitle: 'Trigger pH crashes, low water and more',
+              onTap: () => context.push(AppRoutes.simulator),
+            ),
           ),
-          _CareTile(
-            icon: Icons.science_outlined,
-            title: 'Pod simulator',
-            subtitle: 'Demo tools: trigger pH crashes, low water and more',
-            onTap: () => context.push(AppRoutes.simulator),
-          ),
-          const SizedBox(height: AgSpace.s12),
+          const SizedBox(height: AgSpace.s16),
           const CareRemindersCard(),
         ],
       ),
@@ -66,18 +91,13 @@ class _CareTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AgSpace.s12),
-      child: Card(
-        child: ListTile(
-          minVerticalPadding: AgSpace.s12,
-          leading: Icon(icon),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: onTap,
-        ),
-      ),
+    return ListTile(
+      minVerticalPadding: AgSpace.s12,
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
     );
   }
 }

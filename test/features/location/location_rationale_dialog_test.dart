@@ -26,7 +26,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Allow Location Access'), findsOneWidget);
+      expect(find.text('Use your location?'), findsOneWidget);
       expect(
         find.textContaining('AquaGrow Connect uses your location'),
         findsOneWidget,
@@ -58,13 +58,13 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Allow Location Access'), findsOneWidget);
+      expect(find.text('Use your location?'), findsOneWidget);
 
       await tester.tap(find.text('Allow'));
       await tester.pumpAndSettle();
 
       expect(dialogResult, isTrue);
-      expect(find.text('Allow Location Access'), findsNothing);
+      expect(find.text('Use your location?'), findsNothing);
     });
 
     testWidgets('Not now button pops navigator with false', (tester) async {
@@ -90,13 +90,13 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Allow Location Access'), findsOneWidget);
+      expect(find.text('Use your location?'), findsOneWidget);
 
       await tester.tap(find.text('Not now'));
       await tester.pumpAndSettle();
 
       expect(dialogResult, isFalse);
-      expect(find.text('Allow Location Access'), findsNothing);
+      expect(find.text('Use your location?'), findsNothing);
     });
   });
 }
