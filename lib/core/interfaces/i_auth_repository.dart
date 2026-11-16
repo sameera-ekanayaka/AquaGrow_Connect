@@ -31,6 +31,22 @@ abstract class IAuthRepository {
     required String email,
   });
 
+  /// Updates user profile details such as name, farm name, and contact phone.
+  Future<UserProfile> updateProfile({
+    required String fullName,
+    String? farmName,
+    String? phone,
+  });
+
+  /// Changes the user's password after verifying the current password.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  /// Permanently removes the authenticated user account and associated personal data.
+  Future<void> deleteAccount({required String password});
+
   /// Checks whether an authenticated session is actively cached.
   bool get isAuthenticated;
 }

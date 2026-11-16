@@ -1,21 +1,21 @@
+import 'package:aquagrow_mobile/app/router/app_routes.dart';
 import 'package:aquagrow_mobile/core/config/app_config.dart';
 import 'package:aquagrow_mobile/core/models/user_profile.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/auth/domain/initials.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
+import 'package:aquagrow_mobile/features/auth/presentation/widgets/delete_account_dialog.dart';
 import 'package:aquagrow_mobile/features/sync/application/sync_providers.dart';
 import 'package:aquagrow_mobile/features/sync/application/sync_service.dart';
 import 'package:aquagrow_mobile/features/sync/domain/last_synced_label.dart';
 import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-/// "Account · Profile" from Figma: who is signed in, when readings last
-/// synced, how the app gets its data, how the account is protected, and
-/// Sign out.
-///
-/// Sign out asks first (lecture 5); the router then shows the sign-in screen.
+/// Screen displaying user profile, active farm statistics, security status,
+/// and profile/account actions.
 class ProfileScreen extends ConsumerWidget {
   /// Creates the profile screen.
   const ProfileScreen({super.key});
@@ -34,7 +34,28 @@ class ProfileScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(AgSpace.screen),
           children: [
             _ProfileHeader(user: user),
+            const SizedBox(height: AgSpace.s16),
+            const _ProfileStatsRow(),
             const SizedBox(height: AgSpace.s24),
+            _RowGroup(
+              children: [
+                _ProfileRow(
+                  key: const Key('profile-edit-row'),
+                  icon: Icons.person_outline,
+                  title: 'Edit profile',
+                  subtitle: 'Update your name, farm name, and phone',
+                  onTap: () => context.push(AppRoutes.editProfile),
+                ),
+                _ProfileRow(
+                  key: const Key('profile-password-row'),
+                  icon: Icons.lock_outline,
+                  title: 'Change password',
+                  subtitle: 'Update your account credentials',
+                  onTap: () => context.push(AppRoutes.changePassword),
+                ),
+              ],
+            ),
+            const SizedBox(height: AgSpace.s16),
             _RowGroup(
               children: [
                 _ProfileRow(
@@ -53,15 +74,8 @@ class ProfileScreen extends ConsumerWidget {
                 const _ProfileRow(
                   icon: Icons.shield_outlined,
                   title: 'Security',
-                  subtitle: 'Session kept in the Android Keystore. '
-                      'Only you can read your pods.',
+                  subtitle: 'Your pods are private to your account.',
                 ),
-                if (user != null)
-                  _ProfileRow(
-                    icon: Icons.badge_outlined,
-                    title: 'Account type',
-                    subtitle: user.role.displayName,
-                  ),
               ],
             ),
             const SizedBox(height: AgSpace.s16),
@@ -75,6 +89,15 @@ class ProfileScreen extends ConsumerWidget {
                   destructive: true,
                   onTap: () => _confirmSignOut(context, ref),
                 ),
+                _ProfileRow(
+                  key: const Key('profile-delete-account'),
+                  icon: Icons.delete_forever_outlined,
+                  title: 'Delete account',
+                  subtitle:
+                      'Permanently remove your account and all pod history',
+                  destructive: true,
+                  onTap: () => showDeleteAccountFlow(context, ref),
+                ),
               ],
             ),
           ],
@@ -83,7 +106,6 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  /// "2 min ago · 37 readings", or how many readings are waiting offline.
   static String _syncSubtitle(SyncStatus sync, DateTime now) {
     final when = lastSyncedLabel(sync.lastSyncedAt, now: now);
     if (sync.pending > 0) {
@@ -108,7 +130,6 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-/// The lime initials circle, name and email at the top of Profile.
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({required this.user});
 
@@ -120,6 +141,7 @@ class _ProfileHeader extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final name = user?.fullName?.trim();
     final shownName = (name == null || name.isEmpty) ? 'AquaGrow grower' : name;
+    final farm = user?.farmName?.trim();
 
     return Row(
       children: [
@@ -128,7 +150,6 @@ class _ProfileHeader extends StatelessWidget {
           backgroundColor: c.brand,
           child: Text(
             initialsFor(fullName: user?.fullName, email: user?.email),
-            // Lime stays light in both themes, so the letters stay dark.
             style: text.titleMedium?.copyWith(color: AgColors.light.text),
           ),
         ),
@@ -138,6 +159,11 @@ class _ProfileHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(shownName, style: text.titleLarge),
+              if (farm != null && farm.isNotEmpty)
+                Text(
+                  farm,
+                  style: text.bodyMedium?.copyWith(color: c.brand),
+                ),
               if (user != null)
                 Text(
                   user!.email,
@@ -152,7 +178,83 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-/// A bordered card holding a few [_ProfileRow]s, as in Figma.
+class _ProfileStatsRow extends ConsumerWidget {
+  const _ProfileStatsRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pods = ref.watch(podsProvider).valueOrNull ?? const [];
+    final unreadAlerts = ref.watch(unreadAlertCountProvider);
+    final cropsCount = pods.where((p) => p.batch != null).length;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _StatCard(
+            label: 'Pods',
+            value: '${pods.length}',
+            icon: Icons.grain_outlined,
+          ),
+        ),
+        const SizedBox(width: AgSpace.s8),
+        Expanded(
+          child: _StatCard(
+            label: 'Crops',
+            value: '$cropsCount',
+            icon: Icons.eco_outlined,
+          ),
+        ),
+        const SizedBox(width: AgSpace.s8),
+        Expanded(
+          child: _StatCard(
+            label: 'Alerts',
+            value: '$unreadAlerts',
+            icon: Icons.notifications_none,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ag;
+    final text = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AgSpace.s12,
+        vertical: AgSpace.s8,
+      ),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: AgRadius.all(AgRadius.r16),
+        border: Border.all(color: c.border),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: c.textSecondary),
+          const SizedBox(height: AgSpace.s4),
+          Text(value, style: text.titleMedium),
+          Text(label, style: text.bodySmall),
+        ],
+      ),
+    );
+  }
+}
+
 class _RowGroup extends StatelessWidget {
   const _RowGroup({required this.children});
 
@@ -180,7 +282,6 @@ class _RowGroup extends StatelessWidget {
   }
 }
 
-/// One line in a [_RowGroup]: a round icon, a title and a quiet subtitle.
 class _ProfileRow extends StatelessWidget {
   const _ProfileRow({
     required this.icon,

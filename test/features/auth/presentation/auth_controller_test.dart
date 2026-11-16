@@ -41,6 +41,24 @@ class _FailingAuthRepository implements IAuthRepository {
 
   @override
   Future<void> resetPassword({required String email}) => Future.error(error);
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String fullName,
+    String? farmName,
+    String? phone,
+  }) =>
+      Future.error(error);
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) =>
+      Future.error(error);
+
+  @override
+  Future<void> deleteAccount({required String password}) => Future.error(error);
 }
 
 void main() {

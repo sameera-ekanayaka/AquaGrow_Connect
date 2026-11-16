@@ -24,6 +24,27 @@ abstract final class Validators {
     return null;
   }
 
+  /// Required full name with at least two words.
+  static String? fullName(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'Enter your full name';
+    final words = v.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+    if (words.length < 2) return 'Enter your first and last name';
+    if (v.length > 60) return 'Name must be 60 characters or fewer';
+    return null;
+  }
+
+  /// Optional phone number, must be between 9 and 12 digits if present.
+  static String? phone(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return null;
+    final digits = v.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length < 9 || digits.length > 12) {
+      return 'Phone number must be between 9 and 12 digits';
+    }
+    return null;
+  }
+
   /// Any non-empty text.
   static String? required(String? value, {String field = 'This field'}) {
     if ((value?.trim() ?? '').isEmpty) return '$field is required';
@@ -39,7 +60,9 @@ abstract final class Validators {
   }) {
     final parsed = double.tryParse(value?.trim() ?? '');
     if (parsed == null) return '$field must be a number';
-    if (parsed < min || parsed > max) return '$field must be between $min and $max';
+    if (parsed < min || parsed > max) {
+      return '$field must be between $min and $max';
+    }
     return null;
   }
 }

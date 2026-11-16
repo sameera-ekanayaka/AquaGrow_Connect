@@ -5,6 +5,7 @@ import 'package:aquagrow_mobile/core/models/user_profile.dart';
 import 'package:aquagrow_mobile/core/network/supabase_client.dart';
 import 'package:aquagrow_mobile/core/security/secure_storage_service.dart';
 import 'package:aquagrow_mobile/features/auth/data/auth_error_mapper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Concrete authentication repository orchestrating Supabase Auth,
 /// hardware-backed keystore token persistence, and instant offline/mock fallbacks.
@@ -187,6 +188,93 @@ class AuthRepository implements IAuthRepository {
     await _secureStorage.clearAuthTokens();
     _currentUser = null;
     _authStateController.add(null);
+  }
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String fullName,
+    String? farmName,
+    String? phone,
+  }) async {
+    final sanitizedName = fullName.trim();
+    if (sanitizedName.isEmpty) {
+      throw ArgumentError('Full name must not be empty.');
+    }
+
+    if (SupabaseManager.isConfigured && _currentUser != null) {
+      try {
+        await SupabaseManager.client.from('profiles').update({
+          'full_name': sanitizedName,
+          'farm_name': farmName?.trim(),
+          'phone': phone?.trim(),
+        }).eq('id', _currentUser!.id);
+
+        await SupabaseManager.client.auth.updateUser(
+          UserAttributes(data: {'full_name': sanitizedName}),
+        );
+      } catch (e) {
+        throw mapAuthError(e);
+      }
+    }
+
+    _currentUser = (_currentUser ??
+            UserProfile(
+              id: 'mock-user',
+              email: 'grower@aquagrow.io',
+              role: UserRole.owner,
+              createdAt: DateTime.now(),
+            ))
+        .copyWith(
+      fullName: sanitizedName,
+      farmName: farmName?.trim(),
+      phone: phone?.trim(),
+    );
+
+    _authStateController.add(_currentUser);
+    return _currentUser!;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (newPassword.length < 6) {
+      throw ArgumentError('New password must be at least 6 characters long.');
+    }
+
+    if (SupabaseManager.isConfigured && _currentUser != null) {
+      try {
+        // Re-authenticate to verify current password before updating
+        await SupabaseManager.client.auth.signInWithPassword(
+          email: _currentUser!.email,
+          password: currentPassword,
+        );
+
+        await SupabaseManager.client.auth.updateUser(
+          UserAttributes(password: newPassword),
+        );
+      } catch (e) {
+        throw mapAuthError(e);
+      }
+    }
+  }
+
+  @override
+  Future<void> deleteAccount({required String password}) async {
+    if (SupabaseManager.isConfigured && _currentUser != null) {
+      try {
+        await SupabaseManager.client.auth.signInWithPassword(
+          email: _currentUser!.email,
+          password: password,
+        );
+        await SupabaseManager.client.rpc('delete_own_account');
+      } catch (e) {
+        throw mapAuthError(e);
+      }
+    }
+
+    await signOut();
   }
 
   @override
