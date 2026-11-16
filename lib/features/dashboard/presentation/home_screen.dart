@@ -9,6 +9,7 @@ import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/controls/presentation/pod_controls_card.dart';
 import 'package:aquagrow_mobile/features/dashboard/application/home_clock.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/priority_task.dart';
+import 'package:aquagrow_mobile/features/dashboard/domain/tile_caption.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/time_ago.dart';
 import 'package:aquagrow_mobile/features/dashboard/presentation/widgets/pod_selector.dart';
 import 'package:aquagrow_mobile/features/dashboard/presentation/widgets/priority_task_card.dart';
@@ -198,7 +199,9 @@ class _ReadingsGrid extends ConsumerWidget {
                   label: metric.label,
                   value: metric.format(metric.valueOf(reading)),
                   // An offline pod's numbers are stale, so do not grade them.
-                  caption: online ? metric.targetLabel : 'Last known value',
+                  caption: online
+                      ? tileCaption(metric, metric.valueOf(reading))
+                      : 'Last known value',
                   status: online
                       ? metric.statusOf(metric.valueOf(reading))
                       : SensorStatus.normal,

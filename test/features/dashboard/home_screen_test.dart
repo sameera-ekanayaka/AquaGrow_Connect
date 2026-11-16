@@ -69,6 +69,16 @@ void main() {
     expect(find.text('Water pump'), findsOneWidget);
   });
 
+  testWidgets('an out-of-range tile says which way in words', (tester) async {
+    await pumpHome(tester);
+    expect(find.text('Target 5.5–6.5'), findsOneWidget);
+
+    sim.applyScenario('pod-alpha', SimScenario.acidSpike);
+    await tester.pump();
+
+    expect(find.text('Too low\nTarget 5.5–6.5'), findsOneWidget);
+  });
+
   testWidgets('no task card while every reading is in range', (tester) async {
     await pumpHome(tester);
 
