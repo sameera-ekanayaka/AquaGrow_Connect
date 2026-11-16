@@ -11,13 +11,15 @@ import 'package:go_router/go_router.dart';
 ///
 /// Use it as the first child of a tab's scroll view:
 /// ```dart
-/// const TabHeader(overline: 'YOUR GROWING SPACES', title: 'My Pods')
+/// const TabHeader(title: 'My Pods', subtitle: '2 pods growing')
 /// ```
 class TabHeader extends ConsumerWidget {
-  const TabHeader({required this.title, this.overline, super.key});
+  const TabHeader({required this.title, this.subtitle, super.key});
 
   final String title;
-  final String? overline;
+
+  /// Grey line under the title, for example "2 pods growing".
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,9 +35,15 @@ class TabHeader extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (overline != null) Text(overline!, style: text.bodySmall),
-                const SizedBox(height: AgSpace.s4),
                 Text(title, style: text.headlineMedium),
+                if (subtitle != null) ...[
+                  const SizedBox(height: AgSpace.s4),
+                  Text(
+                    subtitle!,
+                    style: text.bodyMedium
+                        ?.copyWith(color: context.ag.textSecondary),
+                  ),
+                ],
               ],
             ),
           ),
@@ -43,8 +51,8 @@ class TabHeader extends ConsumerWidget {
             label: unread == 0 ? 'Alerts' : 'Alerts, $unread unread',
             button: true,
             child: Material(
-              color: context.ag.subtle,
-              shape: const CircleBorder(),
+              color: context.ag.background,
+              shape: CircleBorder(side: BorderSide(color: context.ag.border)),
               child: InkWell(
                 customBorder: const CircleBorder(),
                 onTap: () => context.push(AppRoutes.alerts),

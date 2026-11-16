@@ -46,7 +46,7 @@ void main() {
 
       // Care header
       expect(find.text('Care'), findsOneWidget);
-      expect(find.text('LOOK AFTER YOUR PODS'), findsOneWidget);
+      expect(find.text('LOOK AFTER YOUR PODS'), findsNothing);
 
       // Reminders card
       expect(find.text('Care reminders'), findsOneWidget);
