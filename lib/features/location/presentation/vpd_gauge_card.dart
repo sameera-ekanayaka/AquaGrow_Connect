@@ -170,8 +170,11 @@ class VpdGaugeCard extends ConsumerWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      Icon(Icons.thermostat,
-                          size: 16, color: colors.textSecondary),
+                      Icon(
+                        Icons.thermostat,
+                        size: 16,
+                        color: colors.textSecondary,
+                      ),
                       const SizedBox(width: AgSpace.s4),
                       Flexible(
                         child: Text(
@@ -189,8 +192,11 @@ class VpdGaugeCard extends ConsumerWidget {
                 const SizedBox(width: AgSpace.s8),
                 Row(
                   children: [
-                    Icon(Icons.water_drop,
-                        size: 16, color: colors.textSecondary),
+                    Icon(
+                      Icons.water_drop,
+                      size: 16,
+                      color: colors.textSecondary,
+                    ),
                     const SizedBox(width: AgSpace.s4),
                     Text(
                       'Humidity ${vpd.relativeHumidityPct.toStringAsFixed(0)}%',

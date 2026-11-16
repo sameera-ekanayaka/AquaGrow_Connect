@@ -86,10 +86,14 @@ class CareRemindersCard extends ConsumerWidget {
               ),
             )
           else
-            ListView.builder(
+            ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: reminders.length,
+              separatorBuilder: (_, __) => Divider(
+                color: colors.border,
+                height: 1,
+              ),
               itemBuilder: (context, index) {
                 final reminder = reminders[index];
                 return CareReminderItemTile(
