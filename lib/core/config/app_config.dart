@@ -27,7 +27,7 @@ class AppConfig {
   /// Reads values injected at build time.
   factory AppConfig.fromEnvironment() {
     const mode = String.fromEnvironment('DATA_MODE', defaultValue: 'simulation');
-    return AppConfig(
+    return const AppConfig(
       supabaseUrl: const String.fromEnvironment('SUPABASE_URL'),
       supabaseAnonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
       openWeatherApiKey: const String.fromEnvironment('OPENWEATHER_API_KEY'),

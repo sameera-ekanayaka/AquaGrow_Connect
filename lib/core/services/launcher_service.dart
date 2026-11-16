@@ -2,7 +2,7 @@ import 'package:aquagrow_mobile/core/interfaces/i_launcher_service.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-final _logger = AppLogger('LauncherService');
+const _logger = AppLogger('LauncherService');
 
 /// Cleans a phone number by stripping all non-digits except an optional leading `+`.
 String cleanPhoneNumber(String phone) {
