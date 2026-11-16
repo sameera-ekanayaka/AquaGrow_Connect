@@ -128,7 +128,9 @@ class SupabaseControlRepository implements IControlRepository {
     } catch (e, s) {
       _log.error('Could not read pod controls', e, s);
       throw NetworkFailure(
-          'Could not reach the pod. Check your connection.', e);
+        'Could not reach the pod. Check your connection.',
+        e,
+      );
     }
   }
 

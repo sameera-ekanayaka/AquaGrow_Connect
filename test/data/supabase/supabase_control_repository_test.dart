@@ -15,6 +15,7 @@ class FakeControlSource implements ControlSource {
     'ph_dose_requested_at': null,
   };
   final updates = <Map<String, dynamic>>[];
+  // ignore: close_sinks, closed in tearDown.
   final changesController = StreamController<Map<String, dynamic>>.broadcast();
   bool failing = false;
 
