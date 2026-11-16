@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Biometric unlock before pump and light commands (security, lecture 9). -->
+    <!-- Optional app lock: fingerprint, face or phone PIN when opening the app (security, lecture 9). -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <queries>
