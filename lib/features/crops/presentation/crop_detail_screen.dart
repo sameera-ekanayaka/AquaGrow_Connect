@@ -1,6 +1,5 @@
 import 'package:aquagrow_mobile/app/router/app_routes.dart';
 import 'package:aquagrow_mobile/core/models/crop_batch.dart';
-import 'package:aquagrow_mobile/core/models/crop_recipe.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
@@ -146,7 +145,7 @@ class CropDetailScreen extends ConsumerWidget {
       message: isEarly
           ? '${batch.cropName} is still in the growing stage. Are you sure you want to harvest early?'
           : 'Are you ready to harvest ${batch.cropName} and generate its Harvest Passport?',
-      confirmLabel: isEarly ? 'Harvest Early' : 'Harvest',
+      confirmLabel: isEarly ? 'Harvest early' : 'Harvest',
     );
 
     if (confirmed && context.mounted) {
