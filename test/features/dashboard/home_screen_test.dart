@@ -99,6 +99,8 @@ void main() {
     await tester.pump();
 
     expect(find.text('No readings yet'), findsOneWidget);
+    expect(find.textContaining('Updated'), findsNothing);
+    expect(find.textContaining('Last reading'), findsNothing);
     expect(find.text('Something went wrong'), findsNothing);
     expect(find.text('Try again'), findsNothing);
   });
