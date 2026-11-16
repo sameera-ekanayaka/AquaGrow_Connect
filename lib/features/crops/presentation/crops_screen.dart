@@ -104,8 +104,9 @@ class CropsScreen extends ConsumerWidget {
         : 'Day ${batch.dayNumber(now)} · Harvest est. in ${batch.daysLeft(now)} days';
 
     return PodCard(
-      cropName: batch?.cropName ?? 'Empty pod',
-      location: pod.displayName,
+      // An empty pod is named after itself, as in the Figma "Add a pod" flow.
+      cropName: batch?.cropName ?? pod.name,
+      location: batch == null ? pod.room : pod.displayName,
       stageLabel: stageLabel,
       harvestLine: harvestLine,
       imageAsset: batch?.imageAsset,
