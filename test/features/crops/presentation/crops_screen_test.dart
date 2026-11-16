@@ -89,6 +89,9 @@ void main() {
       expect(added.batch, isNull);
       await tester.ensureVisible(find.text('No active crop growing'));
       expect(find.text('No active crop growing'), findsOneWidget);
+      // The empty pod's card is titled with the pod's own name.
+      expect(find.text('Pod Gamma'), findsOneWidget);
+      expect(find.text('Balcony'), findsOneWidget);
     });
 
     testWidgets('empty fields show what is missing and add nothing',
@@ -107,6 +110,27 @@ void main() {
       );
       expect(find.text('Serial number is required'), findsOneWidget);
       expect(sim.pods, hasLength(2));
+    });
+
+    testWidgets('after a failed try, typing clears that field error',
+        (tester) async {
+      await openAddPod(tester);
+      await tester.tap(find.byKey(const Key('add-pod-submit')));
+      await tester.pumpAndSettle();
+      const nameError = 'Pod name is required, for example Pod Gamma';
+      expect(find.text(nameError), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const Key('add-pod-name')),
+        'Pod Gamma',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(nameError), findsNothing);
+      expect(
+        find.text('Room is required, for example Kitchen'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a serial number already used shows under the field',
