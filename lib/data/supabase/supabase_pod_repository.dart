@@ -85,8 +85,14 @@ class SupabaseDeviceSource implements DeviceSource {
   Stream<void> changes() {
     late final RealtimeChannel channel;
     late final StreamController<void> controller;
+    StreamSubscription<AuthState>? auth;
     controller = StreamController<void>(
       onListen: () {
+        // Pods read before sign-in come back empty (Row Level Security), so
+        // read them again as soon as the user signs in.
+        auth = _client.auth.onAuthStateChange.listen((state) {
+          if (state.event == AuthChangeEvent.signedIn) controller.add(null);
+        });
         channel = _client
             .channel(RealtimeTopics.unique('devices-changes'))
             .onPostgresChanges(
@@ -105,6 +111,7 @@ class SupabaseDeviceSource implements DeviceSource {
             .subscribe();
       },
       onCancel: () async {
+        await auth?.cancel();
         await _client.removeChannel(channel);
         await controller.close();
       },
