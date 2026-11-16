@@ -78,7 +78,8 @@ void main() {
       expect(fakeRepo.lastFrom, now.subtract(const Duration(hours: 24)));
     });
 
-    test('historyProvider queries repository with 7 days when range is switched',
+    test(
+        'historyProvider queries repository with 7 days when range is switched',
         () async {
       final fakeRepo = _FakeTelemetryRepository();
       final now = DateTime(2026, 11, 15, 12, 0);
