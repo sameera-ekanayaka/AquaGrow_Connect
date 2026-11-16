@@ -20,6 +20,7 @@ import 'package:aquagrow_mobile/data/local/preferences_store.dart';
 import 'package:aquagrow_mobile/data/simulation/in_memory_alert_repository.dart';
 import 'package:aquagrow_mobile/data/simulation/sim_repositories.dart';
 import 'package:aquagrow_mobile/data/supabase/cached_telemetry.dart';
+import 'package:aquagrow_mobile/data/supabase/supabase_control_repository.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_pod_repository.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_telemetry_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,7 +88,18 @@ final telemetryRepositoryProvider = Provider<ITelemetryRepository>((ref) {
 });
 
 final controlRepositoryProvider = Provider<IControlRepository>((ref) {
-  return SimControlRepository(ref.watch(podSimulatorProvider));
+  switch (ref.watch(appConfigProvider).dataMode) {
+    case DataMode.simulation:
+      return SimControlRepository(ref.watch(podSimulatorProvider));
+    case DataMode.live:
+      if (SupabaseManager.isConfigured) {
+        return SupabaseControlRepository(
+          SupabaseControlSource(SupabaseManager.client),
+        );
+      }
+      _log.warning('Supabase did not start, using simulated controls');
+      return SimControlRepository(ref.watch(podSimulatorProvider));
+  }
 });
 
 final alertRepositoryProvider = Provider<IAlertRepository>((ref) {
