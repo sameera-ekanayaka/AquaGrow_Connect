@@ -1,0 +1,2985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AquaGrow Connect — 3D Digital Twin & Hardware Simulator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0a0a;
+      --surface: rgba(22, 22, 22, 0.88);
+      --surface-solid: #161616;
+      --subtle: #1f1f1f;
+      --border: #2a2a2a;
+      --text: #fafafa;
+      --text-secondary: #a3a3a3;
+      --brand-color: #a8e63d;
+      --brand-surface: #26330f;
+      --warning: #f5b04c;
+      --warning-surface: #2e2110;
+      --critical: #f2b8b5;
+      --critical-surface: #3a1a18;
+      --radius-16: 16px;
+      --radius-20: 20px;
+      --radius-24: 24px;
+      --radius-pill: 999px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      accent-color: var(--brand-color);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      user-select: none;
+    }
+
+    #canvas-container {
+      position: relative;
+      flex: 1;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 42%, #1c1d22 0%, #111215 60%, #090a0c 100%);
+    }
+
+    #three-canvas {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Top floating HUD bar over 3D viewport */
+    .viewport-hud-top {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      gap: 16px;
+    }
+
+    .hud-card {
+      pointer-events: auto;
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-20);
+      padding: 14px 18px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--brand-surface);
+      border: 1px solid rgba(168, 230, 61, 0.35);
+      display: grid;
+      place-items: center;
+      color: var(--brand-color);
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 2px 0 0 0;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--brand-surface);
+      color: var(--brand-color);
+      border: 1px solid rgba(168, 230, 61, 0.3);
+    }
+
+    .status-badge[data-tone="warning"] {
+      background: var(--warning-surface);
+      color: var(--warning);
+      border-color: rgba(245, 176, 76, 0.35);
+    }
+
+    .status-badge[data-tone="critical"] {
+      background: var(--critical-surface);
+      color: var(--critical);
+      border-color: rgba(242, 184, 181, 0.35);
+    }
+
+    .status-badge[data-tone="neutral"] {
+      background: var(--subtle);
+      color: var(--text-secondary);
+      border-color: var(--border);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* Camera & View mode pills */
+    .camera-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      background: var(--subtle);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--brand-color);
+    }
+
+    .pill-btn[aria-pressed="true"] {
+      background: var(--brand-surface);
+      color: var(--brand-color);
+      border-color: var(--brand-color);
+    }
+
+    .pill-btn:focus-visible {
+      outline: 2px solid var(--brand-color);
+      outline-offset: 2px;
+    }
+
+    /* Bottom floating telemetry bar on 3D viewport */
+    .viewport-hud-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+      gap: 16px;
+    }
+
+    .sensor-tiles-row {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(135px, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .sensor-tile {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-20);
+      padding: 12px 14px;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .sensor-tile[data-status="warning"] {
+      background: rgba(46, 33, 16, 0.9);
+      border-color: var(--warning);
+    }
+
+    .sensor-tile[data-status="critical"] {
+      background: rgba(58, 26, 24, 0.92);
+      border-color: var(--critical);
+    }
+
+    .sensor-tile-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sensor-tile-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 4px 0 2px;
+      letter-spacing: -0.02em;
+    }
+
+    .sensor-tile-caption {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .sensor-tile[data-status="warning"] .sensor-tile-value,
+    .sensor-tile[data-status="warning"] .sensor-tile-caption {
+      color: var(--warning);
+    }
+
+    .sensor-tile[data-status="critical"] .sensor-tile-value,
+    .sensor-tile[data-status="critical"] .sensor-tile-caption {
+      color: var(--critical);
+    }
+
+    /* Right Control Sidebar */
+    .control-sidebar {
+      width: 410px;
+      height: 100vh;
+      background: var(--surface-solid);
+      border-left: 1px solid var(--border);
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 20;
+    }
+
+    .panel-section {
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-20);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .section-caption {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Pod Selector Tabs */
+    .pod-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .pod-tab {
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-16);
+      padding: 10px 12px;
+      text-align: left;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pod-tab[aria-selected="true"] {
+      border-color: var(--brand-color);
+      background: var(--brand-surface);
+    }
+
+    .pod-tab-name {
+      font-size: 13px;
+      font-weight: 700;
+      display: block;
+    }
+
+    .pod-tab-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Priority Task Alert Banner (matches Home PriorityTaskCard) */
+    .priority-card {
+      background: var(--warning-surface);
+      border: 1px solid rgba(245, 176, 76, 0.45);
+      border-radius: var(--radius-20);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .priority-card[data-severity="critical"] {
+      background: var(--critical-surface);
+      border-color: rgba(242, 184, 181, 0.45);
+    }
+
+    .priority-card[hidden] {
+      display: none;
+    }
+
+    .priority-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--warning);
+      margin: 0;
+    }
+
+    .priority-card[data-severity="critical"] .priority-title {
+      color: var(--critical);
+    }
+
+    .priority-body {
+      font-size: 12px;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    /* Sliders - following modern-web-guidance `slider` & `brand-consistent-forms` */
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .slider-val-badge {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      color: var(--brand-color);
+      background: rgba(168, 230, 61, 0.12);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    input[type="range"] {
+      --slider-track-size: 0.45rem;
+      --slider-thumb-size: 1.15rem;
+      --slider-track-radius: 999px;
+      --slider-thumb-radius: 50%;
+      --slider-track-color: #303036;
+      --slider-fill-color: var(--brand-color);
+      --slider-thumb-color: var(--slider-fill-color);
+      --slider-direction: to right;
+
+      &:dir(rtl) {
+        --slider-direction: to left;
+      }
+
+      --attr-min: attr(min type(<number>), 0);
+      --attr-max: attr(max type(<number>), 100);
+      --control-value: attr(value type(<number>), 50);
+      --slider-progress: calc(
+        progress(var(--control-value), var(--attr-min), var(--attr-max)) * 100%
+      );
+
+      appearance: none;
+      inline-size: 100%;
+      block-size: 2rem;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    @supports not (opacity: progress(1, 0, 100)) {
+      input[type="range"] {
+        --slider-progress: calc(
+          (var(--control-value) - var(--attr-min)) /
+          (var(--attr-max) - var(--attr-min)) * 100%
+        );
+      }
+    }
+
+    /* WebKit/Blink */
+    input[type="range"]::-webkit-slider-runnable-track {
+      block-size: var(--slider-track-size);
+      border: 0;
+      border-radius: var(--slider-track-radius);
+      background: linear-gradient(
+        var(--slider-direction),
+        var(--slider-fill-color) var(--slider-progress),
+        var(--slider-track-color) var(--slider-progress)
+      );
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      inline-size: var(--slider-thumb-size);
+      block-size: var(--slider-thumb-size);
+      margin-block-start: calc(
+        (var(--slider-track-size) - var(--slider-thumb-size)) / 2
+      );
+      border: 2px solid #0a0a0a;
+      border-radius: var(--slider-thumb-radius);
+      background: var(--slider-thumb-color);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Firefox */
+    input[type="range"]::-moz-range-track {
+      block-size: var(--slider-track-size);
+      border: 0;
+      border-radius: var(--slider-track-radius);
+      background: var(--slider-track-color);
+    }
+
+    input[type="range"]::-moz-range-progress {
+      block-size: var(--slider-track-size);
+      border-radius: var(--slider-track-radius);
+      background: var(--slider-fill-color);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      inline-size: var(--slider-thumb-size);
+      block-size: var(--slider-thumb-size);
+      border: 2px solid #0a0a0a;
+      border-radius: var(--slider-thumb-radius);
+      background: var(--slider-thumb-color);
+    }
+
+    input[type="range"]:focus-visible {
+      outline: 2px solid var(--slider-fill-color);
+      outline-offset: 4px;
+    }
+
+    /* Actuator Toggles */
+    .toggle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .toggle-row {
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-16);
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--brand-color);
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .toggle-row input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--brand-color);
+      outline-offset: 2px;
+    }
+
+    @supports not (accent-color: var(--brand-color)) {
+      .toggle-row input[type="checkbox"].visually-hidden {
+        position: absolute !important;
+        clip-path: inset(50%) !important;
+        overflow: hidden !important;
+        width: 1px !important;
+        height: 1px !important;
+        margin: -1px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        white-space: nowrap !important;
+      }
+      .toggle-row {
+        position: relative;
+        padding-left: 2.2rem;
+      }
+      .toggle-row input[type="checkbox"] + span::before {
+        content: "";
+        position: absolute;
+        left: 0.65rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.1rem;
+        height: 1.1rem;
+        border: 2px solid #888;
+        background: #161616;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .toggle-row input[type="checkbox"]:checked + span::before {
+        background-color: var(--brand-color);
+        border-color: var(--brand-color);
+      }
+      .toggle-row input[type="checkbox"]:checked + span::after {
+        content: "✓";
+        position: absolute;
+        left: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0a0a0a;
+        font-weight: bold;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Action Buttons (Dose pH Down / Mark Refilled) */
+    .action-btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .action-btn {
+      min-height: 44px;
+      border-radius: var(--radius-16);
+      border: 1px solid var(--border);
+      background: var(--text);
+      color: #0a0a0a;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 8px 12px;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+
+    .action-btn.secondary {
+      background: var(--surface-solid);
+      color: var(--text);
+      border-color: var(--brand-color);
+    }
+
+    .action-btn:hover {
+      opacity: 0.92;
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Scenario Preset Grid */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .scenario-btn {
+      background: var(--surface-solid);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-16);
+      padding: 9px 11px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .scenario-btn:hover {
+      border-color: var(--text-secondary);
+    }
+
+    .scenario-btn[data-active="true"] {
+      border-color: var(--brand-color);
+      background: var(--brand-surface);
+    }
+
+    .scenario-btn-title {
+      font-size: 12px;
+      font-weight: 700;
+      display: block;
+    }
+
+    .scenario-btn-desc {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Toast feedback */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #fafafa;
+      color: #0a0a0a;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      z-index: 100;
+    }
+
+    .toast[data-visible="true"] {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Collapsible Supabase Live Sync Panel */
+    details.sync-panel {
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-20);
+      padding: 14px 16px;
+    }
+
+    details.sync-panel summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    details.sync-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .sync-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .sync-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sync-field label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .sync-field input,
+    .sync-field select {
+      background: var(--surface-solid);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .sync-field input:focus-visible,
+    .sync-field select:focus-visible {
+      outline: 2px solid var(--brand-color);
+      outline-offset: 1px;
+    }
+
+    .sync-log {
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- 3D Viewport Area -->
+  <div id="canvas-container">
+    <!-- Top HUD -->
+    <div class="viewport-hud-top">
+      <div class="hud-card brand-header">
+        <div class="brand-logo-mark">🌱</div>
+        <div>
+          <h1 class="brand-title">
+            <span id="hud-pod-title">Pod Alpha · Kitchen</span>
+            <span id="hud-status-badge" class="status-badge" data-tone="brand">
+              <span class="status-dot"></span>
+              <span id="hud-status-text">Live · Optimal</span>
+            </span>
+          </h1>
+          <p class="brand-subtitle" id="hud-crop-subtitle">Genovese Basil · Day 8 · Growing · Harvest est. in 20 days</p>
+        </div>
+      </div>
+
+      <div class="hud-card camera-pills" role="toolbar" aria-label="3D View Controls">
+        <button type="button" class="pill-btn" id="btn-cam-beauty" aria-pressed="true">Product View</button>
+        <button type="button" class="pill-btn" id="btn-cam-screen" aria-pressed="false">OLED Screen Closeup</button>
+        <button type="button" class="pill-btn" id="btn-cam-top" aria-pressed="false">Canopy View</button>
+        <button type="button" class="pill-btn" id="btn-xray" aria-pressed="false">Cutaway Tank View</button>
+      </div>
+    </div>
+
+    <!-- Three.js Canvas -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Bottom Live Sensor Tiles (mirrors Flutter Home Screen SensorTile grid) -->
+    <div class="viewport-hud-bottom">
+      <div class="sensor-tiles-row">
+        <div class="sensor-tile" id="tile-ph" data-status="safe">
+          <div class="sensor-tile-label">
+            <span>pH</span>
+            <span>5.8 – 6.5</span>
+          </div>
+          <div class="sensor-tile-value" id="val-ph">6.2</div>
+          <div class="sensor-tile-caption" id="cap-ph">In safe range</div>
+        </div>
+
+        <div class="sensor-tile" id="tile-ec" data-status="safe">
+          <div class="sensor-tile-label">
+            <span>Nutrients (EC)</span>
+            <span>1.2 – 2.0</span>
+          </div>
+          <div class="sensor-tile-value" id="val-ec">1.6 mS</div>
+          <div class="sensor-tile-caption" id="cap-ec">In safe range</div>
+        </div>
+
+        <div class="sensor-tile" id="tile-temp" data-status="safe">
+          <div class="sensor-tile-label">
+            <span>Water temp</span>
+            <span>18 – 24°C</span>
+          </div>
+          <div class="sensor-tile-value" id="val-temp">22.3°C</div>
+          <div class="sensor-tile-caption" id="cap-temp">In safe range</div>
+        </div>
+
+        <div class="sensor-tile" id="tile-level" data-status="safe">
+          <div class="sensor-tile-label">
+            <span>Water level</span>
+            <span>40 – 100%</span>
+          </div>
+          <div class="sensor-tile-value" id="val-level">90%</div>
+          <div class="sensor-tile-caption" id="cap-level">In safe range</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Interactive Simulator Sidebar -->
+  <aside class="control-sidebar" aria-label="Pod Simulator Controls">
+    <!-- Pod Switcher -->
+    <div class="panel-section">
+      <div class="section-header">
+        <h2 class="section-title">Select AquaGrow Pod</h2>
+        <span class="section-caption" id="pod-count-caption">2 demo pods</span>
+      </div>
+      <div class="pod-selector" role="tablist" id="pod-tabs"></div>
+    </div>
+
+    <!-- Priority Task Banner (auto-shows when a metric is out of range) -->
+    <div class="priority-card" id="priority-banner" hidden>
+      <p class="priority-title" id="priority-title">Water needs attention</p>
+      <p class="priority-body" id="priority-body">Refill Pod Alpha today.</p>
+    </div>
+
+    <!-- Live Sensor Sliders -->
+    <div class="panel-section">
+      <div class="section-header">
+        <h2 class="section-title">Live Sensor Telemetry</h2>
+        <span class="section-caption">Updates 3D Pod & OLED</span>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label-row">
+          <label for="slider-ph">Water pH</label>
+          <span class="slider-val-badge" id="badge-ph">6.2</span>
+        </div>
+        <input type="range" id="slider-ph" min="4.0" max="8.5" step="0.1" value="6.2" aria-valuetext="6.2 pH" />
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label-row">
+          <label for="slider-ec">Nutrients (EC)</label>
+          <span class="slider-val-badge" id="badge-ec">1.6 mS/cm</span>
+        </div>
+        <input type="range" id="slider-ec" min="0.4" max="3.0" step="0.1" value="1.6" aria-valuetext="1.6 mS/cm" />
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label-row">
+          <label for="slider-temp">Water Temperature</label>
+          <span class="slider-val-badge" id="badge-temp">22.3°C</span>
+        </div>
+        <input type="range" id="slider-temp" min="14.0" max="34.0" step="0.1" value="22.3" aria-valuetext="22.3 degrees Celsius" />
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label-row">
+          <label for="slider-level">Reservoir Water Level</label>
+          <span class="slider-val-badge" id="badge-level">90%</span>
+        </div>
+        <input type="range" id="slider-level" min="5" max="100" step="1" value="90" aria-valuetext="90 percent" />
+      </div>
+    </div>
+
+    <!-- Hardware Actuators (Pump, Grow Light, Mist, Doser) -->
+    <div class="panel-section">
+      <div class="section-header">
+        <h2 class="section-title">Hardware Actuators</h2>
+        <span class="section-caption">Matches PodControlsCard</span>
+      </div>
+
+      <div class="toggle-grid">
+        <label class="toggle-row" for="chk-pump">
+          <input type="checkbox" id="chk-pump" class="visually-hidden" checked />
+          <span>Water Pump</span>
+        </label>
+        <label class="toggle-row" for="chk-light">
+          <input type="checkbox" id="chk-light" class="visually-hidden" checked />
+          <span>Grow Light</span>
+        </label>
+        <label class="toggle-row" for="chk-mist">
+          <input type="checkbox" id="chk-mist" class="visually-hidden" checked />
+          <span>Ultrasonic Mist</span>
+        </label>
+        <label class="toggle-row" for="chk-online">
+          <input type="checkbox" id="chk-online" class="visually-hidden" checked />
+          <span>Pod Online</span>
+        </label>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label-row">
+          <label for="slider-brightness">LED Spectrum Brightness</label>
+          <span class="slider-val-badge" id="badge-brightness">85%</span>
+        </div>
+        <input type="range" id="slider-brightness" min="0" max="100" step="1" value="85" aria-valuetext="85 percent brightness" />
+      </div>
+
+      <div class="action-btn-row">
+        <button type="button" class="action-btn" id="btn-dose-ph">💧 Dose pH-Down (-0.15)</button>
+        <button type="button" class="action-btn secondary" id="btn-refill">🚰 Mark Tank Refilled</button>
+      </div>
+    </div>
+
+    <!-- Demo Scenarios (mirrors SimScenario in pod_simulator.dart) -->
+    <div class="panel-section">
+      <div class="section-header">
+        <h2 class="section-title">Demo Scenarios</h2>
+        <span class="section-caption">One-click presets</span>
+      </div>
+      <div class="scenario-grid">
+        <button type="button" class="scenario-btn" data-scenario="healthy" data-active="true">
+          <span class="scenario-btn-title">✨ Healthy Pod</span>
+          <span class="scenario-btn-desc">pH 6.2 · 90% · 22.3°C</span>
+        </button>
+        <button type="button" class="scenario-btn" data-scenario="acidSpike">
+          <span class="scenario-btn-title">🧪 pH Crash</span>
+          <span class="scenario-btn-desc">Drops pH to 4.8 (Critical)</span>
+        </button>
+        <button type="button" class="scenario-btn" data-scenario="alkaline">
+          <span class="scenario-btn-title">⚗️ pH Drift High</span>
+          <span class="scenario-btn-desc">Raises pH to 7.6 · fix with pH down in the app</span>
+        </button>
+        <button type="button" class="scenario-btn" data-scenario="lowWater">
+          <span class="scenario-btn-title">🏜️ Low Water</span>
+          <span class="scenario-btn-desc">Drains tank to 18%</span>
+        </button>
+        <button type="button" class="scenario-btn" data-scenario="heatwave">
+          <span class="scenario-btn-title">🔥 Heatwave</span>
+          <span class="scenario-btn-desc">Warms water to 29.5°C</span>
+        </button>
+        <button type="button" class="scenario-btn" data-scenario="nutrientLow">
+          <span class="scenario-btn-title">🌱 Nutrient Low</span>
+          <span class="scenario-btn-desc">EC drops to 0.7 mS/cm</span>
+        </button>
+        <button type="button" class="scenario-btn" data-scenario="offline">
+          <span class="scenario-btn-title">📡 Sensor Offline</span>
+          <span class="scenario-btn-desc">Simulates Wi-Fi drop</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Supabase Live Mode Sync (Option A) -->
+    <details class="sync-panel" id="supabase-panel">
+      <summary>
+        <span>☁️ Supabase Live Sync</span>
+        <span class="status-badge" id="sync-status-badge" data-tone="neutral">
+          <span class="status-dot"></span>
+          <span id="sync-status-text">Local Only</span>
+        </span>
+      </summary>
+      <form class="sync-form" id="supabase-form">
+        <div class="sync-field">
+          <label for="sb-url">SUPABASE_URL</label>
+          <input type="url" id="sb-url" placeholder="https://xxxx.supabase.co" required />
+        </div>
+        <div class="sync-field">
+          <label for="sb-key">SUPABASE_ANON_KEY</label>
+          <input type="password" id="sb-key" placeholder="eyJhbGciOi..." required />
+        </div>
+        <div class="sync-field">
+          <label for="sb-email">App Account Email (owner)</label>
+          <input type="email" id="sb-email" placeholder="osanda@example.com" required />
+        </div>
+        <div class="sync-field">
+          <label for="sb-pass">App Account Password</label>
+          <input type="password" id="sb-pass" placeholder="••••••••" required />
+        </div>
+        <div class="sync-field" id="sb-device-wrap" hidden>
+          <label for="sb-device-select">Target Supabase Device for Selected Pod</label>
+          <select id="sb-device-select"></select>
+        </div>
+        <label class="toggle-row" for="chk-auto-sync">
+          <input type="checkbox" id="chk-auto-sync" class="visually-hidden" checked />
+          <span>Auto-push on slider / scenario</span>
+        </label>
+        <div class="action-btn-row">
+          <button type="submit" class="action-btn" id="btn-sb-connect">Connect</button>
+          <button type="button" class="action-btn secondary" id="btn-sb-push" disabled>Push Now</button>
+          <button type="button" class="action-btn secondary" id="btn-sb-forget">Forget</button>
+        </div>
+        <div class="sync-log" id="sb-log">
+          Sign in with the same account used in the Android app (running in <code>DATA_MODE=live</code>).
+        </div>
+      </form>
+    </details>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+    // -------------------------------------------------------------------------
+    // 1. State matching AquaGrow's PodSimulator (pod-alpha & pod-beta)
+    // -------------------------------------------------------------------------
+    const podsState = {
+      'pod-alpha': {
+        id: 'pod-alpha',
+        name: 'Pod Alpha',
+        room: 'Kitchen',
+        crop: 'Genovese Basil',
+        day: 8,
+        daysToHarvest: 20,
+        ph: 6.2,
+        ec: 1.6,
+        waterTemp: 22.3,
+        waterLevel: 90,
+        pumpOn: true,
+        lightOn: true,
+        lightBrightness: 85,
+        mistOn: true,
+        isOnline: true,
+      },
+      'pod-beta': {
+        id: 'pod-beta',
+        name: 'Pod Beta',
+        room: 'Dining room',
+        crop: 'Baby Spinach',
+        day: 14,
+        daysToHarvest: 11,
+        ph: 6.0,
+        ec: 1.8,
+        waterTemp: 21.4,
+        waterLevel: 76,
+        pumpOn: true,
+        lightOn: true,
+        lightBrightness: 90,
+        mistOn: true,
+        isOnline: true,
+      },
+    };
+
+    let activePodId = 'pod-alpha';
+    let xrayMode = false;
+
+    function currentPod() {
+      return podsState[activePodId];
+    }
+
+    // Which foliage model a crop uses: 'basil' (herbs), 'leafy' (greens), or null (empty pod).
+    function cropKind(crop) {
+      if (!crop) return null;
+      return /spinach|lettuce|choi|rocket|arugula/i.test(crop) ? 'leafy' : 'basil';
+    }
+
+    // Share of the recipe grown so far (0 to 1). `day` is 1 on planting day.
+    function growthProgress(pod) {
+      const total = pod.day - 1 + pod.daysToHarvest;
+      return total > 0 ? Math.min(1, Math.max(0, (pod.day - 1) / total)) : 1;
+    }
+
+    // Same stages as the app's CropBatch.stage: seedling for the first 20%.
+    function stageLabel(pod) {
+      const p = growthProgress(pod);
+      if (p >= 1) return 'Ready to harvest';
+      return p < 0.2 ? 'Seedling' : 'Growing';
+    }
+
+    // Seedlings are small; plants reach full size at harvest.
+    function growthScale(pod) {
+      return 0.3 + 0.7 * growthProgress(pod);
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. Metric Status & Priority Task rules (mirrors SensorMetric & priorityTaskFor)
+    // -------------------------------------------------------------------------
+    function metricStatus(metric, v) {
+      if (metric === 'ph') {
+        if (v < 5.2 || v > 7.2) return 'critical';
+        if (v < 5.8 || v > 6.5) return 'warning';
+        return 'safe';
+      }
+      if (metric === 'ec') {
+        if (v < 0.8 || v > 2.6) return 'critical';
+        if (v < 1.2 || v > 2.0) return 'warning';
+        return 'safe';
+      }
+      if (metric === 'temp') {
+        if (v < 15 || v > 28) return 'critical';
+        if (v < 18 || v > 24) return 'warning';
+        return 'safe';
+      }
+      if (metric === 'level') {
+        if (v < 25) return 'critical';
+        if (v < 40) return 'warning';
+        return 'safe';
+      }
+      return 'safe';
+    }
+
+    function metricCaption(metric, status, v) {
+      if (status === 'safe') return 'In safe range';
+      if (metric === 'ph') return v < 5.8 ? 'Too acidic — check pH' : 'Too alkaline — dose pH-down';
+      if (metric === 'ec') return v < 1.2 ? 'Low nutrients — add A+B' : 'High concentration — dilute';
+      if (metric === 'temp') return v > 24 ? 'Too warm — keep pump running' : 'Water too cool';
+      if (metric === 'level') return 'Low reservoir — refill tank';
+      return 'Needs attention';
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Three.js Scene Setup
+    // -------------------------------------------------------------------------
+    const canvas = document.getElementById('three-canvas');
+    const container = document.getElementById('canvas-container');
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(
+      34,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      100
+    );
+    camera.position.set(4.6, 2.55, 6.2);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.target.set(0, 1.35, 0);
+    controls.minDistance = 2.4;
+    controls.maxDistance = 12;
+    controls.maxPolarAngle = Math.PI * 0.49;
+
+    // Camera animation target
+    let camAnim = null;
+    function flyCameraTo(pos, target) {
+      camAnim = {
+        startPos: camera.position.clone(),
+        endPos: new THREE.Vector3(...pos),
+        startTarget: controls.target.clone(),
+        endTarget: new THREE.Vector3(...target),
+        t: 0,
+      };
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Studio & Grow-Light Lighting
+    // -------------------------------------------------------------------------
+    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.65);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
+    keyLight.position.set(5, 8, 6);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.bias = -0.0005;
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0x93c5fd, 0.55);
+    rimLight.position.set(-6, 5, -5);
+    scene.add(rimLight);
+
+    // Overhead Grow Light sources (Magenta/Violet + Warm White full-spectrum)
+    const growSpotLight = new THREE.SpotLight(0xf472b6, 4.2, 6.5, Math.PI * 0.42, 0.65, 1.3);
+    growSpotLight.position.set(0.15, 3.02, 0);
+    growSpotLight.target.position.set(0.15, 0.7, 0);
+    growSpotLight.castShadow = true;
+    scene.add(growSpotLight);
+    scene.add(growSpotLight.target);
+
+    const growFillLight = new THREE.PointLight(0xfda4af, 1.8, 4.5);
+    growFillLight.position.set(0.15, 2.75, 0);
+    scene.add(growFillLight);
+
+    // -------------------------------------------------------------------------
+    // 5. Procedural Textures (Walnut table, Oak wood panel, Brand Logos, OLED)
+    // -------------------------------------------------------------------------
+    function createWoodTexture(baseHex, grainHex, vertical = false) {
+      const c = document.createElement('canvas');
+      c.width = 512;
+      c.height = 512;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = baseHex;
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.strokeStyle = grainHex;
+      for (let i = 0; i < 180; i++) {
+        ctx.globalAlpha = 0.06 + Math.random() * 0.12;
+        ctx.lineWidth = 1 + Math.random() * 3;
+        ctx.beginPath();
+        if (vertical) {
+          const x = Math.random() * 512;
+          ctx.moveTo(x, 0);
+          ctx.bezierCurveTo(x + (Math.random() - 0.5) * 18, 170, x + (Math.random() - 0.5) * 18, 340, x, 512);
+        } else {
+          const y = Math.random() * 512;
+          ctx.moveTo(0, y);
+          ctx.bezierCurveTo(170, y + (Math.random() - 0.5) * 16, 340, y + (Math.random() - 0.5) * 16, 512, y);
+        }
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // Create "AquaGrow" green logo decal texture matching the photo
+    function createLogoTexture(fontSize = 68) {
+      const c = document.createElement('canvas');
+      c.width = 512;
+      c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, 512, 128);
+      ctx.fillStyle = '#0d5c46';
+      ctx.font = `700 ${fontSize}px Inter, -apple-system, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('AquaGrow', 256, 70);
+
+      // Little leaf accent over the 'o'
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.ellipse(342, 34, 10, 5, -0.45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(354, 36, 8, 4, 0.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // Live OLED Display CanvasTexture on the vertical mast
+    const oledCanvas = document.createElement('canvas');
+    oledCanvas.width = 320;
+    oledCanvas.height = 420;
+    const oledCtx = oledCanvas.getContext('2d');
+    const oledTexture = new THREE.CanvasTexture(oledCanvas);
+    oledTexture.colorSpace = THREE.SRGBColorSpace;
+
+    function updateOledScreenTexture() {
+      const pod = currentPod();
+      oledCtx.fillStyle = '#07080a';
+      oledCtx.fillRect(0, 0, 320, 420);
+
+      // Subtle inner bezel border
+      oledCtx.strokeStyle = '#22262c';
+      oledCtx.lineWidth = 4;
+      oledCtx.strokeRect(6, 6, 308, 408);
+
+      if (!pod.isOnline) {
+        oledCtx.fillStyle = '#f2b8b5';
+        oledCtx.font = '700 28px Inter, monospace';
+        oledCtx.fillText('SYSTEM: OFFLINE', 26, 70);
+        oledCtx.fillStyle = '#a3a3a3';
+        oledCtx.font = '500 21px Inter, monospace';
+        oledCtx.fillText('WAIT FOR WI-FI...', 26, 125);
+        oledCtx.fillText(`WTR LVL: ${Math.round(pod.waterLevel)}%`, 26, 195);
+        oledCtx.fillText(`TEMP:    ${pod.waterTemp.toFixed(1)}°C`, 26, 250);
+        oledCtx.fillText(`pH:      ${pod.ph.toFixed(1)}`, 26, 305);
+        oledCtx.fillText(`EC:      ${pod.ec.toFixed(1)} mS`, 26, 360);
+        oledTexture.needsUpdate = true;
+        return;
+      }
+
+      const statuses = [
+        metricStatus('level', pod.waterLevel),
+        metricStatus('ph', pod.ph),
+        metricStatus('temp', pod.waterTemp),
+        metricStatus('ec', pod.ec),
+      ];
+      const worst = statuses.includes('critical')
+        ? 'CRITICAL'
+        : statuses.includes('warning')
+        ? 'ATTENTION'
+        : 'OPTIMAL';
+
+      oledCtx.fillStyle =
+        worst === 'CRITICAL' ? '#f87171' : worst === 'ATTENTION' ? '#fbbf24' : '#a8e63d';
+      oledCtx.font = '700 25px Inter, monospace';
+      oledCtx.fillText(`SYSTEM: ${worst}`, 24, 62);
+
+      // Divider line
+      oledCtx.fillStyle = '#1e293b';
+      oledCtx.fillRect(24, 82, 272, 2);
+
+      const rows = [
+        { label: 'WTR LVL:', val: `${Math.round(pod.waterLevel)}%`, st: statuses[0] },
+        { label: 'TEMP:', val: `${pod.waterTemp.toFixed(1)}°C`, st: statuses[2] },
+        { label: 'pH:', val: `${pod.ph.toFixed(1)}`, st: statuses[1] },
+        { label: 'EC:', val: `${pod.ec.toFixed(1)} mS`, st: statuses[3] },
+        { label: 'LIGHT:', val: pod.lightOn ? `${pod.lightBrightness}%` : 'OFF', st: 'safe' },
+      ];
+
+      rows.forEach((r, idx) => {
+        const y = 132 + idx * 58;
+        oledCtx.fillStyle = '#cbd5e1';
+        oledCtx.font = '600 23px Inter, monospace';
+        oledCtx.fillText(r.label, 24, y);
+
+        oledCtx.fillStyle =
+          r.st === 'critical' ? '#f87171' : r.st === 'warning' ? '#fbbf24' : '#ffffff';
+        oledCtx.font = '700 25px Inter, monospace';
+        oledCtx.fillText(r.val, 158, y);
+      });
+
+      oledTexture.needsUpdate = true;
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. Build the 3D AquaGrow Pod (faithful to the concept photo)
+    // -------------------------------------------------------------------------
+    const podGroup = new THREE.Group();
+    scene.add(podGroup);
+
+    // 6A. Dark Walnut Countertop
+    const tableTex = createWoodTexture('#2b1b12', '#170d08', false);
+    const tableMat = new THREE.MeshStandardMaterial({
+      map: tableTex,
+      roughness: 0.42,
+      metalness: 0.05,
+    });
+    const tableMesh = new THREE.Mesh(new THREE.BoxGeometry(14, 0.35, 9), tableMat);
+    tableMesh.position.set(0, -0.175, 0);
+    tableMesh.receiveShadow = true;
+    scene.add(tableMesh);
+
+    // 6B. Matte White Reservoir Basin (outer shell)
+    const whiteShellMat = new THREE.MeshPhysicalMaterial({
+      color: 0xf4f4f6,
+      roughness: 0.28,
+      metalness: 0.02,
+      clearcoat: 0.15,
+      clearcoatRoughness: 0.25,
+      transparent: true,
+      opacity: 1.0,
+    });
+
+    const basinWidth = 3.55;
+    const basinHeight = 1.02;
+    const basinDepth = 2.15;
+
+    const basinMesh = new THREE.Mesh(
+      new RoundedBoxGeometry(basinWidth, basinHeight, basinDepth, 8, 0.24),
+      whiteShellMat
+    );
+    basinMesh.position.set(0, basinHeight / 2, 0);
+    basinMesh.castShadow = true;
+    basinMesh.receiveShadow = true;
+    podGroup.add(basinMesh);
+
+    // Subtle dark rubber feet shadow gap under the basin
+    const baseShadowPad = new THREE.Mesh(
+      new RoundedBoxGeometry(basinWidth * 0.94, 0.06, basinDepth * 0.92, 4, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0x111113, roughness: 0.9 })
+    );
+    baseShadowPad.position.set(0, 0.03, 0);
+    podGroup.add(baseShadowPad);
+
+    // 6C. Front Light-Oak Wooden Accent Panel (exact match to photo)
+    const oakTex = createWoodTexture('#c89d6c', '#a47545', true);
+    const oakMat = new THREE.MeshStandardMaterial({
+      map: oakTex,
+      roughness: 0.48,
+      metalness: 0.02,
+    });
+    const oakPanel = new THREE.Mesh(
+      new RoundedBoxGeometry(0.95, 0.68, 0.06, 6, 0.1),
+      oakMat
+    );
+    oakPanel.position.set(0.32, 0.38, basinDepth / 2 + 0.005);
+    podGroup.add(oakPanel);
+
+    // Finger notch recess above the oak panel
+    const notchMesh = new THREE.Mesh(
+      new RoundedBoxGeometry(0.55, 0.07, 0.08, 4, 0.025),
+      new THREE.MeshStandardMaterial({ color: 0xd4d4d8, roughness: 0.45 })
+    );
+    notchMesh.position.set(0.32, 0.92, basinDepth / 2 - 0.01);
+    podGroup.add(notchMesh);
+
+    // 6D. "AquaGrow" Logo on Front-Left of Basin (next to oak panel, as in photo)
+    const logoTex = createLogoTexture(74);
+    const logoMat = new THREE.MeshBasicMaterial({ map: logoTex, transparent: true });
+    const frontLogoPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.23), logoMat);
+    frontLogoPlane.position.set(-0.62, 0.38, basinDepth / 2 + 0.012);
+    podGroup.add(frontLogoPlane);
+
+    // 6E. Top Deck Lid & Rim
+    const topDeckMat = new THREE.MeshStandardMaterial({
+      color: 0xf8f8fa,
+      roughness: 0.25,
+    });
+    const topDeck = new THREE.Mesh(
+      new RoundedBoxGeometry(basinWidth * 0.97, 0.09, basinDepth * 0.96, 6, 0.04),
+      topDeckMat
+    );
+    topDeck.position.set(0, basinHeight + 0.02, 0);
+    topDeck.receiveShadow = true;
+    podGroup.add(topDeck);
+
+    // 6F. Internal Water Volume, Submerged Pump & Nutrient Bubbles (visible in Cutaway mode)
+    const waterMat = new THREE.MeshPhysicalMaterial({
+      color: 0x38bdf8,
+      roughness: 0.12,
+      transmission: 0.65,
+      transparent: true,
+      opacity: 0.72,
+    });
+    const maxWaterHeight = 0.82;
+    const waterMesh = new THREE.Mesh(
+      new RoundedBoxGeometry(basinWidth * 0.91, maxWaterHeight, basinDepth * 0.89, 4, 0.08),
+      waterMat
+    );
+    waterMesh.position.set(0, 0.08 + maxWaterHeight / 2, 0);
+    podGroup.add(waterMesh);
+
+    // Submerged water pump block inside reservoir
+    const pumpBox = new THREE.Mesh(
+      new RoundedBoxGeometry(0.36, 0.26, 0.28, 3, 0.04),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 })
+    );
+    pumpBox.position.set(-0.75, 0.22, -0.35);
+    podGroup.add(pumpBox);
+
+    // Rising air bubbles inside the tank
+    const bubbleCount = 45;
+    const bubbleGeo = new THREE.BufferGeometry();
+    const bubblePositions = new Float32Array(bubbleCount * 3);
+    for (let i = 0; i < bubbleCount; i++) {
+      bubblePositions[i * 3] = (Math.random() - 0.5) * 2.8;
+      bubblePositions[i * 3 + 1] = 0.12 + Math.random() * 0.75;
+      bubblePositions[i * 3 + 2] = (Math.random() - 0.5) * 1.6;
+    }
+    bubbleGeo.setAttribute('position', new THREE.BufferAttribute(bubblePositions, 3));
+    const bubblePoints = new THREE.Points(
+      bubbleGeo,
+      new THREE.PointsMaterial({
+        color: 0xe0f2fe,
+        size: 0.055,
+        transparent: true,
+        opacity: 0.75,
+      })
+    );
+    podGroup.add(bubblePoints);
+
+    // 6G. Vertical Mast / Tower (back-left of center, matching the photo)
+    const mastX = -0.62;
+    const mastZ = -0.52;
+    const mastHeight = 2.15;
+
+    const mastMat = new THREE.MeshPhysicalMaterial({
+      color: 0xf6f6f8,
+      roughness: 0.24,
+      clearcoat: 0.15,
+    });
+    const mastMesh = new THREE.Mesh(
+      new RoundedBoxGeometry(0.54, mastHeight, 0.26, 6, 0.06),
+      mastMat
+    );
+    mastMesh.position.set(mastX, basinHeight + mastHeight / 2 - 0.04, mastZ);
+    mastMesh.castShadow = true;
+    mastMesh.receiveShadow = true;
+    podGroup.add(mastMesh);
+
+    // Braided White Power Cord along the left side of the mast
+    const cordCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(mastX - 0.29, basinHeight + mastHeight - 0.18, mastZ),
+      new THREE.Vector3(mastX - 0.31, basinHeight + 1.35, mastZ + 0.01),
+      new THREE.Vector3(mastX - 0.30, basinHeight + 0.65, mastZ - 0.01),
+      new THREE.Vector3(mastX - 0.29, basinHeight + 0.05, mastZ),
+    ]);
+    const cordMesh = new THREE.Mesh(
+      new THREE.TubeGeometry(cordCurve, 24, 0.022, 8, false),
+      new THREE.MeshStandardMaterial({ color: 0xe4e4e7, roughness: 0.6 })
+    );
+    podGroup.add(cordMesh);
+
+    // Mast "AquaGrow" Logo & Vent Grille
+    const mastLogoPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.38, 0.095), logoMat);
+    mastLogoPlane.position.set(mastX, basinHeight + 1.46, mastZ + 0.132);
+    podGroup.add(mastLogoPlane);
+
+    const ventGrille = new THREE.Mesh(
+      new RoundedBoxGeometry(0.34, 0.032, 0.02, 2, 0.008),
+      new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.8 })
+    );
+    ventGrille.position.set(mastX, basinHeight + 1.31, mastZ + 0.125);
+    podGroup.add(ventGrille);
+
+    // Mast Integrated OLED Display (with live CanvasTexture)
+    const oledScreenMesh = new THREE.Mesh(
+      new PlaneGeometryWithRoundedCorners(0.41, 0.54),
+      new THREE.MeshBasicMaterial({ map: oledTexture })
+    );
+    oledScreenMesh.position.set(mastX, basinHeight + 0.78, mastZ + 0.133);
+    podGroup.add(oledScreenMesh);
+
+    function PlaneGeometryWithRoundedCorners(w, h) {
+      return new THREE.PlaneGeometry(w, h);
+    }
+
+    // 6H. Cantilevered Overhead LED Grow Light Hood
+    const hoodWidth = 3.15;
+    const hoodHeight = 0.095;
+    const hoodDepth = 0.92;
+    const hoodY = basinHeight + mastHeight - 0.02;
+
+    const hoodMesh = new THREE.Mesh(
+      new RoundedBoxGeometry(hoodWidth, hoodHeight, hoodDepth, 6, 0.035),
+      mastMat
+    );
+    hoodMesh.position.set(0.05, hoodY, -0.08);
+    hoodMesh.castShadow = true;
+    podGroup.add(hoodMesh);
+
+    // "AquaGrow" Logo centered on the front edge of the top light hood
+    const hoodLogoPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.13), logoMat);
+    hoodLogoPlane.position.set(0.12, hoodY, -0.08 + hoodDepth / 2 + 0.003);
+    podGroup.add(hoodLogoPlane);
+
+    // Glowing Full-Spectrum Pink/Magenta/White LED Panel on underside of hood
+    const ledCanvas = document.createElement('canvas');
+    ledCanvas.width = 512;
+    ledCanvas.height = 128;
+    const ledCtx = ledCanvas.getContext('2d');
+    ledCtx.fillStyle = '#fdf2f8';
+    ledCtx.fillRect(0, 0, 512, 128);
+    for (let x = 16; x < 500; x += 20) {
+      for (let y = 20; y < 112; y += 26) {
+        const isMagenta = (x + y) % 40 === 0;
+        ledCtx.fillStyle = isMagenta ? '#ec4899' : '#fff1f2';
+        ledCtx.beginPath();
+        ledCtx.arc(x, y, 5.5, 0, Math.PI * 2);
+        ledCtx.fill();
+      }
+    }
+    const ledTex = new THREE.CanvasTexture(ledCanvas);
+    ledTex.colorSpace = THREE.SRGBColorSpace;
+
+    const ledPanelMat = new THREE.MeshStandardMaterial({
+      map: ledTex,
+      emissive: new THREE.Color(0xf472b6),
+      emissiveMap: ledTex,
+      emissiveIntensity: 1.6,
+      roughness: 0.2,
+    });
+    const ledPanelMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(hoodWidth * 0.92, hoodDepth * 0.82),
+      ledPanelMat
+    );
+    ledPanelMesh.rotation.x = Math.PI / 2;
+    ledPanelMesh.position.set(0.05, hoodY - hoodHeight / 2 - 0.002, -0.08);
+    podGroup.add(ledPanelMesh);
+
+    // -------------------------------------------------------------------------
+    // 7. Grow Ports & Photorealistic Sculpted 3D Botanical Crops
+    //    (Uniform per Pod: Pod Alpha = Genovese Basil, Pod Beta = Baby Spinach)
+    // -------------------------------------------------------------------------
+    const plantClusters = [];
+    // 6 evenly arranged grow ports across the deck (3 front row, 3 back row)
+    const portCoords = [
+      { x: -1.10, z: 0.44, scale: 0.96, seed: 1.1 },
+      { x:  0.00, z: 0.46, scale: 1.08, seed: 2.3 },
+      { x:  1.10, z: 0.44, scale: 0.98, seed: 3.7 },
+      { x: -1.10, z: -0.28, scale: 0.92, seed: 4.5 },
+      { x:  0.18, z: -0.30, scale: 1.05, seed: 5.9 },
+      { x:  1.10, z: -0.28, scale: 0.95, seed: 6.4 },
+    ];
+
+    const netCupMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.28 });
+    const spongeMat = new THREE.MeshStandardMaterial({ color: 0x231c18, roughness: 0.92 });
+    const pebbleMat = new THREE.MeshStandardMaterial({ color: 0x7c4a32, roughness: 0.78 });
+    const rootMat = new THREE.MeshStandardMaterial({
+      color: 0xfef3c7,
+      roughness: 0.55,
+      transparent: true,
+      opacity: 0.88,
+    });
+
+    // Generate high-res botanical leaf diffuse + bump maps with midrib, pinnate veins & cell mottling
+    function createBotanicalLeafTextures(type) {
+      const size = 512;
+      const colorCanvas = document.createElement('canvas');
+      colorCanvas.width = size;
+      colorCanvas.height = size;
+      const cCtx = colorCanvas.getContext('2d');
+
+      const bumpCanvas = document.createElement('canvas');
+      bumpCanvas.width = size;
+      bumpCanvas.height = size;
+      const bCtx = bumpCanvas.getContext('2d');
+
+      // Base lamina gradient (v=0 at bottom/base, v=1 at top/tip)
+      const grad = cCtx.createLinearGradient(0, size, 0, 0);
+      if (type === 'basil') {
+        grad.addColorStop(0, '#2e7d1e');
+        grad.addColorStop(0.45, '#3b9628');
+        grad.addColorStop(0.85, '#4da832');
+        grad.addColorStop(1, '#5cb83c');
+      } else {
+        // Baby spinach: deeper forest/emerald green with slightly lighter base & inner veins
+        grad.addColorStop(0, '#1f6f36');
+        grad.addColorStop(0.4, '#166534');
+        grad.addColorStop(0.8, '#15803d');
+        grad.addColorStop(1, '#1e8842');
+      }
+      cCtx.fillStyle = grad;
+      cCtx.fillRect(0, 0, size, size);
+
+      // Neutral bump base
+      bCtx.fillStyle = '#808080';
+      bCtx.fillRect(0, 0, size, size);
+
+      // Interveinal quilted pillows (brighter in bump map so lamina puffs up between veins)
+      for (let i = 0; i < 6; i++) {
+        const yCenter = size * (0.82 - i * 0.13);
+        [-1, 1].forEach((side) => {
+          const xCenter = size * 0.5 + side * size * 0.2;
+          const pGrad = bCtx.createRadialGradient(xCenter, yCenter, 4, xCenter, yCenter, size * 0.14);
+          pGrad.addColorStop(0, 'rgba(235, 235, 235, 0.55)');
+          pGrad.addColorStop(1, 'rgba(128, 128, 128, 0)');
+          bCtx.fillStyle = pGrad;
+          bCtx.beginPath();
+          bCtx.arc(xCenter, yCenter, size * 0.14, 0, Math.PI * 2);
+          bCtx.fill();
+        });
+      }
+
+      // Subtle organic chlorophyll mottling
+      for (let i = 0; i < 120; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const r = 8 + Math.random() * 24;
+        cCtx.fillStyle =
+          Math.random() > 0.5 ? 'rgba(163, 230, 53, 0.045)' : 'rgba(15, 55, 20, 0.05)';
+        cCtx.beginPath();
+        cCtx.arc(x, y, r, 0, Math.PI * 2);
+        cCtx.fill();
+      }
+
+      // Central tapered midrib (from bottom center (256, 512) to tip (256, 20))
+      cCtx.strokeStyle = type === 'basil' ? 'rgba(163, 230, 75, 0.72)' : 'rgba(134, 239, 140, 0.68)';
+      cCtx.lineCap = 'round';
+      for (let seg = 0; seg < 24; seg++) {
+        const t0 = seg / 24;
+        const t1 = (seg + 1) / 24;
+        cCtx.lineWidth = (1 - t0) * 7.5 + 1.0;
+        cCtx.beginPath();
+        cCtx.moveTo(size * 0.5, size * (1 - t0 * 0.94));
+        cCtx.lineTo(size * 0.5, size * (1 - t1 * 0.94));
+        cCtx.stroke();
+      }
+
+      // Pinnate lateral secondary veins arching toward leaf margins
+      const veinPairs = type === 'basil' ? 6 : 5;
+      for (let v = 0; v < veinPairs; v++) {
+        const startT = 0.12 + (v / veinPairs) * 0.72;
+        const startY = size * (1 - startT);
+        const reach = Math.sin(startT * Math.PI) * 0.42;
+
+        [-1, 1].forEach((dir) => {
+          const cpX = size * (0.5 + dir * reach * 0.58);
+          const cpY = startY - size * 0.04;
+          const endX = size * (0.5 + dir * reach);
+          const endY = startY - size * 0.15;
+
+          cCtx.strokeStyle =
+            type === 'basil' ? 'rgba(155, 224, 70, 0.42)' : 'rgba(134, 239, 140, 0.45)';
+          cCtx.lineWidth = (1 - startT * 0.6) * 3.2;
+          cCtx.beginPath();
+          cCtx.moveTo(size * 0.5, startY);
+          cCtx.quadraticCurveTo(cpX, cpY, endX, endY);
+          cCtx.stroke();
+
+          // Recessed vein crease in bump map
+          bCtx.strokeStyle = 'rgba(55, 55, 55, 0.7)';
+          bCtx.lineWidth = (1 - startT * 0.5) * 4.5;
+          bCtx.beginPath();
+          bCtx.moveTo(size * 0.5, startY);
+          bCtx.quadraticCurveTo(cpX, cpY, endX, endY);
+          bCtx.stroke();
+        });
+      }
+
+      const colorTex = new THREE.CanvasTexture(colorCanvas);
+      colorTex.colorSpace = THREE.SRGBColorSpace;
+      const bumpTex = new THREE.CanvasTexture(bumpCanvas);
+      return { colorTex, bumpTex };
+    }
+
+    const basilTextures = createBotanicalLeafTextures('basil');
+    const spinachTextures = createBotanicalLeafTextures('spinach');
+
+    // Create a custom-sculpted 3D botanical leaf geometry (not a sphere!)
+    // Local coordinates: base of leaf blade is at (0,0,0), tip extends along +X
+    function createBotanicalLeafGeometry(type, length = 0.24, width = 0.17) {
+      const segU = 22; // across width
+      const segV = 28; // along length from base to tip
+      const geo = new THREE.BufferGeometry();
+
+      const positions = [];
+      const uvs = [];
+      const indices = [];
+
+      for (let iv = 0; iv <= segV; iv++) {
+        const v = iv / segV; // 0 = base, 1 = tip
+
+        // Botanical leaf silhouette width profile w(v)
+        let widthProfile;
+        if (type === 'basil') {
+          // Ovate-cordate sweet basil silhouette: rounded base, widest at v=0.36, pointed acuminate tip
+          widthProfile =
+            Math.pow(Math.sin(v * Math.PI), 0.78) *
+            (1.0 + 0.18 * Math.sin(v * Math.PI * 2 - 0.6));
+          // Slight natural serration/waviness along margin
+          widthProfile *= 1.0 + 0.025 * Math.sin(v * Math.PI * 10);
+        } else {
+          // Baby spinach spade/ovate silhouette: broader basal lobes, rounded apex
+          const baseLobe = Math.sin(Math.min(1, v * 2.4) * Math.PI * 0.5);
+          const taper = Math.pow(1 - Math.pow(v, 1.45), 0.58);
+          widthProfile = baseLobe * taper * (1.08 + 0.14 * Math.exp(-Math.pow((v - 0.22) / 0.15, 2)));
+        }
+
+        for (let iu = 0; iu <= segU; iu++) {
+          const uNorm = iu / segU; // 0..1
+          const u = (uNorm - 0.5) * 2; // -1..1 across leaf width
+          const absU = Math.abs(u);
+
+          const x = v * length;
+          const z = u * (width * 0.5) * widthProfile;
+
+          let y = 0;
+          if (type === 'basil') {
+            // Signature Genovese basil 3D shape:
+            // 1) Downward longitudinal arch from base to tip
+            const longArch = Math.sin(v * Math.PI * 0.88) * 0.032 * length - Math.pow(v, 2.1) * 0.18 * length;
+            // 2) Downward spoon-cupping across the width
+            const spoonCup = -Math.pow(absU, 1.65) * Math.sin(v * Math.PI) * 0.26 * width;
+            // 3) Central midrib crease + interveinal quilted bullate pillows
+            const midribTrough = -Math.exp(-Math.pow(absU / 0.12, 2)) * 0.008 * width;
+            const bullateQuilt =
+              Math.sin(v * Math.PI * 6.0) *
+              Math.sin(absU * Math.PI) *
+              Math.sin(v * Math.PI) *
+              0.036 *
+              width;
+            y = longArch + spoonCup + midribTrough + bullateQuilt;
+          } else {
+            // Signature Baby Spinach 3D shape:
+            // 1) Gentle forward arch with slightly upturned or wavy margins
+            const longCurve = Math.sin(v * Math.PI * 0.82) * 0.04 * length - Math.pow(v, 2.3) * 0.06 * length;
+            // 2) Subtle V-channel along midrib and shallow upward spooning
+            const channel = absU * 0.035 * width - Math.pow(absU, 2.4) * 0.05 * width;
+            // 3) Savoy crinkle pockets & wavy edge undulation
+            const savoyCrinkle =
+              Math.sin(v * Math.PI * 5.0) * Math.sin(absU * Math.PI) * 0.024 * width +
+              Math.pow(absU, 2) * Math.sin(v * Math.PI * 7.0) * 0.028 * width;
+            y = longCurve + channel + savoyCrinkle;
+          }
+
+          positions.push(x, y, z);
+          uvs.push(uNorm, 1 - v);
+        }
+      }
+
+      for (let iv = 0; iv < segV; iv++) {
+        for (let iu = 0; iu < segU; iu++) {
+          const a = iv * (segU + 1) + iu;
+          const b = a + 1;
+          const c = (iv + 1) * (segU + 1) + iu;
+          const d = c + 1;
+          indices.push(a, b, c);
+          indices.push(b, d, c);
+        }
+      }
+
+      geo.setIndex(indices);
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    const basilLeafGeo = createBotanicalLeafGeometry('basil', 0.25, 0.175);
+    const spinachLeafGeo = createBotanicalLeafGeometry('spinach', 0.24, 0.185);
+
+    // Deterministic pseudo-random helper so each port looks organic and unique
+    function seededRand(seed, idx) {
+      const x = Math.sin(seed * 127.1 + idx * 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    }
+
+    // Build a realistic multi-stem Genovese Basil plant (Pod Alpha)
+    function buildGenoveseBasilFoliage(port) {
+      const foliage = new THREE.Group();
+      const leafMeshes = [];
+      const s = port.scale;
+
+      const stemMat = new THREE.MeshStandardMaterial({
+        color: 0x4d7c0f,
+        roughness: 0.5,
+      });
+
+      // 3 organic curved basil shoots per port (1 tall center, 2 angled side shoots)
+      const shoots = [
+        { height: 0.72 * s, leanX: 0.02, leanZ: -0.01, rotY: port.seed, tiers: 5, scale: 1.0 },
+        { height: 0.52 * s, leanX: -0.11, leanZ: 0.08, rotY: port.seed + 2.1, tiers: 4, scale: 0.78 },
+        { height: 0.48 * s, leanX: 0.10, leanZ: 0.09, rotY: port.seed + 4.2, tiers: 4, scale: 0.74 },
+      ];
+
+      shoots.forEach((shoot, sIdx) => {
+        const shootGroup = new THREE.Group();
+        foliage.add(shootGroup);
+
+        // Curved main stalk using CatmullRomCurve3
+        const stemCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(0, 0.01, 0),
+          new THREE.Vector3(shoot.leanX * 0.35, shoot.height * 0.35, shoot.leanZ * 0.35),
+          new THREE.Vector3(shoot.leanX * 0.75, shoot.height * 0.72, shoot.leanZ * 0.75),
+          new THREE.Vector3(shoot.leanX, shoot.height, shoot.leanZ),
+        ]);
+        const stemTube = new THREE.Mesh(
+          new THREE.TubeGeometry(stemCurve, 16, 0.014 * shoot.scale, 8, false),
+          stemMat
+        );
+        stemTube.castShadow = true;
+        shootGroup.add(stemTube);
+
+        // Decussate opposite leaf pairs along the curved stem
+        for (let t = 1; t <= shoot.tiers; t++) {
+          const frac = t / shoot.tiers;
+          const nodePos = stemCurve.getPointAt(frac * 0.94);
+          // Opposite pairs alternate by 90 degrees (PI/2) at each node
+          const basePairAngle = shoot.rotY + (t % 2) * (Math.PI * 0.5) + (seededRand(port.seed, t * 7 + sIdx) - 0.5) * 0.22;
+
+          // 2 main opposite leaves + 2 smaller axillary side leaves at mature nodes
+          const nodeLeaves = t < shoot.tiers ? [0, Math.PI, 0.48, Math.PI + 0.48] : [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5];
+
+          nodeLeaves.forEach((offsetAngle, lIdx) => {
+            const isAxillary = lIdx >= 2 && t < shoot.tiers;
+            const isTopCrown = t === shoot.tiers;
+            const angle = basePairAngle + offsetAngle;
+
+            // Bell-shaped leaf size distribution (largest in middle tiers, tender & small at crown)
+            const tierBell = isTopCrown ? 0.52 : 0.68 + Math.sin(frac * Math.PI) * 0.52;
+            const leafScale = shoot.scale * tierBell * (isAxillary ? 0.54 : 1.0);
+
+            const leafHolder = new THREE.Group();
+            leafHolder.position.copy(nodePos);
+            leafHolder.rotation.y = angle;
+
+            // Curved petiole connecting stem node to leaf blade base
+            const petLen = (isTopCrown ? 0.035 : 0.075) * leafScale;
+            const petRise = (isTopCrown ? 0.025 : 0.015) * leafScale;
+            const petCurve = new THREE.CatmullRomCurve3([
+              new THREE.Vector3(0, 0, 0),
+              new THREE.Vector3(petLen * 0.5, petRise, 0),
+              new THREE.Vector3(petLen, petRise * 0.6, 0),
+            ]);
+            const petMesh = new THREE.Mesh(
+              new THREE.TubeGeometry(petCurve, 6, 0.0065 * leafScale, 6, false),
+              stemMat
+            );
+            leafHolder.add(petMesh);
+
+            // Young upper leaves are slightly brighter/tender lime-emerald
+            const baseTint = isTopCrown || isAxillary
+              ? new THREE.Color(0x52b736)
+              : new THREE.Color(0x3b9628);
+
+            const mat = new THREE.MeshPhysicalMaterial({
+              color: baseTint.clone(),
+              map: basilTextures.colorTex,
+              bumpMap: basilTextures.bumpTex,
+              bumpScale: 0.016,
+              roughness: 0.22,
+              metalness: 0.01,
+              clearcoat: 0.48,
+              clearcoatRoughness: 0.2,
+              sheen: 0.25,
+              sheenColor: new THREE.Color(0xa3e635),
+              side: THREE.DoubleSide,
+            });
+
+            const blade = new THREE.Mesh(basilLeafGeo, mat);
+            blade.scale.setScalar(leafScale);
+            blade.position.set(petLen * 0.92, petRise * 0.55, 0);
+            // Natural outward pitch and slight organic roll
+            blade.rotation.z = isTopCrown ? 0.22 : -0.08 - (1 - frac) * 0.22;
+            blade.rotation.x = (seededRand(port.seed, t * 19 + lIdx) - 0.5) * 0.22;
+            blade.castShadow = true;
+            blade.receiveShadow = true;
+
+            leafHolder.add(blade);
+            shootGroup.add(leafHolder);
+            leafMeshes.push({ mesh: blade, baseColor: baseTint });
+          });
+        }
+      });
+
+      return { foliage, leafMeshes };
+    }
+
+    // Build a realistic crisp Baby Spinach rosette plant (Pod Beta)
+    function buildBabySpinachFoliage(port) {
+      const foliage = new THREE.Group();
+      const leafMeshes = [];
+      const s = port.scale;
+
+      const petioleMat = new THREE.MeshStandardMaterial({
+        color: 0x4ade80,
+        roughness: 0.42,
+      });
+
+      // 3 concentric rosette whorls: outer mature spreading blades, mid upright blades, inner tender heart leaves
+      const whorls = [
+        { count: 8, radiusReach: 0.16, rise: 0.13, bladeScale: 0.98, pitch: -0.14, colorHex: 0x166534 },
+        { count: 7, radiusReach: 0.12, rise: 0.20, bladeScale: 0.86, pitch: 0.10,  colorHex: 0x15803d },
+        { count: 5, radiusReach: 0.06, rise: 0.24, bladeScale: 0.62, pitch: 0.36,  colorHex: 0x22c55e },
+      ];
+
+      whorls.forEach((whorl, wIdx) => {
+        for (let i = 0; i < whorl.count; i++) {
+          const jitter = (seededRand(port.seed, wIdx * 13 + i) - 0.5) * 0.26;
+          const angle = port.seed + wIdx * 0.62 + (i / whorl.count) * Math.PI * 2 + jitter;
+
+          const stalkGroup = new THREE.Group();
+          stalkGroup.rotation.y = angle;
+
+          const reach = whorl.radiusReach * s * (0.9 + seededRand(port.seed, i * 31) * 0.22);
+          const rise = whorl.rise * s * (0.9 + seededRand(port.seed, i * 17) * 0.22);
+
+          // Graceful S-curved fleshy spinach petiole rising from crown
+          const petCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0.01, 0.01, 0),
+            new THREE.Vector3(reach * 0.42, rise * 0.62, 0),
+            new THREE.Vector3(reach, rise, 0),
+          ]);
+          const petTube = new THREE.Mesh(
+            new THREE.TubeGeometry(petCurve, 10, 0.0095 * whorl.bladeScale * s, 7, false),
+            petioleMat
+          );
+          petTube.scale.z = 1.35; // slightly flattened celery-like petiole stalk
+          petTube.castShadow = true;
+          stalkGroup.add(petTube);
+
+          const baseTint = new THREE.Color(whorl.colorHex);
+          const mat = new THREE.MeshPhysicalMaterial({
+            color: baseTint.clone(),
+            map: spinachTextures.colorTex,
+            bumpMap: spinachTextures.bumpTex,
+            bumpScale: 0.014,
+            roughness: 0.32,
+            metalness: 0.01,
+            clearcoat: 0.24,
+            clearcoatRoughness: 0.3,
+            sheen: 0.2,
+            sheenColor: new THREE.Color(0x86efac),
+            side: THREE.DoubleSide,
+          });
+
+          const bScale = whorl.bladeScale * s;
+          const blade = new THREE.Mesh(spinachLeafGeo, mat);
+          blade.scale.setScalar(bScale);
+          blade.position.set(reach * 0.95, rise * 0.96, 0);
+          blade.rotation.z = whorl.pitch;
+          blade.rotation.x = (seededRand(port.seed, wIdx * 29 + i) - 0.5) * 0.24;
+          blade.castShadow = true;
+          blade.receiveShadow = true;
+          stalkGroup.add(blade);
+
+          foliage.add(stalkGroup);
+          leafMeshes.push({ mesh: blade, baseColor: baseTint });
+        }
+      });
+
+      return { foliage, leafMeshes };
+    }
+
+    function createPlantCluster(port) {
+      const group = new THREE.Group();
+      group.position.set(port.x, basinHeight + 0.06, port.z);
+
+      // White Net-Cup Beveled Collar
+      const collar = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.225, 0.195, 0.052, 28),
+        netCupMat
+      );
+      collar.receiveShadow = true;
+      group.add(collar);
+
+      // Dark Grow Sponge Core
+      const sponge = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.165, 0.145, 0.058, 22),
+        spongeMat
+      );
+      sponge.position.y = 0.005;
+      group.add(sponge);
+
+      // Hydroton Expanded Clay Pebbles (LECA) nestled on top of the grow sponge
+      for (let p = 0; p < 12; p++) {
+        const pa = (p / 12) * Math.PI * 2 + port.seed;
+        const pr = 0.045 + (p % 3) * 0.036;
+        const pebble = new THREE.Mesh(new THREE.DodecahedronGeometry(0.022, 1), pebbleMat);
+        pebble.scale.set(1.1, 0.75, 0.95);
+        pebble.position.set(Math.cos(pa) * pr, 0.032, Math.sin(pa) * pr);
+        pebble.rotation.set(p, pa, p * 0.5);
+        group.add(pebble);
+      }
+
+      // Submerged Fibrous Hydroponic Root System hanging down into the water tank
+      const rootsGroup = new THREE.Group();
+      for (let r = 0; r < 11; r++) {
+        const len = 0.36 + seededRand(port.seed, r * 11) * 0.32;
+        const rx = (seededRand(port.seed, r * 3) - 0.5) * 0.13;
+        const rz = (seededRand(port.seed, r * 7) - 0.5) * 0.13;
+        const rCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(rx * 0.4, -0.03, rz * 0.4),
+          new THREE.Vector3(rx, -len * 0.5, rz),
+          new THREE.Vector3(rx * 1.25, -len, rz * 1.25),
+        ]);
+        const rootMesh = new THREE.Mesh(
+          new THREE.TubeGeometry(rCurve, 8, 0.007, 5, false),
+          rootMat
+        );
+        rootsGroup.add(rootMesh);
+      }
+      group.add(rootsGroup);
+
+      // Build both crop varieties for this port so switching pods swaps all 6 ports cleanly
+      const basil = buildGenoveseBasilFoliage(port);
+      const spinach = buildBabySpinachFoliage(port);
+
+      group.add(basil.foliage);
+      group.add(spinach.foliage);
+
+      podGroup.add(group);
+      plantClusters.push({
+        group,
+        basil,
+        spinach,
+      });
+    }
+
+    portCoords.forEach(createPlantCluster);
+
+    // -------------------------------------------------------------------------
+    // 8. Ultrasonic Mist Plume (matching the vapor mist in the concept photo)
+    // -------------------------------------------------------------------------
+    function createSoftMistSpriteTexture() {
+      const c = document.createElement('canvas');
+      c.width = 128;
+      c.height = 128;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createRadialGradient(64, 64, 4, 64, 64, 60);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 0.38)');
+      grad.addColorStop(0.5, 'rgba(235, 240, 255, 0.16)');
+      grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const mistParticles = [];
+    const mistTex = createSoftMistSpriteTexture();
+    const mistGroup = new THREE.Group();
+    podGroup.add(mistGroup);
+
+    for (let i = 0; i < 28; i++) {
+      const mat = new THREE.SpriteMaterial({
+        map: mistTex,
+        transparent: true,
+        opacity: 0.25,
+        depthWrite: false,
+      });
+      const sprite = new THREE.Sprite(mat);
+      const s = 0.45 + Math.random() * 0.55;
+      sprite.scale.set(s, s, 1);
+      sprite.position.set(
+        mastX + 0.25 + Math.random() * 0.55,
+        basinHeight + 0.35 + Math.random() * 1.15,
+        mastZ + 0.18 + Math.random() * 0.45
+      );
+      mistGroup.add(sprite);
+      mistParticles.push({
+        sprite,
+        vy: 0.003 + Math.random() * 0.004,
+        vx: 0.001 + Math.random() * 0.002,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    // Dosing droplet plume effect when user clicks "Dose pH-Down"
+    let doseBurstTime = 0;
+    const doseRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.08, 0.22, 32),
+      new THREE.MeshBasicMaterial({
+        color: 0xa8e63d,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0,
+      })
+    );
+    doseRing.rotation.x = -Math.PI / 2;
+    doseRing.position.set(0, basinHeight + 0.08, 0);
+    podGroup.add(doseRing);
+
+    // -------------------------------------------------------------------------
+    // 9. Sync UI, Sliders, HUD & 3D Scene
+    // -------------------------------------------------------------------------
+    const sliderIds = ['slider-ph', 'slider-ec', 'slider-temp', 'slider-level', 'slider-brightness'];
+
+    function syncSliderCssVars(slider) {
+      slider.style.setProperty('--attr-min', slider.min || 0);
+      slider.style.setProperty('--attr-max', slider.max || 100);
+      slider.style.setProperty('--control-value', slider.value);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.dataset.visible = 'true';
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        toast.dataset.visible = 'false';
+      }, 2400);
+    }
+
+    function syncAllFromState() {
+      const pod = currentPod();
+
+      // Header HUD
+      document.getElementById('hud-pod-title').textContent = `${pod.name} · ${pod.room}`;
+      document.getElementById('hud-crop-subtitle').textContent = pod.crop
+        ? `${pod.crop} · Day ${pod.day} · ${stageLabel(pod)} · ` +
+          (pod.daysToHarvest > 0 ? `Harvest est. in ${pod.daysToHarvest} days` : 'Ready to harvest')
+        : 'Empty pod · plant a crop in the AquaGrow app';
+
+      // Pod tabs
+      renderPodTabs();
+
+      // Sliders & values
+      const sPh = document.getElementById('slider-ph');
+      const sEc = document.getElementById('slider-ec');
+      const sTemp = document.getElementById('slider-temp');
+      const sLevel = document.getElementById('slider-level');
+      const sBright = document.getElementById('slider-brightness');
+
+      sPh.value = pod.ph.toFixed(1);
+      sPh.setAttribute('aria-valuetext', `${pod.ph.toFixed(1)} pH`);
+      sEc.value = pod.ec.toFixed(1);
+      sEc.setAttribute('aria-valuetext', `${pod.ec.toFixed(1)} mS/cm`);
+      sTemp.value = pod.waterTemp.toFixed(1);
+      sTemp.setAttribute('aria-valuetext', `${pod.waterTemp.toFixed(1)} degrees Celsius`);
+      sLevel.value = Math.round(pod.waterLevel);
+      sLevel.setAttribute('aria-valuetext', `${Math.round(pod.waterLevel)} percent`);
+      sBright.value = Math.round(pod.lightBrightness);
+      sBright.setAttribute('aria-valuetext', `${Math.round(pod.lightBrightness)} percent brightness`);
+
+      sliderIds.forEach((id) => syncSliderCssVars(document.getElementById(id)));
+
+      document.getElementById('badge-ph').textContent = pod.ph.toFixed(1);
+      document.getElementById('badge-ec').textContent = `${pod.ec.toFixed(1)} mS/cm`;
+      document.getElementById('badge-temp').textContent = `${pod.waterTemp.toFixed(1)}°C`;
+      document.getElementById('badge-level').textContent = `${Math.round(pod.waterLevel)}%`;
+      document.getElementById('badge-brightness').textContent = pod.lightOn ? `${Math.round(pod.lightBrightness)}%` : 'OFF';
+
+      // Checkboxes
+      document.getElementById('chk-pump').checked = pod.pumpOn;
+      document.getElementById('chk-light').checked = pod.lightOn;
+      document.getElementById('chk-mist').checked = pod.mistOn;
+      document.getElementById('chk-online').checked = pod.isOnline;
+
+      // Bottom Sensor Tiles
+      const stPh = metricStatus('ph', pod.ph);
+      const stEc = metricStatus('ec', pod.ec);
+      const stTemp = metricStatus('temp', pod.waterTemp);
+      const stLevel = metricStatus('level', pod.waterLevel);
+
+      const applyTile = (idSuffix, valText, status, metric, rawVal) => {
+        const tile = document.getElementById(`tile-${idSuffix}`);
+        tile.dataset.status = status;
+        document.getElementById(`val-${idSuffix}`).textContent = valText;
+        document.getElementById(`cap-${idSuffix}`).textContent = metricCaption(metric, status, rawVal);
+      };
+
+      applyTile('ph', pod.ph.toFixed(1), stPh, 'ph', pod.ph);
+      applyTile('ec', `${pod.ec.toFixed(1)} mS`, stEc, 'ec', pod.ec);
+      applyTile('temp', `${pod.waterTemp.toFixed(1)}°C`, stTemp, 'temp', pod.waterTemp);
+      applyTile('level', `${Math.round(pod.waterLevel)}%`, stLevel, 'level', pod.waterLevel);
+
+      // Priority Task Card & Top Status Badge
+      const badge = document.getElementById('hud-status-badge');
+      const badgeText = document.getElementById('hud-status-text');
+      const banner = document.getElementById('priority-banner');
+      const pTitle = document.getElementById('priority-title');
+      const pBody = document.getElementById('priority-body');
+
+      if (!pod.isOnline) {
+        badge.dataset.tone = 'neutral';
+        badgeText.textContent = 'Offline';
+        banner.hidden = false;
+        banner.dataset.severity = 'critical';
+        pTitle.textContent = `${pod.name} is offline`;
+        pBody.textContent = 'Check the pod power cable and Wi-Fi connection.';
+      } else {
+        // Priority order from docs/tasks/osanda.md: critical before warning; water level > pH > temp > EC
+        const ordered = [
+          { key: 'level', status: stLevel, title: 'Water needs attention', body: `Refill ${pod.name} today (${Math.round(pod.waterLevel)}% remaining).` },
+          { key: 'ph', status: stPh, title: 'pH out of range', body: `Water pH is ${pod.ph.toFixed(1)} (target 5.8–6.5). Dose pH-down or check reservoir.` },
+          { key: 'temp', status: stTemp, title: 'Water temperature alert', body: `Water is ${pod.waterTemp.toFixed(1)}°C (target 18–24°C). Ensure circulation pump is on.` },
+          { key: 'ec', status: stEc, title: 'Nutrient level out of range', body: `EC is ${pod.ec.toFixed(1)} mS/cm (target 1.2–2.0 mS/cm).` },
+        ];
+        const crit = ordered.find((x) => x.status === 'critical');
+        const warn = ordered.find((x) => x.status === 'warning');
+        const urgent = crit || warn;
+
+        if (urgent) {
+          badge.dataset.tone = urgent.status === 'critical' ? 'critical' : 'warning';
+          badgeText.textContent = urgent.status === 'critical' ? 'Live · Critical' : 'Live · Needs care';
+          banner.hidden = false;
+          banner.dataset.severity = urgent.status;
+          pTitle.textContent = urgent.title;
+          pBody.textContent = urgent.body;
+        } else {
+          badge.dataset.tone = 'brand';
+          badgeText.textContent = 'Live · Optimal';
+          banner.hidden = true;
+        }
+      }
+
+      // Update 3D Lighting, Water Volume, Plant Health & OLED Display
+      const effBrightness = pod.lightOn ? pod.lightBrightness / 100 : 0;
+      growSpotLight.intensity = 4.8 * effBrightness;
+      growFillLight.intensity = 2.0 * effBrightness;
+      ledPanelMat.emissiveIntensity = 0.08 + 1.85 * effBrightness;
+
+      // Water tank level height & color shift (tint slightly amber/red on extreme pH or heat)
+      const levelRatio = Math.max(0.05, pod.waterLevel / 100);
+      waterMesh.scale.y = levelRatio;
+      waterMesh.position.y = 0.08 + (maxWaterHeight * levelRatio) / 2;
+
+      if (stPh === 'critical') {
+        waterMat.color.setHex(0xfb7185);
+      } else if (stTemp === 'critical') {
+        waterMat.color.setHex(0xfbbf24);
+      } else {
+        waterMat.color.setHex(0x38bdf8);
+      }
+
+      // Show the pod's crop (basil-like or leafy-green foliage, none when empty),
+      // grown to its day in the recipe, with droop & color stress when critical
+      const kind = cropKind(pod.crop);
+      const growth = growthScale(pod);
+      const hasCritical = [stPh, stEc, stTemp, stLevel].includes('critical');
+      plantClusters.forEach((cluster) => {
+        cluster.basil.foliage.visible = kind === 'basil';
+        cluster.spinach.foliage.visible = kind === 'leafy';
+        if (!kind) return;
+
+        const activeVariety = kind === 'basil' ? cluster.basil : cluster.spinach;
+        activeVariety.foliage.scale.set(growth, growth * (hasCritical ? 0.86 : 1.0), growth);
+        activeVariety.leafMeshes.forEach(({ mesh, baseColor }) => {
+          if (hasCritical) {
+            mesh.material.color.lerpColors(baseColor, new THREE.Color(0xca8a04), 0.38);
+          } else {
+            mesh.material.color.copy(baseColor);
+          }
+        });
+      });
+
+      updateOledScreenTexture();
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. Wire up UI Event Listeners
+    // -------------------------------------------------------------------------
+    function clearActiveScenarioButtons() {
+      document.querySelectorAll('.scenario-btn').forEach((b) => (b.dataset.active = 'false'));
+    }
+
+    document.getElementById('slider-ph').addEventListener('input', (e) => {
+      currentPod().ph = parseFloat(e.target.value);
+      clearActiveScenarioButtons();
+      syncAllFromState();
+      scheduleSupabasePush(false);
+    });
+
+    document.getElementById('slider-ec').addEventListener('input', (e) => {
+      currentPod().ec = parseFloat(e.target.value);
+      clearActiveScenarioButtons();
+      syncAllFromState();
+      scheduleSupabasePush(false);
+    });
+
+    document.getElementById('slider-temp').addEventListener('input', (e) => {
+      currentPod().waterTemp = parseFloat(e.target.value);
+      clearActiveScenarioButtons();
+      syncAllFromState();
+      scheduleSupabasePush(false);
+    });
+
+    document.getElementById('slider-level').addEventListener('input', (e) => {
+      currentPod().waterLevel = parseFloat(e.target.value);
+      clearActiveScenarioButtons();
+      syncAllFromState();
+      scheduleSupabasePush(false);
+    });
+
+    document.getElementById('slider-brightness').addEventListener('input', (e) => {
+      currentPod().lightBrightness = parseFloat(e.target.value);
+      if (currentPod().lightBrightness > 0) currentPod().lightOn = true;
+      syncAllFromState();
+      pushActuators(currentPod());
+    });
+
+    document.getElementById('chk-pump').addEventListener('change', (e) => {
+      currentPod().pumpOn = e.target.checked;
+      showToast(e.target.checked ? 'Water circulation pump turned ON' : 'Water circulation pump turned OFF');
+      syncAllFromState();
+      pushActuators(currentPod());
+    });
+
+    document.getElementById('chk-light').addEventListener('change', (e) => {
+      currentPod().lightOn = e.target.checked;
+      showToast(e.target.checked ? 'Full-spectrum LED grow light ON' : 'Grow light turned OFF');
+      syncAllFromState();
+      pushActuators(currentPod());
+    });
+
+    document.getElementById('chk-mist').addEventListener('change', (e) => {
+      currentPod().mistOn = e.target.checked;
+      showToast(e.target.checked ? 'Ultrasonic humidifier mist ON' : 'Ultrasonic mist turned OFF');
+      syncAllFromState();
+    });
+
+    document.getElementById('chk-online').addEventListener('change', (e) => {
+      currentPod().isOnline = e.target.checked;
+      showToast(e.target.checked ? `${currentPod().name} reconnected` : `${currentPod().name} went offline`);
+      syncAllFromState();
+      pushDeviceOnlineState(currentPod());
+    });
+
+    // Dose pH-Down (-0.15 pH, matches PodSimulator.dosePhDown)
+    document.getElementById('btn-dose-ph').addEventListener('click', () => {
+      const pod = currentPod();
+      if (!pod.isOnline) {
+        showToast('Cannot dose while pod is offline');
+        return;
+      }
+      pod.ph = Math.max(4.0, +(pod.ph - 0.15).toFixed(2));
+      doseBurstTime = 1.0;
+      showToast(`Dosed pH-Down: pH lowered to ${pod.ph.toFixed(1)}`);
+      syncAllFromState();
+      scheduleSupabasePush(true);
+    });
+
+    // Mark Tank Refilled (100% water level, matches PodSimulator.markRefilled)
+    document.getElementById('btn-refill').addEventListener('click', () => {
+      const pod = currentPod();
+      pod.waterLevel = 100;
+      showToast(`${pod.name} water tank refilled to 100%`);
+      syncAllFromState();
+      scheduleSupabasePush(true);
+    });
+
+    // Pod Selector Tabs: one per pod (the two demo pods, or the user's live pods)
+    function renderPodTabs() {
+      const wrap = document.getElementById('pod-tabs');
+      const pods = Object.values(podsState);
+      document.getElementById('pod-count-caption').textContent = sbClient
+        ? `${pods.length} live pod${pods.length === 1 ? '' : 's'}`
+        : `${pods.length} demo pods`;
+      wrap.replaceChildren(
+        ...pods.map((pod) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'pod-tab';
+          btn.setAttribute('role', 'tab');
+          btn.setAttribute('aria-selected', String(pod.id === activePodId));
+          const name = document.createElement('span');
+          name.className = 'pod-tab-name';
+          name.textContent = pod.name;
+          const meta = document.createElement('span');
+          meta.className = 'pod-tab-meta';
+          meta.textContent = `${pod.room} · ${pod.crop || 'Empty'}`;
+          btn.append(name, meta);
+          btn.addEventListener('click', () => {
+            activePodId = pod.id;
+            refreshDeviceSelector();
+            syncAllFromState();
+            showToast(`Switched to ${pod.name} · ${pod.room}`);
+          });
+          return btn;
+        })
+      );
+    }
+
+    // Scenario Presets
+    document.querySelectorAll('.scenario-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        clearActiveScenarioButtons();
+        btn.dataset.active = 'true';
+        const sc = btn.dataset.scenario;
+        const pod = currentPod();
+        const prevOnline = pod.isOnline;
+        pod.isOnline = true;
+        if (sc === 'healthy') {
+          pod.ph = 6.2;
+          pod.ec = 1.6;
+          pod.waterTemp = 22.3;
+          pod.waterLevel = 90;
+          pod.pumpOn = true;
+          pod.lightOn = true;
+          pod.mistOn = true;
+          showToast('Scenario applied: Healthy Pod');
+        } else if (sc === 'acidSpike') {
+          pod.ph = 4.8;
+          showToast('Scenario applied: pH Crash (4.8)');
+        } else if (sc === 'alkaline') {
+          pod.ph = 7.6;
+          showToast('Scenario applied: pH Drift High (7.6)');
+        } else if (sc === 'lowWater') {
+          pod.waterLevel = 18;
+          showToast('Scenario applied: Low Water (18%)');
+        } else if (sc === 'heatwave') {
+          pod.waterTemp = 29.5;
+          showToast('Scenario applied: Heatwave (29.5°C)');
+        } else if (sc === 'nutrientLow') {
+          pod.ec = 0.7;
+          showToast('Scenario applied: Nutrient Low (0.7 mS/cm)');
+        } else if (sc === 'offline') {
+          pod.isOnline = false;
+          showToast('Scenario applied: Sensor Offline');
+        }
+        syncAllFromState();
+        if (pod.isOnline !== prevOnline) pushDeviceOnlineState(pod);
+        if (pod.isOnline) scheduleSupabasePush(true);
+      });
+    });
+
+    // Camera & Cutaway Buttons
+    function setCamButtons(activeId) {
+      ['btn-cam-beauty', 'btn-cam-screen', 'btn-cam-top'].forEach((id) => {
+        document.getElementById(id).setAttribute('aria-pressed', String(id === activeId));
+      });
+    }
+
+    document.getElementById('btn-cam-beauty').addEventListener('click', () => {
+      setCamButtons('btn-cam-beauty');
+      flyCameraTo([4.6, 2.55, 6.2], [0, 1.35, 0]);
+    });
+
+    document.getElementById('btn-cam-screen').addEventListener('click', () => {
+      setCamButtons('btn-cam-screen');
+      flyCameraTo([-0.62, 1.82, 2.25], [-0.62, 1.72, -0.52]);
+    });
+
+    document.getElementById('btn-cam-top').addEventListener('click', () => {
+      setCamButtons('btn-cam-top');
+      flyCameraTo([0.2, 5.2, 2.8], [0, 1.0, 0]);
+    });
+
+    document.getElementById('btn-xray').addEventListener('click', (e) => {
+      xrayMode = !xrayMode;
+      e.currentTarget.setAttribute('aria-pressed', String(xrayMode));
+      whiteShellMat.opacity = xrayMode ? 0.22 : 1.0;
+      oakPanel.visible = !xrayMode;
+      frontLogoPlane.visible = !xrayMode;
+      showToast(xrayMode ? 'Cutaway Tank View enabled: inspect water level & roots' : 'Cutaway Tank View disabled');
+    });
+
+    // -------------------------------------------------------------------------
+    // 10B. Supabase Realtime Telemetry Sync (Option A)
+    // -------------------------------------------------------------------------
+    let sbClient = null;
+    let sbDevices = [];
+    const sbDeviceMapping = {
+      'pod-alpha': null,
+      'pod-beta': null,
+    };
+    let pushDebounceTimer = null;
+
+    const sbBadge = document.getElementById('sync-status-badge');
+    const sbBadgeText = document.getElementById('sync-status-text');
+    const sbLog = document.getElementById('sb-log');
+    const sbDeviceWrap = document.getElementById('sb-device-wrap');
+    const sbDeviceSelect = document.getElementById('sb-device-select');
+    const sbPushBtn = document.getElementById('btn-sb-push');
+
+    function setSyncStatus(tone, label, logMsg) {
+      sbBadge.dataset.tone = tone;
+      sbBadgeText.textContent = label;
+      if (logMsg) sbLog.textContent = logMsg;
+    }
+
+    function refreshDeviceSelector() {
+      // Live pods each stream to their own device row, so there is nothing to pick.
+      if (!sbDevices.length || sbDeviceMapping[activePodId] === activePodId) {
+        sbDeviceWrap.hidden = true;
+        return;
+      }
+      sbDeviceWrap.hidden = false;
+      sbDeviceSelect.innerHTML = '';
+      sbDevices.forEach((d) => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = `${d.device_name || 'AquaGrow Pod'} · ${d.room || 'Home'} (${d.id.slice(0, 8)}…)`;
+        sbDeviceSelect.appendChild(opt);
+      });
+      if (sbDeviceMapping[activePodId]) {
+        sbDeviceSelect.value = sbDeviceMapping[activePodId];
+      }
+    }
+
+    sbDeviceSelect.addEventListener('change', (e) => {
+      sbDeviceMapping[activePodId] = e.target.value;
+      saveSyncSettings();
+    });
+
+    // Remembered connection (this browser only). The password is never stored:
+    // supabase-js keeps the signed-in session in localStorage and refreshes it.
+    const SYNC_SETTINGS_KEY = 'aquagrow-sim-sync';
+
+    function readSyncSettings() {
+      try {
+        return JSON.parse(localStorage.getItem(SYNC_SETTINGS_KEY)) || null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function saveSyncSettings() {
+      try {
+        localStorage.setItem(
+          SYNC_SETTINGS_KEY,
+          JSON.stringify({
+            url: document.getElementById('sb-url').value.trim(),
+            key: document.getElementById('sb-key').value.trim(),
+            email: document.getElementById('sb-email').value.trim(),
+            mapping: { ...sbDeviceMapping },
+          })
+        );
+      } catch (_) {
+        /* storage blocked: nothing to remember */
+      }
+    }
+
+    async function pushTelemetryToSupabase(pod) {
+      if (!sbClient) return;
+      const deviceId = sbDeviceMapping[pod.id];
+      if (!deviceId) {
+        setSyncStatus('warning', 'No device', `No Supabase device mapped to ${pod.name}.`);
+        return;
+      }
+      const row = {
+        device_id: deviceId,
+        reading_id: crypto.randomUUID(),
+        ph: +pod.ph.toFixed(2),
+        ec_ms: +pod.ec.toFixed(2),
+        tds_ppm: +(pod.ec * 500).toFixed(1),
+        water_temp_c: +pod.waterTemp.toFixed(2),
+        water_level_pct: +pod.waterLevel.toFixed(2),
+        recorded_at: new Date().toISOString(),
+      };
+      const { error } = await sbClient.from('telemetry_logs').insert(row);
+      if (error) {
+        setSyncStatus('critical', 'Push failed', `Supabase insert error: ${error.message}`);
+      } else {
+        // A reading means the pod is reporting: mark it online and refresh
+        // last_seen_at, so the app shows "Live" even for a pod that started
+        // offline (for example one just created with Add a pod).
+        // Only when the row still says offline, so the app is not refreshed every 4 s.
+        if (pod.isOnline && !pod.serverOnline) {
+          pod.serverOnline = true;
+          const { error: onlineErr } = await sbClient
+            .from('devices')
+            .update({ is_online: true, last_seen_at: new Date().toISOString() })
+            .eq('id', deviceId);
+          if (onlineErr) {
+            setSyncStatus('warning', 'Update err', `Device online update failed: ${onlineErr.message}`);
+            return;
+          }
+        }
+        const now = new Date().toLocaleTimeString();
+        setSyncStatus(
+          'brand',
+          'Synced',
+          `Pushed ${pod.name} at ${now}: pH ${row.ph}, EC ${row.ec_ms}, ${row.water_temp_c}°C, ${row.water_level_pct}%`
+        );
+      }
+    }
+
+    async function pushDeviceOnlineState(pod) {
+      if (!sbClient) return;
+      pod.serverOnline = pod.isOnline;
+      const deviceId = sbDeviceMapping[pod.id];
+      if (!deviceId) return;
+      const { error } = await sbClient
+        .from('devices')
+        .update({ is_online: pod.isOnline, last_seen_at: new Date().toISOString() })
+        .eq('id', deviceId);
+      if (error) {
+        setSyncStatus('warning', 'Update err', `Device online update failed: ${error.message}`);
+      }
+    }
+
+    function scheduleSupabasePush(immediate = false) {
+      if (!sbClient || !document.getElementById('chk-auto-sync').checked) return;
+      clearTimeout(pushDebounceTimer);
+      if (immediate) {
+        pushTelemetryToSupabase(currentPod());
+      } else {
+        pushDebounceTimer = setTimeout(() => pushTelemetryToSupabase(currentPod()), 320);
+      }
+    }
+
+    document.getElementById('supabase-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const url = document.getElementById('sb-url').value.trim();
+      const key = document.getElementById('sb-key').value.trim();
+      const email = document.getElementById('sb-email').value.trim();
+      const password = document.getElementById('sb-pass').value;
+
+      setSyncStatus('warning', 'Connecting…', 'Signing in to Supabase…');
+      try {
+        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+        sbClient = createClient(url, key);
+        let user;
+        if (password) {
+          const { data: authData, error: authErr } = await sbClient.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (authErr) throw authErr;
+          user = authData.user;
+        } else {
+          // No password typed: reuse the remembered session, if there is one.
+          const { data } = await sbClient.auth.getSession();
+          if (!data.session) throw new Error('Enter the password to sign in.');
+          user = data.session.user;
+        }
+        document.getElementById('sb-pass').value = '';
+        await goLiveWithDevices(user, readSyncSettings()?.mapping);
+        saveSyncSettings();
+      } catch (err) {
+        sbClient = null;
+        sbPushBtn.disabled = true;
+        setSyncStatus('critical', 'Auth Error', err.message || String(err));
+      }
+    });
+
+    // The user's pods with their growing crop and control columns (migration 005).
+    const LIVE_DEVICE_SELECT =
+      'id, device_name, room, is_online, pump_on, light_on, light_brightness, ' +
+      'ph_dose_requested_at, refill_requested_at, ' +
+      'crop_batches(status, custom_crop_name, planted_date, crop_recipes(crop_name, duration_days))';
+
+    // Reads the user's devices and turns them into simulator pods. Keeps the
+    // water readings of pods already on screen, so a reload never jumps.
+    async function loadLivePods() {
+      const { data: devices, error } = await sbClient
+        .from('devices')
+        .select(LIVE_DEVICE_SELECT)
+        .order('created_at');
+      if (error) throw error;
+      sbDevices = devices || [];
+
+      const old = { ...podsState };
+      Object.keys(podsState).forEach((k) => delete podsState[k]);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      sbDevices.forEach((d) => {
+        const batch = (d.crop_batches || []).find((b) => b.status === 'ACTIVE');
+        const crop = batch
+          ? (batch.custom_crop_name || '').trim() || batch.crop_recipes?.crop_name || 'Crop'
+          : null;
+        const planted = batch ? new Date(`${batch.planted_date}T00:00:00`) : today;
+        const day = Math.floor((today - planted) / 86400000) + 1;
+        const duration = batch?.crop_recipes?.duration_days || 30;
+        const prev = old[d.id];
+        podsState[d.id] = {
+          id: d.id,
+          name: d.device_name || 'AquaGrow pod',
+          room: d.room || 'Home',
+          crop,
+          day,
+          daysToHarvest: Math.max(0, duration - (day - 1)),
+          ph: prev?.ph ?? 6.2,
+          ec: prev?.ec ?? 1.6,
+          waterTemp: prev?.waterTemp ?? 22.3,
+          waterLevel: prev?.waterLevel ?? 90,
+          pumpOn: d.pump_on ?? true,
+          lightOn: d.light_on ?? true,
+          lightBrightness: d.light_brightness ?? 80,
+          mistOn: prev?.mistOn ?? true,
+          isOnline: prev?.isOnline ?? true,
+          serverOnline: !!d.is_online,
+          doseSeen: d.ph_dose_requested_at,
+          refillSeen: d.refill_requested_at,
+        };
+        sbDeviceMapping[d.id] = d.id;
+      });
+      if (!podsState[activePodId]) activePodId = sbDevices[0]?.id;
+    }
+
+    async function goLiveWithDevices(user) {
+      await loadLivePods();
+      if (sbDevices.length === 0) {
+        setSyncStatus(
+          'warning',
+          '0 devices',
+          `Signed in as ${user.email}. Add a pod in the AquaGrow app first.`
+        );
+        sbPushBtn.disabled = true;
+        return;
+      }
+      // Each live pod streams to its own device row: no target to pick.
+      sbDeviceWrap.hidden = true;
+      sbPushBtn.disabled = false;
+      syncAllFromState();
+      subscribeToApp();
+      startStreaming();
+
+      setSyncStatus(
+        'brand',
+        `Live · ${sbDevices.length} pod${sbDevices.length > 1 ? 's' : ''}`,
+        `Connected as ${user.email}. Streaming every 4 s; app commands apply here.`
+      );
+      showToast('Connected to Supabase Realtime!');
+    }
+
+    // Applies commands the app wrote on a device row (pump, light, pH-down, refill).
+    function applyAppCommands(row) {
+      const pod = podsState[row.id];
+      if (!pod) return;
+      const said = [];
+      if (row.pump_on !== undefined && row.pump_on !== pod.pumpOn) {
+        pod.pumpOn = row.pump_on;
+        said.push(`pump ${row.pump_on ? 'on' : 'off'}`);
+      }
+      if (row.light_on !== undefined && row.light_on !== pod.lightOn) {
+        pod.lightOn = row.light_on;
+        said.push(`light ${row.light_on ? 'on' : 'off'}`);
+      }
+      if (row.light_brightness !== undefined && row.light_brightness !== pod.lightBrightness) {
+        pod.lightBrightness = row.light_brightness;
+        said.push(`brightness ${row.light_brightness}%`);
+      }
+      if (row.ph_dose_requested_at && row.ph_dose_requested_at !== pod.doseSeen) {
+        pod.doseSeen = row.ph_dose_requested_at;
+        pod.ph = Math.max(4.0, +(pod.ph - 0.3).toFixed(2));
+        if (row.id === activePodId) doseBurstTime = 1.0;
+        said.push(`pH-down dosed (pH ${pod.ph.toFixed(1)})`);
+      }
+      if (row.refill_requested_at && row.refill_requested_at !== pod.refillSeen) {
+        pod.refillSeen = row.refill_requested_at;
+        pod.waterLevel = 100;
+        said.push('tank refilled');
+      }
+      if (typeof row.is_online === 'boolean') pod.serverOnline = row.is_online;
+      if (!said.length) return;
+      showToast(`App → ${pod.name}: ${said.join(', ')}`);
+      if (row.id === activePodId) syncAllFromState();
+      // Report the result straight away, so the app sees the change.
+      if (pod.isOnline && (row.ph_dose_requested_at || row.refill_requested_at)) {
+        pushTelemetryToSupabase(pod);
+      }
+    }
+
+    let appChannel = null;
+    function subscribeToApp() {
+      if (appChannel) sbClient.removeChannel(appChannel);
+      appChannel = sbClient
+        .channel(`sim-app-${Date.now()}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'devices' }, (p) =>
+          applyAppCommands(p.new)
+        )
+        // A pod added, planted or harvested in the app: reload the pods.
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'devices' }, reloadFromApp)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'crop_batches' }, reloadFromApp)
+        .subscribe();
+    }
+
+    async function reloadFromApp() {
+      try {
+        await loadLivePods();
+        syncAllFromState();
+        showToast('Pods updated from the app');
+      } catch (err) {
+        setSyncStatus('critical', 'Reload failed', err.message || String(err));
+      }
+    }
+
+    // Live pods report every 4 s, like the real ESP32. Water drifts a little,
+    // warms up while the pump is off and slowly evaporates.
+    let streamTimer = null;
+    function startStreaming() {
+      clearInterval(streamTimer);
+      streamTimer = setInterval(() => {
+        if (!sbClient || !document.getElementById('chk-auto-sync').checked) return;
+        Object.values(podsState).forEach((pod) => {
+          if (!pod.isOnline) return;
+          pod.ph = Math.min(8.5, Math.max(4.0, pod.ph + (Math.random() - 0.5) * 0.03));
+          pod.ec = Math.max(0.2, pod.ec + (Math.random() - 0.5) * 0.02);
+          const targetTemp = pod.pumpOn ? 22.3 : 27;
+          pod.waterTemp += (targetTemp - pod.waterTemp) * 0.06 + (Math.random() - 0.5) * 0.04;
+          pod.waterLevel = Math.max(0, pod.waterLevel - 0.03);
+          pushTelemetryToSupabase(pod);
+        });
+        syncAllFromState();
+      }, 4000);
+    }
+
+    // Pump, light and brightness changed here: write them on the device row,
+    // so the app's controls show the same state.
+    async function pushActuators(pod) {
+      if (!sbClient || !podsState[pod.id] || !sbDevices.some((d) => d.id === pod.id)) return;
+      const { error } = await sbClient
+        .from('devices')
+        .update({
+          pump_on: pod.pumpOn,
+          light_on: pod.lightOn,
+          light_brightness: Math.round(pod.lightBrightness),
+        })
+        .eq('id', pod.id);
+      if (error) setSyncStatus('warning', 'Update err', `Control update failed: ${error.message}`);
+    }
+
+    // On page load: fill in the remembered fields and reconnect with the saved session.
+    (async () => {
+      const saved = readSyncSettings();
+      if (!saved) return;
+      document.getElementById('sb-url').value = saved.url || '';
+      document.getElementById('sb-key').value = saved.key || '';
+      document.getElementById('sb-email').value = saved.email || '';
+      document.getElementById('sb-pass').required = false;
+      if (!saved.url || !saved.key) return;
+      try {
+        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+        sbClient = createClient(saved.url, saved.key);
+        const { data } = await sbClient.auth.getSession();
+        if (!data.session) {
+          sbClient = null;
+          setSyncStatus('neutral', 'Local Only', 'Session expired. Enter the password and Connect.');
+          return;
+        }
+        setSyncStatus('warning', 'Connecting…', 'Reconnecting with the saved session…');
+        await goLiveWithDevices(data.session.user, saved.mapping);
+      } catch (err) {
+        sbClient = null;
+        sbPushBtn.disabled = true;
+        setSyncStatus('critical', 'Auth Error', err.message || String(err));
+      }
+    })();
+
+    document.getElementById('btn-sb-forget').addEventListener('click', async () => {
+      try {
+        localStorage.removeItem(SYNC_SETTINGS_KEY);
+      } catch (_) {
+        /* ignore */
+      }
+      if (sbClient) await sbClient.auth.signOut().catch(() => {});
+      sbClient = null;
+      sbDevices = [];
+      refreshDeviceSelector();
+      sbPushBtn.disabled = true;
+      ['sb-url', 'sb-key', 'sb-email', 'sb-pass'].forEach((id) => {
+        document.getElementById(id).value = '';
+      });
+      // Back to the two demo pods.
+      location.reload();
+    });
+
+    sbPushBtn.addEventListener('click', () => pushTelemetryToSupabase(currentPod()));
+
+    // -------------------------------------------------------------------------
+    // 11. Animation Loop (Mist drift, Pump bubbles, Gentle leaf motion)
+    // -------------------------------------------------------------------------
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      const elapsed = clock.getElapsedTime();
+      const pod = currentPod();
+
+      // Smooth camera preset transitions
+      if (camAnim) {
+        camAnim.t = Math.min(1, camAnim.t + dt * 2.4);
+        const ease = 1 - Math.pow(1 - camAnim.t, 3);
+        camera.position.lerpVectors(camAnim.startPos, camAnim.endPos, ease);
+        controls.target.lerpVectors(camAnim.startTarget, camAnim.endTarget, ease);
+        if (camAnim.t >= 1) camAnim = null;
+      }
+
+      controls.update();
+
+      // Ultrasonic mist plume animation (matches photo's vapor plume behind mast)
+      mistGroup.visible = pod.mistOn && pod.isOnline && pod.waterLevel > 10;
+      if (mistGroup.visible) {
+        mistParticles.forEach((p, idx) => {
+          p.sprite.position.y += p.vy;
+          p.sprite.position.x += Math.sin(elapsed * 1.2 + p.phase) * 0.0018 + p.vx;
+          const progress = (p.sprite.position.y - (basinHeight + 0.3)) / 1.35;
+          p.sprite.material.opacity = Math.sin(Math.min(1, Math.max(0, progress)) * Math.PI) * 0.26;
+          if (p.sprite.position.y > basinHeight + 1.65) {
+            p.sprite.position.set(
+              mastX + 0.18 + Math.random() * 0.35,
+              basinHeight + 0.32,
+              mastZ + 0.15 + Math.random() * 0.35
+            );
+          }
+        });
+      }
+
+      // Submerged pump bubbles animation
+      bubblePoints.visible = pod.pumpOn && pod.isOnline;
+      if (bubblePoints.visible) {
+        const posAttr = bubbleGeo.getAttribute('position');
+        const maxY = 0.08 + maxWaterHeight * (pod.waterLevel / 100);
+        for (let i = 0; i < bubbleCount; i++) {
+          let y = posAttr.getY(i) + 0.008;
+          if (y > maxY) y = 0.12;
+          posAttr.setY(i, y);
+        }
+        posAttr.needsUpdate = true;
+      }
+
+      // Subtle organic breeze on plant leaves
+      plantClusters.forEach((cluster, idx) => {
+        const activeFoliage = activePodId === 'pod-alpha' ? cluster.basil.foliage : cluster.spinach.foliage;
+        activeFoliage.rotation.z = Math.sin(elapsed * 1.5 + idx) * 0.018;
+        activeFoliage.rotation.x = Math.cos(elapsed * 1.2 + idx) * 0.014;
+      });
+
+      // Dosing ring pulse effect
+      if (doseBurstTime > 0) {
+        doseBurstTime = Math.max(0, doseBurstTime - dt * 1.4);
+        const s = 1 + (1 - doseBurstTime) * 4.5;
+        doseRing.scale.set(s, s, 1);
+        doseRing.material.opacity = doseBurstTime * 0.75;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    syncAllFromState();
+    animate();
+  </script>
+</body>
+</html>

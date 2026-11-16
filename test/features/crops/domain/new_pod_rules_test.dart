@@ -25,4 +25,13 @@ void main() {
     expect(NewPodRules.serialNumber('AQG 2026'), format);
     expect(NewPodRules.serialNumber('A' * 41), format);
   });
+
+  test('a pod name already in use is refused, in any case', () {
+    const taken = ['Pod Alpha', 'Pod Beta'];
+    expect(
+      NewPodRules.name(' pod alpha ', taken: taken),
+      'You already have a pod called pod alpha. Pick another name.',
+    );
+    expect(NewPodRules.name('Pod Gamma', taken: taken), isNull);
+  });
 }

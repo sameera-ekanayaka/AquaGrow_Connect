@@ -87,8 +87,8 @@ void main() {
       expect(added.name, 'Pod Gamma');
       expect(added.room, 'Balcony');
       expect(added.batch, isNull);
-      await tester.ensureVisible(find.text('No active crop growing'));
-      expect(find.text('No active crop growing'), findsOneWidget);
+      await tester.ensureVisible(find.text('Tap to plant a crop'));
+      expect(find.text('Tap to plant a crop'), findsOneWidget);
       // The empty pod's card is titled with the pod's own name.
       expect(find.text('Pod Gamma'), findsOneWidget);
       expect(find.text('Balcony'), findsOneWidget);
@@ -210,6 +210,40 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('My Pods'), findsOneWidget);
+    });
+
+    testWidgets('tapping an empty pod plants the chosen crop', (tester) async {
+      await openAddPod(tester);
+      await fillAndSubmit(tester);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+
+      final podCard = find.text('Tap to plant a crop');
+      await tester.ensureVisible(podCard);
+      await tester.tap(podCard);
+      await tester.pumpAndSettle();
+      expect(find.text('Choose a crop'), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Plant Sweet Mint'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Choose a crop'), findsNothing);
+      expect(find.text('Sweet Mint planted in Pod Gamma'), findsOneWidget);
+      final gamma = sim.pods.firstWhere((p) => p.name == 'Pod Gamma');
+      expect(gamma.batch?.cropName, 'Sweet Mint');
+      expect(gamma.batch?.daysToHarvest, 35);
+    });
+
+    testWidgets('a name already used by a pod is refused', (tester) async {
+      await openAddPod(tester);
+      await fillAndSubmit(tester, name: 'Pod Alpha');
+
+      expect(
+        find.text(
+          'You already have a pod called Pod Alpha. Pick another name.',
+        ),
+        findsOneWidget,
+      );
+      expect(sim.pods, hasLength(2));
     });
   });
 }

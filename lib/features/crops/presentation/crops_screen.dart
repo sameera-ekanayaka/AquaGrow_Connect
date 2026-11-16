@@ -4,6 +4,7 @@ import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/crops/presentation/add_pod_screen.dart';
+import 'package:aquagrow_mobile/features/crops/presentation/plant_crop_sheet.dart';
 import 'package:aquagrow_mobile/shared/widgets/pod_card.dart';
 import 'package:aquagrow_mobile/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ class CropsScreen extends ConsumerWidget {
 
     final String stageLabel = batch == null ? 'Empty' : batch.stage(now).label;
     final String harvestLine = batch == null
-        ? 'No active crop growing'
+        ? 'Tap to plant a crop'
         : 'Day ${batch.dayNumber(now)} · Harvest est. in ${batch.daysLeft(now)} days';
 
     return PodCard(
@@ -110,7 +111,9 @@ class CropsScreen extends ConsumerWidget {
       stageLabel: stageLabel,
       harvestLine: harvestLine,
       imageAsset: batch?.imageAsset,
-      onTap: () => context.push(AppRoutes.cropDetail(pod.id)),
+      onTap: batch == null
+          ? () => showPlantCropSheet(context, pod)
+          : () => context.push(AppRoutes.cropDetail(pod.id)),
     );
   }
 

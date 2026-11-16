@@ -42,9 +42,6 @@ class _AddPodScreenState extends ConsumerState<AddPodScreen> {
   PodSystemType _type = PodSystemType.nft;
   bool _busy = false;
 
-  /// After the first try, errors update as the user types.
-  bool _tried = false;
-
   /// "Already registered", from the repository, shown under the serial field.
   String? _serialTaken;
 
@@ -61,7 +58,6 @@ class _AddPodScreenState extends ConsumerState<AddPodScreen> {
 
   Future<void> _submit() async {
     setState(() {
-      _tried = true;
       _serialTaken = null;
       _error = null;
     });
@@ -109,9 +105,8 @@ class _AddPodScreenState extends ConsumerState<AddPodScreen> {
       body: SafeArea(
         child: Form(
           key: _formKey,
-          autovalidateMode: _tried
-              ? AutovalidateMode.onUserInteraction
-              : AutovalidateMode.disabled,
+          // Each field checks itself as soon as the user types in it.
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
             padding: const EdgeInsets.all(AgSpace.screen),
             children: [
@@ -131,7 +126,14 @@ class _AddPodScreenState extends ConsumerState<AddPodScreen> {
                   helperText: 'Shown on Home and My Pods.',
                   prefixIcon: Icon(Icons.spa_outlined),
                 ),
-                validator: NewPodRules.name,
+                validator: (v) => NewPodRules.name(
+                  v,
+                  taken: [
+                    for (final pod
+                        in ref.read(podsProvider).valueOrNull ?? const <Pod>[])
+                      pod.name,
+                  ],
+                ),
               ),
               const SizedBox(height: AgSpace.s16),
               TextFormField(

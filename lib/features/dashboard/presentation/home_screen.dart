@@ -7,6 +7,7 @@ import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/controls/presentation/pod_controls_card.dart';
+import 'package:aquagrow_mobile/features/crops/presentation/plant_crop_sheet.dart';
 import 'package:aquagrow_mobile/features/dashboard/application/home_clock.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/priority_task.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/tile_caption.dart';
@@ -163,6 +164,11 @@ class _Hero extends StatelessWidget {
       return EmptyView(
         title: '${pod.name} is empty',
         message: 'Plant a crop to track its growth here.',
+        action: FilledButton.icon(
+          onPressed: () => showPlantCropSheet(context, pod),
+          icon: const Icon(Icons.eco_outlined),
+          label: const Text('Plant a crop'),
+        ),
       );
     }
     final left = batch.daysLeft(now);

@@ -76,9 +76,9 @@ class _PodControlsCardState extends ConsumerState<PodControlsCard> {
   }
 
   Widget _body(AsyncValue<ActuatorState> actuators) {
-    // In live mode, commands still go to the built-in simulator, which does
-    // not know pods from Supabase, so they have no actuator state. That is
-    // not the user's fault: explain it instead of "Something went wrong".
+    // In live mode the controls live on the pod's `devices` row. A database
+    // without migration 005 has no such columns: explain it instead of
+    // "Something went wrong".
     if (actuators.hasError && !actuators.hasValue) {
       if (!_pod.isOnline) return _controls(ActuatorState.initial);
       return EmptyView(

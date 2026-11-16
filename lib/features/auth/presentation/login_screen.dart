@@ -82,6 +82,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         const SizedBox(height: AgSpace.s32),
         Form(
           key: _formKey,
+          // Each field checks itself as soon as the user types in it.
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: AutofillGroup(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
