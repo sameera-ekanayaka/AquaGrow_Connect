@@ -5,6 +5,7 @@ import 'package:aquagrow_mobile/core/interfaces/i_control_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_local_data_eraser.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_preferences_store.dart';
+import 'package:aquagrow_mobile/core/interfaces/i_share_service.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_telemetry_repository.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/models/actuator_state.dart';
@@ -12,6 +13,7 @@ import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/pod_alert.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/network/supabase_client.dart';
+import 'package:aquagrow_mobile/core/services/share_service.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/data/local/local_data_eraser.dart';
 import 'package:aquagrow_mobile/data/local/preferences_store.dart';
@@ -157,4 +159,9 @@ final alertsProvider = StreamProvider<List<PodAlert>>((ref) {
 final unreadAlertCountProvider = Provider<int>((ref) {
   final alerts = ref.watch(alertsProvider).valueOrNull ?? const <PodAlert>[];
   return alerts.where((a) => !a.acknowledged).length;
+});
+
+/// Platform share service for text summaries and CSV exports.
+final shareServiceProvider = Provider<IShareService>((ref) {
+  return const ShareService();
 });

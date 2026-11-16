@@ -53,7 +53,8 @@ TrendForecast? computeTrend({
 
   final recent = readings
       .where(
-          (r) => !r.recordedAt.isBefore(cutoff) && !r.recordedAt.isAfter(now))
+        (r) => !r.recordedAt.isBefore(cutoff) && !r.recordedAt.isAfter(now),
+      )
       .toList()
     ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
 
