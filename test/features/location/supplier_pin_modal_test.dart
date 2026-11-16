@@ -1,8 +1,34 @@
+import 'package:aquagrow_mobile/core/interfaces/i_launcher_service.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/presentation/widgets/supplier_pin_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _FakeLauncher implements ILauncherService {
+  _FakeLauncher({this.success = true});
+  final bool success;
+  String? lastPhone;
+  bool directionsCalled = false;
+
+  @override
+  Future<bool> dial(String phone) async {
+    lastPhone = phone;
+    return success;
+  }
+
+  @override
+  Future<bool> openDirections({
+    required double latitude,
+    required double longitude,
+    String? label,
+  }) async {
+    directionsCalled = true;
+    return success;
+  }
+}
 
 /// A verified test supplier used across all modal tests.
 const _verifiedSupplier = HydroSupplier(
@@ -45,14 +71,20 @@ Widget _buildModal({
   HydroSupplier supplier = _verifiedSupplier,
   double? userLatitude,
   double? userLongitude,
+  ILauncherService? launcher,
 }) {
-  return MaterialApp(
-    theme: AppTheme.light,
-    home: Scaffold(
-      body: SupplierPinModal(
-        supplier: supplier,
-        userLatitude: userLatitude,
-        userLongitude: userLongitude,
+  return ProviderScope(
+    overrides: [
+      if (launcher != null) launcherServiceProvider.overrideWithValue(launcher),
+    ],
+    child: MaterialApp(
+      theme: AppTheme.light,
+      home: Scaffold(
+        body: SupplierPinModal(
+          supplier: supplier,
+          userLatitude: userLatitude,
+          userLongitude: userLongitude,
+        ),
       ),
     ),
   );
@@ -234,34 +266,37 @@ void main() {
       expect(find.text('Directions'), findsOneWidget);
     });
 
-    testWidgets('tapping Call shows Dialing snackbar', (tester) async {
+    testWidgets('tapping Call invokes launcher dial', (tester) async {
       tester.view.physicalSize = const Size(800, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(_buildModal());
+      final launcher = _FakeLauncher(success: true);
+      await tester.pumpWidget(_buildModal(launcher: launcher));
       await tester.pump();
 
       await tester.tap(find.byIcon(Icons.phone));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.textContaining('Dialing'), findsOneWidget);
+      expect(launcher.lastPhone, _verifiedSupplier.phone);
     });
 
-    testWidgets('tapping Directions shows Navigating snackbar', (tester) async {
+    testWidgets('tapping Directions invokes launcher openDirections',
+        (tester) async {
       tester.view.physicalSize = const Size(800, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(_buildModal());
+      final launcher = _FakeLauncher(success: true);
+      await tester.pumpWidget(_buildModal(launcher: launcher));
       await tester.pump();
 
       await tester.tap(find.byIcon(Icons.directions));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.textContaining('Navigating to'), findsOneWidget);
+      expect(launcher.directionsCalled, isTrue);
     });
 
     testWidgets('shows inventory section header', (tester) async {

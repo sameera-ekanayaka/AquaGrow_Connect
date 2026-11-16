@@ -47,4 +47,3 @@ void main() {
     expect(p.qrData, contains('Genovese Basil'));
   });
 }
-

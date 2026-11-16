@@ -67,7 +67,7 @@ void main() {
 
     expect(find.text('Data mode'), findsOneWidget);
     expect(find.text('Simulation · built-in pods'), findsOneWidget);
-    expect(find.textContaining('Android Keystore'), findsOneWidget);
+    expect(find.text('Your pods are private to your account.'), findsOneWidget);
   });
 
   testWidgets('says not synced yet before the first sync', (tester) async {
@@ -104,6 +104,8 @@ void main() {
   testWidgets('sign out asks first and does nothing on cancel', (tester) async {
     await pumpProfile(tester);
 
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('profile-sign-out')));
     await tester.pumpAndSettle();
     expect(find.text('Sign out?'), findsOneWidget);
@@ -117,6 +119,8 @@ void main() {
   testWidgets('sign out signs out after confirming', (tester) async {
     await pumpProfile(tester);
 
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('profile-sign-out')));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Sign out'));

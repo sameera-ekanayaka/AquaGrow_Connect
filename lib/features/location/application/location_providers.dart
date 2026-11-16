@@ -1,10 +1,12 @@
 import 'package:aquagrow_mobile/core/config/app_config.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_geo_service.dart';
+import 'package:aquagrow_mobile/core/interfaces/i_launcher_service.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_weather_service.dart';
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/models/vpd_reading.dart';
 import 'package:aquagrow_mobile/core/models/weather_data.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
+import 'package:aquagrow_mobile/core/services/launcher_service.dart';
 import 'package:aquagrow_mobile/core/services/vpd_calculator.dart';
 import 'package:aquagrow_mobile/core/services/weather_service.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
@@ -16,6 +18,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final geoServiceProvider = Provider<IGeoService>((ref) {
   return GeoService();
 });
+
+/// Provider for external action launching (phone dialer, maps directions).
+final launcherServiceProvider = Provider<ILauncherService>((ref) {
+  return const LauncherService();
+});
+
+/// Selected display mode (List or Map) for the hydroponic supplier directory.
+enum SupplierViewMode {
+  /// Scrollable vertical list view.
+  list,
+
+  /// Interactive OpenStreetMap tile view.
+  map,
+}
+
+/// Tracks the active supplier directory view mode (defaults to [SupplierViewMode.list]).
+final supplierViewModeProvider =
+    StateProvider<SupplierViewMode>((ref) => SupplierViewMode.list);
 
 /// Provider for the atmospheric weather service.
 ///

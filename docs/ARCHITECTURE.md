@@ -42,7 +42,7 @@ repositories (Model). Screens never talk to Supabase, Hive or the simulator dire
 | `lib/app/` | `app.dart` (MaterialApp), `router/` (go_router, auth redirect), `shell/` (bottom nav, tab header, offline banner) | Tharindu |
 | `lib/core/config/` | `AppConfig`, `DataMode` from `--dart-define` | Frozen |
 | `lib/core/models/` | `Pod`, `CropBatch`, `SensorReading`, `SensorMetric`, `ActuatorState`, `PodAlert`, ... | Frozen (ask the group) |
-| `lib/core/interfaces/` | Repository contracts | Frozen (ask the group) |
+| `lib/core/interfaces/` | Repository and system contracts (`ILauncherService`, `IShareService`, etc.) | Frozen (ask the group) |
 | `lib/core/simulation/` | `PodSimulator`, `SimScenario` | Frozen (ask Tharindu) |
 | `lib/core/theme/` | `AgColors`, `AgSpace`, `AgRadius`, `AppTheme` from Figma | Tharindu (Osanda may tune token values to match Figma) |
 | `lib/core/errors/`, `logging/`, `utils/` | `AppFailure`, `AppLogger`, `Validators` | Frozen |
@@ -119,6 +119,11 @@ go_router, configured in `lib/app/router/app_router.dart`. Paths live in `AppRou
 - Repositories catch exceptions and throw an `AppFailure` subtype with a safe, friendly message.
 - `AsyncValueView` shows `AppFailure.message`. Never show `e.toString()` to users.
 - Log with `const _log = AppLogger('feature-name');`. Never `print`. Logs appear in Android Studio Logcat.
+
+## 8.1 Device Integrations and Services
+
+- **Launcher Service (`ILauncherService`)**: Provides decoupled dialer (`tel:`) and maps direction (`geo:`, Google Maps web fallback) capabilities. In tests, mocked with fakes.
+- **Share Service (`IShareService`)**: Provides cross-platform text and byte/file export capabilities for Harvest Passports and telemetry CSV exports. Tests override it with in-memory recorders.
 
 ## 9. Security (lecture 9, OWASP Mobile Top 10)
 

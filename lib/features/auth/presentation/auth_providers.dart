@@ -108,6 +108,59 @@ class AuthController extends StateNotifier<AuthUiState> {
     state = const AuthUiState();
   }
 
+  /// Updates profile metadata (name, farm name, phone).
+  Future<bool> updateProfile({
+    required String fullName,
+    String? farmName,
+    String? phone,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final updated = await _repository.updateProfile(
+        fullName: fullName,
+        farmName: farmName,
+        phone: phone,
+      );
+      state = state.copyWith(isLoading: false, user: updated);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: _messageFor(e));
+      return false;
+    }
+  }
+
+  /// Changes the user's password.
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      await _repository.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: _messageFor(e));
+      return false;
+    }
+  }
+
+  /// Permanently removes the authenticated user account and associated personal data.
+  Future<bool> deleteAccount({required String password}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      await _repository.deleteAccount(password: password);
+      state = const AuthUiState();
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: _messageFor(e));
+      return false;
+    }
+  }
+
   /// Sends a password reset email to [email].
   ///
   /// Returns null when the email was sent, or a message that is safe to show

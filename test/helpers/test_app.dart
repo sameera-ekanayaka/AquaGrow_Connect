@@ -88,6 +88,30 @@ class FakeAuthRepository implements IAuthRepository {
 
   @override
   Future<void> resetPassword({required String email}) async {}
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String fullName,
+    String? farmName,
+    String? phone,
+  }) async {
+    final updated = (user ?? testUser).copyWith(
+      fullName: fullName,
+      farmName: farmName,
+      phone: phone,
+    );
+    _setUser(updated);
+    return updated;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {}
+
+  @override
+  Future<void> deleteAccount({required String password}) async => signOut();
 }
 
 /// Builds the whole app for a widget test, with no plugins, network or timers:

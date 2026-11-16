@@ -10,7 +10,7 @@ phone volume on, screen mirroring tested. Keep the backup video ready.
 | 2 | Sameera | 1:00 | Sign in with the demo account. Show profile. | Supabase Auth, Keystore tokens, RLS (L9, security) |
 | 3 | Osanda | 1:30 | Home live readings. Care > Pod simulator > **pH crash**. Back to Home: red pH tile, notification, alert in the list. Turn the pump off: confirm dialog. | IoT (ILO6), L4 services, L5 dialogs |
 | 4 | Udeshika | 1:00 | Crops > Pod Alpha detail: stage timeline, days left. Harvest, then show the Passport QR and scan it with another phone. | L5 lists and detail, data integrity |
-| 5 | Imasha | 1:00 | Insights: 24 h chart and stability, weather and VPD. Care > suppliers sorted by distance. Shake to refresh. | L7 REST, L8 location and sensors |
+| 5 | Imasha | 1:00 | Insights: 24 h chart, stability, and trend warning chip when pH is falling. Weather and VPD. Care > suppliers sorted by distance. Shake to refresh. | L7 REST, L8 location and sensors |
 | 6 | Sameera | 0:45 | Flight mode on: app still works, offline banner. Off: "readings synced". | L1 networks, L9 sync |
 | 7 | Tharindu | 0:45 | Slides: architecture, tests and CI, Flutter vs SwiftUI, future work | L4, L10, L11 |
 

@@ -33,4 +33,28 @@ void main() {
       expect(Validators.numberInRange('15', min: 0, max: 14), isNotNull);
     });
   });
+
+  group('Validators.fullName', () {
+    test('requires at least two words', () {
+      expect(Validators.fullName(''), isNotNull);
+      expect(Validators.fullName('Imasha'), isNotNull);
+      expect(Validators.fullName('Imasha Perera'), isNull);
+      expect(Validators.fullName('  Kamal  Silva  '), isNull);
+    });
+  });
+
+  group('Validators.phone', () {
+    test('accepts null or empty as optional', () {
+      expect(Validators.phone(null), isNull);
+      expect(Validators.phone(''), isNull);
+      expect(Validators.phone('   '), isNull);
+    });
+
+    test('validates 9 to 12 digits', () {
+      expect(Validators.phone('12345'), isNotNull);
+      expect(Validators.phone('0771234567'), isNull);
+      expect(Validators.phone('+94771234567'), isNull);
+      expect(Validators.phone('123456789012345'), isNotNull);
+    });
+  });
 }

@@ -3,6 +3,8 @@ import 'package:aquagrow_mobile/app/router/auth_session.dart';
 import 'package:aquagrow_mobile/app/shell/app_shell.dart';
 import 'package:aquagrow_mobile/features/alerts/presentation/alerts_screen.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/auth_providers.dart';
+import 'package:aquagrow_mobile/features/auth/presentation/change_password_screen.dart';
+import 'package:aquagrow_mobile/features/auth/presentation/edit_profile_screen.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/login_screen.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/profile_screen.dart';
 import 'package:aquagrow_mobile/features/auth/presentation/register_screen.dart';
@@ -56,16 +58,27 @@ final routerProvider = Provider<GoRouter>((ref) {
       location: state.matchedLocation,
     ),
     routes: [
-      GoRoute(path: AppRoutes.onboarding, builder: (_, __) => const OnboardingScreen()),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (_, __) => const OnboardingScreen(),
+      ),
       GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
-      GoRoute(path: AppRoutes.register, builder: (_, __) => const RegisterScreen()),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (_, __) => const RegisterScreen(),
+      ),
 
       // Bottom-navigation tabs. Order must match AppShell.destinations.
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => AppShell(navigationShell: shell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: AppRoutes.home, builder: (_, __) => const HomeScreen())],
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (_, __) => const HomeScreen(),
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [
@@ -127,9 +140,28 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Full-screen pages that cover the bottom bar.
       GoRoute(path: AppRoutes.alerts, builder: (_, __) => const AlertsScreen()),
-      GoRoute(path: AppRoutes.profile, builder: (_, __) => const ProfileScreen()),
-      GoRoute(path: AppRoutes.simulator, builder: (_, __) => const SimulatorPanelScreen()),
-      GoRoute(path: AppRoutes.settings, builder: (_, __) => const SettingsScreen()),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (_, __) => const ProfileScreen(),
+        routes: [
+          GoRoute(
+            path: 'edit',
+            builder: (_, __) => const EditProfileScreen(),
+          ),
+          GoRoute(
+            path: 'password',
+            builder: (_, __) => const ChangePasswordScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.simulator,
+        builder: (_, __) => const SimulatorPanelScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (_, __) => const SettingsScreen(),
+      ),
     ],
   );
 

@@ -45,6 +45,8 @@ class UserProfile {
   final String id;
   final String email;
   final String? fullName;
+  final String? farmName;
+  final String? phone;
   final String? avatarUrl;
   final UserRole role;
   final DateTime createdAt;
@@ -53,6 +55,8 @@ class UserProfile {
     required this.id,
     required this.email,
     this.fullName,
+    this.farmName,
+    this.phone,
     this.avatarUrl,
     required this.role,
     required this.createdAt,
@@ -67,6 +71,8 @@ class UserProfile {
       id: json['id'] as String,
       email: json['email'] as String? ?? '',
       fullName: json['full_name'] as String?,
+      farmName: json['farm_name'] as String?,
+      phone: json['phone'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       role: UserRole.fromString(json['role'] as String? ?? 'owner'),
       createdAt: json['created_at'] != null
@@ -80,6 +86,8 @@ class UserProfile {
       'id': id,
       'email': email,
       'full_name': fullName,
+      'farm_name': farmName,
+      'phone': phone,
       'avatar_url': avatarUrl,
       'role': role.toDbValue(),
       'created_at': createdAt.toIso8601String(),
@@ -90,6 +98,8 @@ class UserProfile {
     String? id,
     String? email,
     String? fullName,
+    String? farmName,
+    String? phone,
     String? avatarUrl,
     UserRole? role,
     DateTime? createdAt,
@@ -98,6 +108,8 @@ class UserProfile {
       id: id ?? this.id,
       email: email ?? this.email,
       fullName: fullName ?? this.fullName,
+      farmName: farmName ?? this.farmName,
+      phone: phone ?? this.phone,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,

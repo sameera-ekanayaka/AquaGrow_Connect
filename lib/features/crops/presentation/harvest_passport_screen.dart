@@ -3,6 +3,7 @@ import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/crops/application/crop_detail_providers.dart';
 import 'package:aquagrow_mobile/features/crops/domain/harvest_passport.dart';
+import 'package:aquagrow_mobile/features/crops/domain/passport_share_text.dart';
 import 'package:aquagrow_mobile/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,8 +28,41 @@ class HarvestPassportScreen extends ConsumerWidget {
     final c = context.ag;
     final text = Theme.of(context).textTheme;
 
+    final pods = podsAsync.valueOrNull;
+    final matches = pods?.where((p) => p.id == podId) ?? const [];
+    final activePod = matches.isEmpty ? null : matches.first;
+    final activeBatch = activePod?.batch;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Harvest Passport')),
+      appBar: AppBar(
+        title: const Text('Harvest Passport'),
+        actions: [
+          if (activePod != null && activeBatch != null)
+            IconButton(
+              icon: const Icon(Icons.share),
+              tooltip: 'Share passport',
+              onPressed: () {
+                final now = DateTime.now();
+                final averages =
+                    ref.read(cropTodayTelemetryProvider(podId)).valueOrNull;
+                final passport = HarvestPassport(
+                  crop: activeBatch.cropName,
+                  variety: activeBatch.variety,
+                  pod: activePod.name,
+                  plantedAt: activeBatch.plantedAt,
+                  harvestedAt: DateTime(now.year, now.month, now.day),
+                  avgPh: averages?.avgPh,
+                  avgEc: averages?.avgEc,
+                );
+                final shareText = buildPassportShareText(passport);
+                ref.read(shareServiceProvider).shareText(
+                      shareText,
+                      subject: 'Harvest Passport: ${passport.crop}',
+                    );
+              },
+            ),
+        ],
+      ),
       body: SafeArea(
         child: AsyncValueView<List<Pod>>(
           value: podsAsync,

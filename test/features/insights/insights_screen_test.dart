@@ -1,3 +1,4 @@
+import 'package:aquagrow_mobile/core/interfaces/i_share_service.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
@@ -13,6 +14,27 @@ import 'package:aquagrow_mobile/features/location/presentation/weather_summary_c
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class _FakeShareService implements IShareService {
+  String? sharedFileName;
+  String? sharedMimeType;
+  List<int>? sharedBytes;
+
+  @override
+  Future<void> shareText(String text, {String? subject}) async {}
+
+  @override
+  Future<void> shareBytes({
+    required List<int> bytes,
+    required String fileName,
+    required String mimeType,
+    String? text,
+  }) async {
+    sharedBytes = bytes;
+    sharedFileName = fileName;
+    sharedMimeType = mimeType;
+  }
+}
 
 void main() {
   final fixedClock = DateTime(2026, 11, 15, 10, 0);
@@ -218,6 +240,65 @@ void main() {
         // Verify metric changed to EC
         expect(container.read(historyMetricProvider), equals(SensorMetric.ec));
         expect(find.textContaining('mS/cm'), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'tapping export button triggers shareBytes with generated CSV',
+      (tester) async {
+        final sim = PodSimulator(clock: () => fixedClock);
+        final fakeShare = _FakeShareService();
+        final container = ProviderContainer(
+          overrides: [
+            podSimulatorProvider.overrideWithValue(sim),
+            clockProvider.overrideWithValue(() => fixedClock),
+            selectedPodProvider.overrideWithValue(demoPod),
+            historyProvider.overrideWith((ref) => sampleReadings),
+            weatherDataProvider.overrideWith((ref) => sampleWeather),
+            shareServiceProvider.overrideWithValue(fakeShare),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(createWidgetUnderTest(container: container));
+        await tester.pump();
+
+        expect(find.byTooltip('Export readings'), findsOneWidget);
+        await tester.tap(find.byTooltip('Export readings'));
+        await tester.pump();
+
+        expect(fakeShare.sharedFileName, contains('aquagrow_pod_alpha'));
+        expect(fakeShare.sharedFileName, endsWith('.csv'));
+        expect(fakeShare.sharedMimeType, 'text/csv');
+        expect(fakeShare.sharedBytes, isNotNull);
+      },
+    );
+
+    testWidgets(
+      'tapping export button with empty history shows friendly SnackBar',
+      (tester) async {
+        final sim = PodSimulator(clock: () => fixedClock);
+        final fakeShare = _FakeShareService();
+        final container = ProviderContainer(
+          overrides: [
+            podSimulatorProvider.overrideWithValue(sim),
+            clockProvider.overrideWithValue(() => fixedClock),
+            selectedPodProvider.overrideWithValue(demoPod),
+            historyProvider.overrideWith((ref) => const <SensorReading>[]),
+            weatherDataProvider.overrideWith((ref) => sampleWeather),
+            shareServiceProvider.overrideWithValue(fakeShare),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(createWidgetUnderTest(container: container));
+        await tester.pump();
+
+        await tester.tap(find.byTooltip('Export readings'));
+        await tester.pump();
+
+        expect(find.text('No readings to export yet'), findsOneWidget);
+        expect(fakeShare.sharedBytes, isNull);
       },
     );
   });
