@@ -46,9 +46,9 @@ abstract final class AppTheme {
     );
 
     final textTheme = _textTheme(c, brightness);
+    // Minimal UI: cards are filled with the surface colour, no border.
     final cardShape = RoundedRectangleBorder(
       borderRadius: AgRadius.all(AgRadius.r20),
-      side: BorderSide(color: c.border),
     );
 
     return ThemeData(
@@ -109,9 +109,10 @@ abstract final class AppTheme {
           borderRadius: AgRadius.all(AgRadius.r16),
           borderSide: BorderSide(color: c.border),
         ),
+        // Minimal UI: filled fields, no outline until focused.
         enabledBorder: OutlineInputBorder(
           borderRadius: AgRadius.all(AgRadius.r16),
-          borderSide: BorderSide(color: c.border),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AgRadius.all(AgRadius.r16),
