@@ -1,3 +1,4 @@
+import 'package:aquagrow_mobile/core/config/app_config.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
@@ -34,6 +35,19 @@ class _SimulatorPanelScreenState extends ConsumerState<SimulatorPanelScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Live pods come from Supabase; the built-in simulator only knows the
+    // demo pods, so point to the 3D web simulator instead of failing.
+    if (ref.watch(appConfigProvider).dataMode == DataMode.live) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Pod simulator')),
+        body: const EmptyView(
+          icon: Icons.view_in_ar_rounded,
+          title: 'Live pods use the 3D simulator',
+          message: 'Open the AquaGrow 3D simulator on the laptop and pick a '
+              'pod there. Its readings and your controls show up here live.',
+        ),
+      );
+    }
     final sim = ref.watch(podSimulatorProvider);
     final pods = ref.watch(podsProvider).valueOrNull ?? const <Pod>[];
     final selectedId = ref.watch(selectedPodIdProvider);
