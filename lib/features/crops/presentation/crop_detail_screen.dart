@@ -1,4 +1,5 @@
 import 'package:aquagrow_mobile/app/router/app_routes.dart';
+import 'package:aquagrow_mobile/core/errors/app_failure.dart';
 import 'package:aquagrow_mobile/core/models/crop_batch.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
@@ -116,7 +117,7 @@ class CropDetailScreen extends ConsumerWidget {
                 const SizedBox(height: AgSpace.s24),
                 FilledButton(
                   onPressed: canHarvest
-                      ? () => _onHarvest(context, batch, stage)
+                      ? () => _onHarvest(context, ref, batch, stage)
                       : null,
                   child: Text(
                     stage == GrowthStage.harvested
@@ -135,6 +136,7 @@ class CropDetailScreen extends ConsumerWidget {
 
   Future<void> _onHarvest(
     BuildContext context,
+    WidgetRef ref,
     CropBatch batch,
     GrowthStage stage,
   ) async {
@@ -148,9 +150,28 @@ class CropDetailScreen extends ConsumerWidget {
       confirmLabel: isEarly ? 'Harvest early' : 'Harvest',
     );
 
-    if (confirmed && context.mounted) {
-      await context.push(AppRoutes.harvestPassport(podId));
+    if (!confirmed || !context.mounted) return;
+    // The passport reads the growing batch, so the pod empties after it.
+    await context.push(AppRoutes.harvestPassport(podId));
+    try {
+      await ref.read(podRepositoryProvider).harvest(podId);
+    } on AppFailure catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(e.message)));
+      }
+      return;
     }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('${batch.cropName} harvested. The pod is empty.'),
+        ),
+      );
+    context.pop();
   }
 }
 
