@@ -1,5 +1,5 @@
 -- ==============================================================================
--- 006: Ultrasonic mist control (feature/osanda-demo-fixes)
+-- 008: Ultrasonic mist control (feature/osanda-demo-fixes)
 -- ==============================================================================
 -- The app writes the wanted mist state; the pod or the 3D simulator obeys it.
 ALTER TABLE public.devices
