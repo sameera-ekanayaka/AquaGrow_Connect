@@ -5,6 +5,7 @@ import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
 import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
+import 'package:aquagrow_mobile/data/supabase/realtime_topics.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_rows.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -55,7 +56,7 @@ class SupabaseDeviceSource implements DeviceSource {
     controller = StreamController<void>(
       onListen: () {
         channel = _client
-            .channel('devices-changes')
+            .channel(RealtimeTopics.unique('devices-changes'))
             .onPostgresChanges(
               event: PostgresChangeEvent.all,
               schema: 'public',
