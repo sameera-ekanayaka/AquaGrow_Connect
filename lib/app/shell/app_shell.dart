@@ -1,6 +1,6 @@
 import 'package:aquagrow_mobile/app/shell/notification_setup.dart';
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
-import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
+import 'package:aquagrow_mobile/app/shell/pill_nav_bar.dart';
 import 'package:aquagrow_mobile/features/alerts/application/alert_engine.dart';
 import 'package:aquagrow_mobile/features/sync/presentation/sync_listener.dart';
 import 'package:flutter/material.dart';
@@ -23,24 +23,24 @@ class AppShell extends ConsumerWidget {
 
   /// Tab order must match the branches in `app_router.dart`.
   static const destinations = [
-    NavigationDestination(
-      icon: Icon(Icons.home_outlined),
-      selectedIcon: Icon(Icons.home),
+    PillNavItem(
+      icon: Icons.home_outlined,
+      selectedIcon: Icons.home,
       label: 'Home',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.eco_outlined),
-      selectedIcon: Icon(Icons.eco),
+    PillNavItem(
+      icon: Icons.eco_outlined,
+      selectedIcon: Icons.eco,
       label: 'Crops',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.insights_outlined),
-      selectedIcon: Icon(Icons.insights),
+    PillNavItem(
+      icon: Icons.insights_outlined,
+      selectedIcon: Icons.insights,
       label: 'Insights',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.spa_outlined),
-      selectedIcon: Icon(Icons.spa),
+    PillNavItem(
+      icon: Icons.spa_outlined,
+      selectedIcon: Icons.spa,
       label: 'Care',
     ),
   ];
@@ -57,7 +57,6 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Starts the alert engine once and keeps it alive while the shell is shown.
     ref.watch(alertEngineProvider);
-    final c = context.ag;
     return Scaffold(
       body: SyncListener(
         child: NotificationSetup(
@@ -69,42 +68,10 @@ class AppShell extends ConsumerWidget {
           ),
         ),
       ),
-      // Minimal UI: a floating white pill; only the current tab shows its
-      // label, on a lime indicator.
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AgSpace.s16,
-            0,
-            AgSpace.s16,
-            AgSpace.s8,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: AgRadius.all(AgRadius.pill),
-              boxShadow: [
-                BoxShadow(
-                  color: c.text.withValues(alpha: 0.1),
-                  blurRadius: 32,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: AgRadius.all(AgRadius.pill),
-              child: NavigationBar(
-                height: 64,
-                backgroundColor: c.background,
-                indicatorColor: c.brand,
-                labelBehavior:
-                    NavigationDestinationLabelBehavior.onlyShowSelected,
-                selectedIndex: navigationShell.currentIndex,
-                onDestinationSelected: _onTap,
-                destinations: destinations,
-              ),
-            ),
-          ),
-        ),
+      bottomNavigationBar: PillNavBar(
+        items: destinations,
+        selectedIndex: navigationShell.currentIndex,
+        onSelected: _onTap,
       ),
     );
   }

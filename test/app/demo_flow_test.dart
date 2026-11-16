@@ -33,7 +33,7 @@ void main() {
       find.descendant(of: find.byType(Badge), matching: find.text(count));
 
   Future<void> openTab(WidgetTester tester, String label) async {
-    await tester.tap(find.widgetWithText(NavigationDestination, label));
+    await tester.tap(find.byTooltip(label));
     await settle(tester);
   }
 

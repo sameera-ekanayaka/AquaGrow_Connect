@@ -22,7 +22,7 @@ void main() {
       await tester.pump();
 
       // Switch to Crops tab
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Crops'));
+      await tester.tap(find.byTooltip('Crops'));
       await tester.pumpAndSettle();
 
       expect(find.text('My Pods'), findsOneWidget);
@@ -38,7 +38,7 @@ void main() {
 
       await tester.pumpWidget(testApp(sim: sim));
       await tester.pump();
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Crops'));
+      await tester.tap(find.byTooltip('Crops'));
       await tester.pumpAndSettle();
 
       final addBtn = find.text('Add a pod');
@@ -166,7 +166,7 @@ void main() {
       await tester.pumpWidget(testApp(sim: sim));
       await tester.pump();
 
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Crops'));
+      await tester.tap(find.byTooltip('Crops'));
       await tester.pumpAndSettle();
 
       expect(find.byType(GridView), findsOneWidget);
@@ -187,7 +187,7 @@ void main() {
 
       await tester.pumpWidget(testApp(sim: empty));
       await tester.pump();
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Crops'));
+      await tester.tap(find.byTooltip('Crops'));
       await tester.pumpAndSettle();
 
       expect(find.text('No pods yet'), findsOneWidget);
@@ -206,7 +206,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Crops'));
+      await tester.tap(find.byTooltip('Crops'));
       await tester.pumpAndSettle();
 
       expect(find.text('My Pods'), findsOneWidget);
