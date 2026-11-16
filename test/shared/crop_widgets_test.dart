@@ -147,8 +147,8 @@ void main() {
         find.text('Day 8 of 28, harvest in about 20 days'),
         findsOneWidget,
       );
-      // Stage appears in the photo badge and in the body.
-      expect(find.text('Growing'), findsNWidgets(2));
+      // Stage appears once, in the photo badge.
+      expect(find.text('Growing'), findsOneWidget);
       expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
     });
 
