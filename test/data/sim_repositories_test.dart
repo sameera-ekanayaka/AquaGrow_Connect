@@ -6,6 +6,7 @@ import 'package:aquagrow_mobile/core/models/sensor_status.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/data/simulation/in_memory_alert_repository.dart';
 import 'package:aquagrow_mobile/data/simulation/sim_repositories.dart';
+import 'package:aquagrow_mobile/features/crops/domain/crop_recipes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -91,5 +92,27 @@ void main() {
         isA<ValidationFailure>().having((f) => f.message, 'message', 'This serial number is already registered.'),
       ),
     );
+  });
+
+  test('plantCrop fills an empty pod and harvest empties it again', () async {
+    final repo = SimPodRepository(sim);
+    final pod = await repo.addPod(
+      NewPod(name: 'Pod Gamma', room: 'Balcony', serialNumber: 'AQG-1', systemType: PodSystemType.nft),
+    );
+
+    await repo.plantCrop(pod.id, CropRecipes.findForCrop('Genovese Basil'));
+    var planted = (await repo.getPods()).firstWhere((p) => p.id == pod.id);
+    expect(planted.batch?.cropName, 'Genovese Basil');
+    expect(planted.batch?.daysToHarvest, 28);
+    expect(planted.batch?.plantedAt, DateTime(2026, 11, 15));
+
+    await expectLater(
+      repo.plantCrop(pod.id, CropRecipes.findForCrop('Baby Spinach')),
+      throwsA(isA<ValidationFailure>()),
+    );
+
+    await repo.harvest(pod.id);
+    planted = (await repo.getPods()).firstWhere((p) => p.id == pod.id);
+    expect(planted.batch, isNull);
   });
 }

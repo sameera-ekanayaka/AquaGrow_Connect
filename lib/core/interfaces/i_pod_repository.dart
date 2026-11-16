@@ -1,3 +1,4 @@
+import 'package:aquagrow_mobile/core/models/crop_recipe.dart';
 import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 
@@ -18,4 +19,13 @@ abstract interface class IPodRepository {
   /// Throws a `ValidationFailure` if the serial number is already
   /// registered, or another `AppFailure` (network, sign-in) if it fails.
   Future<Pod> addPod(NewPod pod);
+
+  /// Starts growing [recipe] in the empty pod [podId], planted today.
+  ///
+  /// Throws a `ValidationFailure` if the pod already grows a crop, or another
+  /// `AppFailure` (network, sign-in) if it fails.
+  Future<void> plantCrop(String podId, CropRecipe recipe);
+
+  /// Marks the crop in [podId] as harvested, so the pod is empty again.
+  Future<void> harvest(String podId);
 }

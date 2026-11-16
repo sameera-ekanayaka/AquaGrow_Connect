@@ -5,6 +5,7 @@ import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_pod_repository.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_telemetry_repository.dart';
+import 'package:aquagrow_mobile/features/crops/domain/crop_recipes.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
@@ -38,6 +39,22 @@ class FakeDeviceSource implements DeviceSource {
       'crop_batches': <Map<String, dynamic>>[],
     };
   }
+
+  Map<String, dynamic>? batch;
+  final harvested = <String>[];
+
+  @override
+  Future<String?> recipeIdFor(String cropName) async =>
+      cropName == 'Genovese Basil' ? 'recipe-uuid' : null;
+
+  @override
+  Future<void> insertBatch(Map<String, dynamic> values) async {
+    if (insertError != null) throw insertError!;
+    batch = values;
+  }
+
+  @override
+  Future<void> harvestBatches(String deviceId) async => harvested.add(deviceId);
 }
 
 class FakeTelemetrySource implements TelemetrySource {
@@ -232,6 +249,69 @@ void main() {
           ),
         );
       });
+    });
+  });
+
+  group('SupabasePodRepository planting', () {
+    final basil = CropRecipes.findForCrop('Genovese Basil');
+
+    test('newBatchRow plants today with the expected harvest date', () {
+      expect(
+        SupabasePodRepository.newBatchRow(
+          'pod-1',
+          basil,
+          'recipe-uuid',
+          DateTime(2026, 11, 16, 21, 30),
+        ),
+        {
+          'device_id': 'pod-1',
+          'recipe_id': 'recipe-uuid',
+          'custom_crop_name': 'Genovese Basil',
+          'planted_date': '2026-11-16',
+          'expected_harvest_date': '2026-12-14',
+          'status': 'ACTIVE',
+        },
+      );
+    });
+
+    test('plantCrop inserts an ACTIVE batch with the recipe id', () async {
+      final source = FakeDeviceSource();
+      await SupabasePodRepository(source).plantCrop('pod-1', basil);
+
+      expect(source.batch?['device_id'], 'pod-1');
+      expect(source.batch?['recipe_id'], 'recipe-uuid');
+      expect(source.batch?['status'], 'ACTIVE');
+    });
+
+    test('a crop with no database recipe is planted by name', () async {
+      final source = FakeDeviceSource();
+      await SupabasePodRepository(source)
+          .plantCrop('pod-1', CropRecipes.findForCrop('Sweet Mint'));
+
+      expect(source.batch?['recipe_id'], isNull);
+      expect(source.batch?['custom_crop_name'], 'Sweet Mint');
+    });
+
+    test('a failed insert is a friendly NetworkFailure', () async {
+      final source = FakeDeviceSource()..insertError = Exception('offline');
+
+      await expectLater(
+        SupabasePodRepository(source).plantCrop('pod-1', basil),
+        throwsA(
+          isA<NetworkFailure>().having(
+            (f) => f.message,
+            'message',
+            'Could not plant the crop. Check your connection.',
+          ),
+        ),
+      );
+    });
+
+    test('harvest marks the pod\'s active batch harvested', () async {
+      final source = FakeDeviceSource();
+      await SupabasePodRepository(source).harvest('pod-1');
+
+      expect(source.harvested, ['pod-1']);
     });
   });
 

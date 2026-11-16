@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:aquagrow_mobile/core/errors/app_failure.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
+import 'package:aquagrow_mobile/core/models/crop_recipe.dart';
 import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/data/supabase/realtime_topics.dart';
@@ -23,6 +24,15 @@ abstract interface class DeviceSource {
   /// Inserts a `devices` row owned by the signed-in user and returns it,
   /// read back with [devicesSelect].
   Future<Map<String, dynamic>> insertDevice(Map<String, dynamic> values);
+
+  /// The id of the `crop_recipes` row named [cropName], or null if none.
+  Future<String?> recipeIdFor(String cropName);
+
+  /// Inserts a `crop_batches` row.
+  Future<void> insertBatch(Map<String, dynamic> values);
+
+  /// Sets every ACTIVE batch of [deviceId] to HARVESTED.
+  Future<void> harvestBatches(String deviceId);
 }
 
 /// [DeviceSource] backed by Supabase (REST for reads, realtime for changes).
@@ -50,6 +60,28 @@ class SupabaseDeviceSource implements DeviceSource {
   }
 
   @override
+  Future<String?> recipeIdFor(String cropName) async {
+    final row = await _client
+        .from('crop_recipes')
+        .select('id')
+        .eq('crop_name', cropName)
+        .limit(1)
+        .maybeSingle();
+    return row?['id'] as String?;
+  }
+
+  @override
+  Future<void> insertBatch(Map<String, dynamic> values) =>
+      _client.from('crop_batches').insert(values);
+
+  @override
+  Future<void> harvestBatches(String deviceId) => _client
+      .from('crop_batches')
+      .update({'status': 'HARVESTED'})
+      .eq('device_id', deviceId)
+      .eq('status', 'ACTIVE');
+
+  @override
   Stream<void> changes() {
     late final RealtimeChannel channel;
     late final StreamController<void> controller;
@@ -61,6 +93,13 @@ class SupabaseDeviceSource implements DeviceSource {
               event: PostgresChangeEvent.all,
               schema: 'public',
               table: 'devices',
+              callback: (_) => controller.add(null),
+            )
+            // Planting and harvesting change the pod's crop.
+            .onPostgresChanges(
+              event: PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'crop_batches',
               callback: (_) => controller.add(null),
             )
             .subscribe();
@@ -131,6 +170,61 @@ class SupabasePodRepository implements IPodRepository {
     } catch (e, s) {
       _log.error('Could not add pod', e, s);
       throw NetworkFailure('Could not add the pod. Check your connection.', e);
+    }
+  }
+
+  /// The `crop_batches` columns for [recipe] planted in [podId] on [today].
+  static Map<String, dynamic> newBatchRow(
+    String podId,
+    CropRecipe recipe,
+    String? recipeId,
+    DateTime today,
+  ) =>
+      {
+        'device_id': podId,
+        'recipe_id': recipeId,
+        'custom_crop_name': recipe.cropName,
+        'planted_date': _date(today),
+        'expected_harvest_date':
+            _date(today.add(Duration(days: recipe.durationDays))),
+        'status': 'ACTIVE',
+      };
+
+  static String _date(DateTime d) =>
+      d.toIso8601String().substring(0, 10); // yyyy-MM-dd
+
+  @override
+  Future<void> plantCrop(String podId, CropRecipe recipe) => _write(
+        'Could not plant the crop. Check your connection.',
+        () async {
+          final recipeId = await _source.recipeIdFor(recipe.cropName);
+          await _source.insertBatch(
+            newBatchRow(podId, recipe, recipeId, DateTime.now()),
+          );
+        },
+      );
+
+  @override
+  Future<void> harvest(String podId) => _write(
+        'Could not save the harvest. Check your connection.',
+        () => _source.harvestBatches(podId),
+      );
+
+  /// Runs [write], turning errors into [AppFailure]s with [message].
+  Future<void> _write(String message, Future<void> Function() write) async {
+    try {
+      await write();
+    } on AppFailure {
+      rethrow;
+    } on PostgrestException catch (e, s) {
+      _log.error(message, e, s);
+      if (e.code == '42501') {
+        throw AuthFailure('Sign in again and try once more.', cause: e);
+      }
+      throw NetworkFailure(message, e);
+    } catch (e, s) {
+      _log.error(message, e, s);
+      throw NetworkFailure(message, e);
     }
   }
 

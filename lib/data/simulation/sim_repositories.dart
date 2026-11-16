@@ -5,10 +5,12 @@ import 'package:aquagrow_mobile/core/interfaces/i_control_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_telemetry_repository.dart';
 import 'package:aquagrow_mobile/core/models/actuator_state.dart';
+import 'package:aquagrow_mobile/core/models/crop_recipe.dart';
 import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
+import 'package:aquagrow_mobile/data/supabase/supabase_rows.dart';
 
 /// Pods from the [PodSimulator].
 class SimPodRepository implements IPodRepository {
@@ -33,6 +35,23 @@ class SimPodRepository implements IPodRepository {
     }
     return _sim.addPod(name: pod.name, room: pod.room, serialNumber: pod.serialNumber);
   }
+
+  /// Plants the crop in the simulator for this session only.
+  @override
+  Future<void> plantCrop(String podId, CropRecipe recipe) async {
+    if (_sim.pods.any((p) => p.id == podId && p.batch != null)) {
+      throw const ValidationFailure('This pod already grows a crop. Harvest it first.');
+    }
+    _sim.plantCrop(
+      podId,
+      cropName: recipe.cropName,
+      daysToHarvest: recipe.durationDays,
+      imageAsset: SupabaseRows.cropImage(recipe.cropName),
+    );
+  }
+
+  @override
+  Future<void> harvest(String podId) async => _sim.harvest(podId);
 }
 
 /// Readings and history from the [PodSimulator].

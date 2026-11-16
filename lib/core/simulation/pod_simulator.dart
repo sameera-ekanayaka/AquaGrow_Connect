@@ -171,6 +171,30 @@ class PodSimulator {
     return pod.toPod();
   }
 
+  /// Plants [cropName] in [podId] today, growing for [daysToHarvest] days.
+  ///
+  /// Throws a [StateError] if the pod already grows a crop.
+  void plantCrop(String podId, {required String cropName, required int daysToHarvest, String? imageAsset}) {
+    final pod = _pod(podId);
+    if (pod.batch != null) throw StateError('$podId already grows ${pod.batch!.cropName}');
+    final now = _now();
+    pod.batch = CropBatch(
+      id: '$podId-batch-${now.microsecondsSinceEpoch}',
+      podId: podId,
+      cropName: cropName,
+      imageAsset: imageAsset,
+      plantedAt: DateTime(now.year, now.month, now.day),
+      daysToHarvest: daysToHarvest,
+    );
+    _emitPods();
+  }
+
+  /// Removes the crop from [podId] after harvest, so the pod is empty again.
+  void harvest(String podId) {
+    _pod(podId).batch = null;
+    _emitPods();
+  }
+
   /// The most recent reading for [podId].
   SensorReading latest(String podId) => _pod(podId).toReading(_now(), _tickCount);
 
@@ -462,8 +486,8 @@ class _SimPod {
   final SimPodSeed baseline;
   final DateTime startedAt;
 
-  /// The crop growing now, or null for a pod added without one.
-  final CropBatch? batch;
+  /// The crop growing now, or null for an empty pod.
+  CropBatch? batch;
   final List<SensorReading> buffer = [];
 
   String get id => baseline.id;
