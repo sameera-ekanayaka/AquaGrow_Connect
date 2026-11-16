@@ -5,7 +5,8 @@ import 'package:aquagrow_mobile/core/models/sensor_status.dart';
 ///
 /// In range it is just the target. Out of range it says which way first, so
 /// the tile never relies on colour alone (DESIGN.md screen rule 8), for
-/// example "Too high · Target 18–24°C" or "Running low · Refill below 30%".
+/// example "Too high" above "Target 18–24°C". The direction gets its own
+/// line so a narrow tile never breaks the range in two.
 String tileCaption(SensorMetric metric, double value) {
   if (metric.statusOf(value) == SensorStatus.normal) return metric.targetLabel;
   final low = value < metric.targetMin;
@@ -13,5 +14,5 @@ String tileCaption(SensorMetric metric, double value) {
     SensorMetric.waterLevel => 'Running low',
     _ => low ? 'Too low' : 'Too high',
   };
-  return '$direction · ${metric.targetLabel}';
+  return '$direction\n${metric.targetLabel}';
 }

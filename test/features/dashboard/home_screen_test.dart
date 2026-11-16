@@ -76,7 +76,7 @@ void main() {
     sim.applyScenario('pod-alpha', SimScenario.acidSpike);
     await tester.pump();
 
-    expect(find.text('Too low · Target 5.5–6.5'), findsOneWidget);
+    expect(find.text('Too low\nTarget 5.5–6.5'), findsOneWidget);
   });
 
   testWidgets('no task card while every reading is in range', (tester) async {

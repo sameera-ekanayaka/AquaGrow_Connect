@@ -86,7 +86,7 @@ The aim was one consistent look: the same accent, type, shapes and wording on ev
 
 | # | Severity | Screen | Problem | Fix | Owner |
 | --- | --- | --- | --- | --- | --- |
-| 17 | 3 | Home | An out-of-range tile (water 25°C) only turns amber; the caption still says "Target 18–24°C". Colour is the only signal (DESIGN rule 8). | Caption says which way first: "Too high · Target 18–24°C". | Osanda (fixed in this round) |
+| 17 | 3 | Home | An out-of-range tile (water 25°C) only turns amber; the caption still says "Target 18–24°C". Colour is the only signal (DESIGN rule 8). | Caption says which way first, on its own line: "Too high", then "Target 18–24°C". | Osanda (fixed in this round) |
 | 18 | 1 | My Pods | Every card says the stage twice: the photo badge and a "Growing" line under the name. | Keep the badge only. | Osanda (fixed in this round) |
 | 19 | 2 | Location dialog | The only lime filled button in the app. Everywhere else the primary button is near-black. Also Title Case ("Allow Location Access"). | Use the themed `FilledButton` and "Allow location access". | Imasha |
 | 20 | 2 | Weather and VPD cards | Wide letter spacing and capitals ("SCATTERED CLOUDS WITH MILD HUMI...") are cut off, and the spacing differs from every other screen. | Sentence case, normal spacing, let the condition wrap to two lines. | Imasha |

@@ -11,23 +11,23 @@ void main() {
   test('above the target says too high', () {
     expect(
       tileCaption(SensorMetric.waterTemp, 25),
-      'Too high · Target 18–24°C',
+      'Too high\nTarget 18–24°C',
     );
-    expect(tileCaption(SensorMetric.ph, 7.5), 'Too high · Target 5.5–6.5');
+    expect(tileCaption(SensorMetric.ph, 7.5), 'Too high\nTarget 5.5–6.5');
   });
 
   test('below the target says too low', () {
-    expect(tileCaption(SensorMetric.ph, 4.8), 'Too low · Target 5.5–6.5');
+    expect(tileCaption(SensorMetric.ph, 4.8), 'Too low\nTarget 5.5–6.5');
     expect(
       tileCaption(SensorMetric.ec, 0.9),
-      'Too low · Target 1.2–2.4 mS/cm',
+      'Too low\nTarget 1.2–2.4 mS/cm',
     );
   });
 
   test('low water says running low', () {
     expect(
       tileCaption(SensorMetric.waterLevel, 12),
-      'Running low · Refill below 30%',
+      'Running low\nRefill below 30%',
     );
   });
 }
