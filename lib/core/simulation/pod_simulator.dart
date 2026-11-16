@@ -116,8 +116,8 @@ class PodSimulator {
   final DateTime Function() _now;
   final Map<String, _SimPod> _pods = {};
 
-  /// Serial numbers of pods added with [addPod], upper-cased.
-  final Set<String> _serials = {};
+  /// Serial numbers of pods added with [addPod], keyed by pod id (upper-cased).
+  final Map<String, String> _serials = {};
   int _tickCount = 0;
   Timer? _timer;
 
@@ -143,7 +143,7 @@ class PodSimulator {
       _actuatorsChanged.stream.where((e) => e.key == podId).map((e) => e.value);
 
   /// Whether a pod with [serialNumber] was already added (any case).
-  bool hasSerial(String serialNumber) => _serials.contains(serialNumber.trim().toUpperCase());
+  bool hasSerial(String serialNumber) => _serials.containsValue(serialNumber.trim().toUpperCase());
 
   /// Adds a pod with no crop yet and returns it. Its readings start at the
   /// healthy defaults and follow the same physics as the demo pods.
@@ -151,7 +151,7 @@ class PodSimulator {
   /// Throws an [ArgumentError] if [serialNumber] was already added.
   Pod addPod({required String name, required String room, required String serialNumber}) {
     final serial = serialNumber.trim().toUpperCase();
-    if (_serials.contains(serial)) {
+    if (_serials.containsValue(serial)) {
       throw ArgumentError.value(serialNumber, 'serialNumber', 'Already added');
     }
     final slug = serial.toLowerCase().replaceAll(RegExp('[^a-z0-9]+'), '-');
@@ -164,7 +164,7 @@ class PodSimulator {
       _now(),
     );
     _pods[id] = pod;
-    _serials.add(serial);
+    _serials[id] = serial;
     _log.info('Pod added: $id');
     _emitPods();
     _emitNow(pod);
@@ -199,6 +199,7 @@ class PodSimulator {
   void removePod(String podId) {
     _pod(podId);
     _pods.remove(podId);
+    _serials.remove(podId);
     _emitPods();
   }
 

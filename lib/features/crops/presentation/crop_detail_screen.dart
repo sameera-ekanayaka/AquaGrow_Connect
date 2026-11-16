@@ -203,6 +203,7 @@ class CropDetailScreen extends ConsumerWidget {
     await context.push(AppRoutes.harvestPassport(podId));
     try {
       await ref.read(podRepositoryProvider).harvest(podId);
+      ref.invalidate(podsProvider);
     } on AppFailure catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)

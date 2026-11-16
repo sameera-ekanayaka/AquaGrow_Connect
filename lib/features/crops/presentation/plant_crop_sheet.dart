@@ -50,6 +50,7 @@ class _PlantCropSheetState extends ConsumerState<PlantCropSheet> {
     });
     try {
       await ref.read(podRepositoryProvider).plantCrop(widget.pod.id, recipe);
+      ref.invalidate(podsProvider);
       if (mounted) Navigator.of(context).pop(recipe.cropName);
     } on AppFailure catch (e) {
       if (mounted) {

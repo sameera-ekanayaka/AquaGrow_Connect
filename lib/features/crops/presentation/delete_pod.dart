@@ -28,6 +28,8 @@ Future<bool> confirmDeletePod(
     messenger.showSnackBar(SnackBar(content: Text(e.message)));
     return false;
   }
+  // Live mode: reload pods immediately so the deleted pod's name can be reused.
+  ref.invalidate(podsProvider);
   messenger.showSnackBar(SnackBar(content: Text('${pod.name} deleted')));
   return true;
 }
