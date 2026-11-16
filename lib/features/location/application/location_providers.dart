@@ -24,6 +24,19 @@ final launcherServiceProvider = Provider<ILauncherService>((ref) {
   return const LauncherService();
 });
 
+/// Selected display mode (List or Map) for the hydroponic supplier directory.
+enum SupplierViewMode {
+  /// Scrollable vertical list view.
+  list,
+
+  /// Interactive OpenStreetMap tile view.
+  map,
+}
+
+/// Tracks the active supplier directory view mode (defaults to [SupplierViewMode.list]).
+final supplierViewModeProvider =
+    StateProvider<SupplierViewMode>((ref) => SupplierViewMode.list);
+
 /// Provider for the atmospheric weather service.
 ///
 /// Automatically uses the API key configured in [AppConfig], delegating to

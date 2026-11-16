@@ -259,8 +259,7 @@ class SupplierPinModal extends ConsumerWidget {
                       if (!success && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content:
-                                const Text('Could not open the phone app'),
+                            content: const Text('Could not open the phone app'),
                             action: SnackBarAction(
                               label: 'Copy',
                               onPressed: () {

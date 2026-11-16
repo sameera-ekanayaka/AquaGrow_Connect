@@ -2,6 +2,7 @@ import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/services/geo_service.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
+import 'package:aquagrow_mobile/features/location/presentation/widgets/supplier_map_view.dart';
 import 'package:aquagrow_mobile/features/location/presentation/widgets/supplier_pin_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,7 @@ class _HydroMapScreenState extends ConsumerState<HydroMapScreen> {
     final selectedCategory = ref.watch(selectedSupplierCategoryProvider);
     final positionAsync = ref.watch(currentPositionProvider);
     final hasQuery = ref.watch(supplierSearchQueryProvider).isNotEmpty;
+    final viewMode = ref.watch(supplierViewModeProvider);
     final colors = context.ag;
     final userPos = positionAsync.value;
 
@@ -114,6 +116,53 @@ class _HydroMapScreenState extends ConsumerState<HydroMapScreen> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AgSpace.screen),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<SupplierViewMode>(
+                segments: const [
+                  ButtonSegment<SupplierViewMode>(
+                    value: SupplierViewMode.list,
+                    label: Text('List'),
+                    icon: Icon(Icons.list, size: 18),
+                  ),
+                  ButtonSegment<SupplierViewMode>(
+                    value: SupplierViewMode.map,
+                    label: Text('Map'),
+                    icon: Icon(Icons.map_outlined, size: 18),
+                  ),
+                ],
+                selected: {viewMode},
+                onSelectionChanged: (set) {
+                  if (set.isNotEmpty) {
+                    ref.read(supplierViewModeProvider.notifier).state =
+                        set.first;
+                  }
+                },
+                style: ButtonStyle(
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: AgRadius.all(AgRadius.r16),
+                    ),
+                  ),
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return colors.brandSurface;
+                    }
+                    return colors.surface;
+                  }),
+                  foregroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return colors.text;
+                    }
+                    return colors.textSecondary;
+                  }),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AgSpace.s8),
           SizedBox(
             height: kMinTouchTarget,
             child: ListView.separated(
@@ -151,21 +200,23 @@ class _HydroMapScreenState extends ConsumerState<HydroMapScreen> {
           ),
           const SizedBox(height: AgSpace.s8),
           Expanded(
-            child: suppliers.isEmpty
-                ? _EmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AgSpace.screen,
-                      vertical: AgSpace.s8,
-                    ),
-                    itemCount: suppliers.length,
-                    itemBuilder: (context, index) {
-                      return _SupplierCard(
-                        supplier: suppliers[index],
-                        userPos: userPos,
-                      );
-                    },
-                  ),
+            child: viewMode == SupplierViewMode.map
+                ? const SupplierMapView()
+                : (suppliers.isEmpty
+                    ? _EmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AgSpace.screen,
+                          vertical: AgSpace.s8,
+                        ),
+                        itemCount: suppliers.length,
+                        itemBuilder: (context, index) {
+                          return _SupplierCard(
+                            supplier: suppliers[index],
+                            userPos: userPos,
+                          );
+                        },
+                      )),
           ),
         ],
       ),

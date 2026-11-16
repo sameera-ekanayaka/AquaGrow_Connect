@@ -75,8 +75,7 @@ Widget _buildModal({
 }) {
   return ProviderScope(
     overrides: [
-      if (launcher != null)
-        launcherServiceProvider.overrideWithValue(launcher),
+      if (launcher != null) launcherServiceProvider.overrideWithValue(launcher),
     ],
     child: MaterialApp(
       theme: AppTheme.light,
@@ -283,7 +282,8 @@ void main() {
       expect(launcher.lastPhone, _verifiedSupplier.phone);
     });
 
-    testWidgets('tapping Directions invokes launcher openDirections', (tester) async {
+    testWidgets('tapping Directions invokes launcher openDirections',
+        (tester) async {
       tester.view.physicalSize = const Size(800, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
