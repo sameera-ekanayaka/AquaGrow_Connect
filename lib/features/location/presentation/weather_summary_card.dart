@@ -96,24 +96,6 @@ class WeatherSummaryCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: AgSpace.s8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AgSpace.s8,
-                      vertical: AgSpace.s4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colors.brandSurface,
-                      borderRadius: AgRadius.all(AgRadius.pill),
-                    ),
-                    child: Text(
-                      '${weather.latitude.toStringAsFixed(2)}°, ${weather.longitude.toStringAsFixed(2)}°',
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -161,12 +143,12 @@ class WeatherSummaryCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: AgSpace.s4),
                   Text(
-                    weather.weatherDescription.toUpperCase(),
+                    _toSentenceCase(weather.weatherDescription),
                     style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.1,
+                      fontWeight: FontWeight.w500,
                       color: colors.textSecondary,
                     ),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -194,7 +176,7 @@ class WeatherSummaryCard extends ConsumerWidget {
         Divider(color: colors.border, height: 1),
         const SizedBox(height: AgSpace.s16),
 
-        // Atmospheric Metrics Grid
+        // Atmospheric Metrics Grid (small white boxes for Humidity, Wind, UV, Sunset)
         Row(
           children: [
             Expanded(
@@ -205,23 +187,7 @@ class WeatherSummaryCard extends ConsumerWidget {
                 value: '${weather.relativeHumidityPct.toStringAsFixed(0)}%',
               ),
             ),
-            Expanded(
-              child: _buildMetricTile(
-                context: context,
-                icon: Icons.compress_outlined,
-                label: 'Pressure',
-                value:
-                    '${weather.atmosphericPressureHpa.toStringAsFixed(0)} hPa',
-              ),
-            ),
-            Expanded(
-              child: _buildMetricTile(
-                context: context,
-                icon: Icons.wb_sunny_outlined,
-                label: 'UV Index',
-                value: weather.uvIndex.toStringAsFixed(1),
-              ),
-            ),
+            const SizedBox(width: AgSpace.s8),
             Expanded(
               child: _buildMetricTile(
                 context: context,
@@ -230,69 +196,25 @@ class WeatherSummaryCard extends ConsumerWidget {
                 value: '${weather.windSpeedMps.toStringAsFixed(1)} m/s',
               ),
             ),
+            const SizedBox(width: AgSpace.s8),
+            Expanded(
+              child: _buildMetricTile(
+                context: context,
+                icon: Icons.wb_sunny_outlined,
+                label: 'UV',
+                value: weather.uvIndex.toStringAsFixed(1),
+              ),
+            ),
+            const SizedBox(width: AgSpace.s8),
+            Expanded(
+              child: _buildMetricTile(
+                context: context,
+                icon: Icons.wb_twilight,
+                label: 'Sunset',
+                value: _formatTime(weather.sunsetTime),
+              ),
+            ),
           ],
-        ),
-
-        const SizedBox(height: AgSpace.s16),
-
-        // Solar Daylight Bar
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AgSpace.s12,
-            vertical: AgSpace.s8,
-          ),
-          decoration: BoxDecoration(
-            color: colors.subtle,
-            borderRadius: AgRadius.all(AgRadius.r16),
-            border: Border.all(color: colors.border),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Icon(Icons.wb_twilight, color: colors.warning, size: 18),
-                    const SizedBox(width: AgSpace.s8),
-                    Flexible(
-                      child: Text(
-                        'Sunrise: ${_formatTime(weather.sunriseTime)}',
-                        style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colors.textSecondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AgSpace.s8),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.nightlight_round,
-                      color: colors.textSecondary,
-                      size: 16,
-                    ),
-                    const SizedBox(width: AgSpace.s8),
-                    Flexible(
-                      child: Text(
-                        'Sunset: ${_formatTime(weather.sunsetTime)}',
-                        style: textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colors.textSecondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ],
     );
@@ -307,25 +229,38 @@ class WeatherSummaryCard extends ConsumerWidget {
     final colors = context.ag;
     final textTheme = Theme.of(context).textTheme;
 
-    return Column(
-      children: [
-        Icon(icon, size: 18, color: colors.brand),
-        const SizedBox(height: AgSpace.s4),
-        Text(
-          value,
-          style: textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colors.text,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: AgSpace.s8,
+        horizontal: AgSpace.s4,
+      ),
+      decoration: BoxDecoration(
+        color: colors.subtle,
+        borderRadius: AgRadius.all(AgRadius.r16),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 18, color: colors.textSecondary),
+          const SizedBox(height: AgSpace.s4),
+          Text(
+            value,
+            style: textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colors.text,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        const SizedBox(height: AgSpace.s4),
-        Text(
-          label,
-          style: textTheme.labelSmall?.copyWith(
-            color: colors.textSecondary,
+          const SizedBox(height: AgSpace.s4),
+          Text(
+            label,
+            style: textTheme.labelSmall?.copyWith(
+              color: colors.textSecondary,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -380,5 +315,10 @@ class WeatherSummaryCard extends ConsumerWidget {
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  String _toSentenceCase(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 }
