@@ -81,6 +81,8 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
       title: const Text('Reset your password'),
       content: Form(
         key: _formKey,
+        // The email checks itself as soon as the user types in it.
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
