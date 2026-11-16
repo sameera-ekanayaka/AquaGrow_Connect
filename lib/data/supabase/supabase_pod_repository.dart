@@ -119,7 +119,8 @@ class SupabasePodRepository implements IPodRepository {
       // 23505: unique_violation on devices.serial_number.
       if (e.code == '23505') {
         throw const ValidationFailure(
-            'This serial number is already registered.');
+          'This serial number is already registered.',
+        );
       }
       // 42501: Row Level Security refused the insert.
       if (e.code == '42501') {
