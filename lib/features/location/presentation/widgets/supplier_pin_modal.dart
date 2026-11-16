@@ -1,10 +1,13 @@
 import 'package:aquagrow_mobile/core/models/hydro_supplier.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
+import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Modal bottom sheet displaying verified hydroponic retailer profile,
 /// inventory highlights, GPS coordinates, and direct contact options.
-class SupplierPinModal extends StatelessWidget {
+class SupplierPinModal extends ConsumerWidget {
   /// Creates a [SupplierPinModal] for the given [supplier].
   const SupplierPinModal({
     super.key,
@@ -42,7 +45,7 @@ class SupplierPinModal extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.ag;
 
     final double? distanceKm = (userLatitude != null && userLongitude != null)
@@ -250,10 +253,25 @@ class SupplierPinModal extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Dialing ${supplier.phone}...')),
-                      );
+                    onPressed: () async {
+                      final launcher = ref.read(launcherServiceProvider);
+                      final success = await launcher.dial(supplier.phone);
+                      if (!success && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                const Text('Could not open the phone app'),
+                            action: SnackBarAction(
+                              label: 'Copy',
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: supplier.phone),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      }
                     },
                     icon: const Icon(Icons.phone, size: 18),
                     label: Text(supplier.phone),
@@ -269,12 +287,28 @@ class SupplierPinModal extends StatelessWidget {
                 const SizedBox(width: AgSpace.s12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Navigating to ${supplier.name}...'),
-                        ),
+                    onPressed: () async {
+                      final launcher = ref.read(launcherServiceProvider);
+                      final success = await launcher.openDirections(
+                        latitude: supplier.latitude,
+                        longitude: supplier.longitude,
+                        label: supplier.name,
                       );
+                      if (!success && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Could not open maps'),
+                            action: SnackBarAction(
+                              label: 'Copy',
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: supplier.address),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      }
                     },
                     icon: const Icon(Icons.directions, size: 18),
                     label: const Text('Directions'),
