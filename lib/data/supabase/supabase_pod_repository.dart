@@ -33,6 +33,9 @@ abstract interface class DeviceSource {
 
   /// Sets every ACTIVE batch of [deviceId] to HARVESTED.
   Future<void> harvestBatches(String deviceId);
+
+  /// Deletes the `devices` row [deviceId]; its batches and readings cascade.
+  Future<void> deleteDevice(String deviceId);
 }
 
 /// [DeviceSource] backed by Supabase (REST for reads, realtime for changes).
@@ -80,6 +83,10 @@ class SupabaseDeviceSource implements DeviceSource {
       .update({'status': 'HARVESTED'})
       .eq('device_id', deviceId)
       .eq('status', 'ACTIVE');
+
+  @override
+  Future<void> deleteDevice(String deviceId) =>
+      _client.from('devices').delete().eq('id', deviceId);
 
   @override
   Stream<void> changes() {
@@ -215,6 +222,12 @@ class SupabasePodRepository implements IPodRepository {
   Future<void> harvest(String podId) => _write(
         'Could not save the harvest. Check your connection.',
         () => _source.harvestBatches(podId),
+      );
+
+  @override
+  Future<void> deletePod(String podId) => _write(
+        'Could not delete the pod. Check your connection.',
+        () => _source.deleteDevice(podId),
       );
 
   /// Runs [write], turning errors into [AppFailure]s with [message].

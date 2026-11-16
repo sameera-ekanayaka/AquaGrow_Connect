@@ -52,6 +52,10 @@ class SimPodRepository implements IPodRepository {
 
   @override
   Future<void> harvest(String podId) async => _sim.harvest(podId);
+
+  /// Removes the pod from the simulator for this session only.
+  @override
+  Future<void> deletePod(String podId) async => _sim.removePod(podId);
 }
 
 /// Readings and history from the [PodSimulator].

@@ -195,6 +195,13 @@ class PodSimulator {
     _emitPods();
   }
 
+  /// Removes [podId] from this session.
+  void removePod(String podId) {
+    _pod(podId);
+    _pods.remove(podId);
+    _emitPods();
+  }
+
   /// The most recent reading for [podId].
   SensorReading latest(String podId) => _pod(podId).toReading(_now(), _tickCount);
 

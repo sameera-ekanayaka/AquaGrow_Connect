@@ -6,6 +6,7 @@ import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/crops/application/crop_detail_providers.dart';
 import 'package:aquagrow_mobile/features/crops/domain/crop_recipes.dart';
+import 'package:aquagrow_mobile/features/crops/presentation/delete_pod.dart';
 import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:aquagrow_mobile/shared/widgets/crop_photo.dart';
 import 'package:aquagrow_mobile/shared/widgets/state_views.dart';
@@ -18,6 +19,13 @@ import 'package:go_router/go_router.dart';
 ///
 /// OWNER: Udeshika (see docs/tasks/udeshika.md).
 class CropDetailScreen extends ConsumerWidget {
+  Pod? _podOf(List<Pod>? pods) {
+    for (final pod in pods ?? const <Pod>[]) {
+      if (pod.id == podId) return pod;
+    }
+    return null;
+  }
+
   /// Creates the screen for the pod with [podId].
   const CropDetailScreen({required this.podId, super.key});
 
@@ -30,7 +38,21 @@ class CropDetailScreen extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          if (_podOf(podsAsync.valueOrNull) case final pod?)
+            IconButton(
+              tooltip: 'Delete pod',
+              icon: const Icon(Icons.delete_outline_rounded),
+              onPressed: () async {
+                if (await confirmDeletePod(context, ref, pod) &&
+                    context.mounted) {
+                  context.pop();
+                }
+              },
+            ),
+        ],
+      ),
       body: SafeArea(
         child: AsyncValueView<List<Pod>>(
           value: podsAsync,
