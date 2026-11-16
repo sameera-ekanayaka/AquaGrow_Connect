@@ -1,5 +1,6 @@
 import 'package:aquagrow_mobile/app/shell/notification_setup.dart';
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
+import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/features/alerts/application/alert_engine.dart';
 import 'package:aquagrow_mobile/features/sync/presentation/sync_listener.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +39,8 @@ class AppShell extends ConsumerWidget {
       label: 'Insights',
     ),
     NavigationDestination(
-      icon: Icon(Icons.add_box_outlined),
-      selectedIcon: Icon(Icons.add_box),
+      icon: Icon(Icons.spa_outlined),
+      selectedIcon: Icon(Icons.spa),
       label: 'Care',
     ),
   ];
@@ -56,6 +57,7 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Starts the alert engine once and keeps it alive while the shell is shown.
     ref.watch(alertEngineProvider);
+    final c = context.ag;
     return Scaffold(
       body: SyncListener(
         child: NotificationSetup(
@@ -67,10 +69,42 @@ class AppShell extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onTap,
-        destinations: destinations,
+      // Minimal UI: a floating white pill; only the current tab shows its
+      // label, on a lime indicator.
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AgSpace.s16,
+            0,
+            AgSpace.s16,
+            AgSpace.s8,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: AgRadius.all(AgRadius.pill),
+              boxShadow: [
+                BoxShadow(
+                  color: c.text.withValues(alpha: 0.1),
+                  blurRadius: 32,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: AgRadius.all(AgRadius.pill),
+              child: NavigationBar(
+                height: 64,
+                backgroundColor: c.background,
+                indicatorColor: c.brand,
+                labelBehavior:
+                    NavigationDestinationLabelBehavior.onlyShowSelected,
+                selectedIndex: navigationShell.currentIndex,
+                onDestinationSelected: _onTap,
+                destinations: destinations,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
