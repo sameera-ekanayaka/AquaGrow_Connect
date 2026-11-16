@@ -179,8 +179,18 @@ class _ReadingsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final readings = ref.watch(latestReadingProvider(podId));
+    // A pod that was just added has not reported yet. That is not an error,
+    // so say what will happen instead of offering "Try again".
+    if (readings.error is DeviceFailure && !readings.hasValue) {
+      return const EmptyView(
+        icon: Icons.sensors_rounded,
+        title: 'No readings yet',
+        message: 'They appear here when the pod sends its first reading.',
+      );
+    }
     return AsyncValueView(
-      value: ref.watch(latestReadingProvider(podId)),
+      value: readings,
       onRetry: () => ref.invalidate(latestReadingProvider(podId)),
       data: (reading) => LayoutBuilder(
         builder: (context, constraints) {

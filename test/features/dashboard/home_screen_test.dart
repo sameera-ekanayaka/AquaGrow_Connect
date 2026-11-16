@@ -1,5 +1,6 @@
 import 'package:aquagrow_mobile/app/app.dart';
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
+import 'package:aquagrow_mobile/core/errors/app_failure.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/data/local/preferences_store.dart';
@@ -22,7 +23,10 @@ void main() {
   setUp(() => sim = PodSimulator(clock: () => _now));
   tearDown(() => sim.dispose());
 
-  Future<void> pumpHome(WidgetTester tester) async {
+  Future<void> pumpHome(
+    WidgetTester tester, {
+    List<Override> extra = const [],
+  }) async {
     // A tall phone, so every Home section is built without scrolling.
     tester.view.physicalSize = const Size(1170, 7200);
     tester.view.devicePixelRatio = 3;
@@ -44,6 +48,7 @@ void main() {
               ..setBool(OnboardingStore.seenKey, value: true),
           ),
           homeClockProvider.overrideWithValue(() => _now),
+          ...extra,
         ],
         child: const AquaGrowApp(),
       ),
@@ -77,6 +82,25 @@ void main() {
     await tester.pump();
 
     expect(find.text('Too low\nTarget 5.5–6.5'), findsOneWidget);
+  });
+
+  testWidgets('a pod with no readings yet says so instead of an error',
+      (tester) async {
+    await pumpHome(
+      tester,
+      extra: [
+        latestReadingProvider.overrideWith(
+          (ref, podId) => Stream.error(
+            const DeviceFailure('No readings from this pod yet.'),
+          ),
+        ),
+      ],
+    );
+    await tester.pump();
+
+    expect(find.text('No readings yet'), findsOneWidget);
+    expect(find.text('Something went wrong'), findsNothing);
+    expect(find.text('Try again'), findsNothing);
   });
 
   testWidgets('no task card while every reading is in range', (tester) async {
