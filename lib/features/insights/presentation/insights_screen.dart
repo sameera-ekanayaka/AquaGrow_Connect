@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:aquagrow_mobile/app/router/app_routes.dart';
 import 'package:aquagrow_mobile/app/shell/tab_header.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
@@ -8,8 +10,10 @@ import 'package:aquagrow_mobile/features/insights/application/history_providers.
 import 'package:aquagrow_mobile/features/insights/application/insights_refresh_action.dart';
 import 'package:aquagrow_mobile/features/insights/application/shake_detector.dart';
 import 'package:aquagrow_mobile/features/insights/application/shake_detector_provider.dart';
+import 'package:aquagrow_mobile/features/insights/domain/readings_csv.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/widgets/shake_feedback.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/widgets/telemetry_history_chart.dart';
+import 'package:aquagrow_mobile/features/insights/presentation/widgets/trend_chip.dart';
 import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
 import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
 import 'package:aquagrow_mobile/shared/widgets/widgets.dart';
@@ -83,6 +87,31 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     ShakeFeedback.show(context);
   }
 
+  Future<void> _exportReadings() async {
+    final historyAsync = ref.read(historyProvider);
+    final readings = historyAsync.valueOrNull ?? const [];
+    if (readings.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No readings to export yet')),
+        );
+      }
+      return;
+    }
+
+    final selectedPod = ref.read(selectedPodProvider);
+    final now = ref.read(clockProvider)();
+    final podName = selectedPod?.name ?? 'pod';
+    final fileName = buildCsvFileName(podName: podName, now: now);
+    final csvString = readingsToCsv(readings);
+
+    await ref.read(shareServiceProvider).shareBytes(
+          bytes: utf8.encode(csvString),
+          fileName: fileName,
+          mimeType: 'text/csv',
+        );
+  }
+
   @override
   void dispose() {
     _shakeDetector?.dispose();
@@ -106,9 +135,21 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
       child: ListView(
         padding: const EdgeInsets.all(AgSpace.screen),
         children: [
-          TabHeader(
-            overline: podSubtitle.toUpperCase(),
-            title: 'Insights',
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TabHeader(
+                  overline: podSubtitle.toUpperCase(),
+                  title: 'Insights',
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.file_download_outlined),
+                tooltip: 'Export readings',
+                onPressed: _exportReadings,
+              ),
+            ],
           ),
 
           const SizedBox(height: AgSpace.s12),
@@ -191,6 +232,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           ),
 
           const SizedBox(height: AgSpace.s16),
+
+          // Short-term trend warning chip
+          const TrendChip(),
 
           // Historical chart card with loading/error/empty state handling
           AsyncValueView<List<SensorReading>>(

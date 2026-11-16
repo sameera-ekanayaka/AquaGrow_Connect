@@ -1,4 +1,5 @@
 import 'package:aquagrow_mobile/core/errors/app_failure.dart';
+import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod_alert.dart';
 import 'package:aquagrow_mobile/core/models/sensor_metric.dart';
 import 'package:aquagrow_mobile/core/models/sensor_status.dart';
@@ -70,5 +71,25 @@ void main() {
     expect(alerts.map((a) => a.id), ['a2', 'a1']);
     expect(alerts.last.acknowledged, isTrue);
     repo.dispose();
+  });
+
+  test('addPod adds an empty pod and rejects a used serial number', () async {
+    final repo = SimPodRepository(sim);
+    final pod = await repo.addPod(
+      NewPod(name: ' Pod Gamma ', room: 'Balcony', serialNumber: 'aqg-2026-0042', systemType: PodSystemType.nft),
+    );
+
+    expect(pod.name, 'Pod Gamma');
+    expect(pod.batch, isNull);
+    expect((await repo.getPods()).map((p) => p.id), contains(pod.id));
+
+    await expectLater(
+      repo.addPod(
+        NewPod(name: 'Another', room: 'Hall', serialNumber: 'AQG-2026-0042', systemType: PodSystemType.dwc),
+      ),
+      throwsA(
+        isA<ValidationFailure>().having((f) => f.message, 'message', 'This serial number is already registered.'),
+      ),
+    );
   });
 }

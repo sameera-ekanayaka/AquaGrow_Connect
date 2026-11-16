@@ -49,7 +49,7 @@ class VpdGaugeCard extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Vapor Pressure Deficit (VPD)',
+                            'Air dryness (VPD)',
                             style: textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: colors.text,
@@ -76,18 +76,19 @@ class VpdGaugeCard extends ConsumerWidget {
                   vertical: AgSpace.s4,
                 ),
                 decoration: BoxDecoration(
-                  color: zoneTone.surface,
+                  color: vpd.isOptimal ? colors.brandSurface : zoneTone.surface,
                   borderRadius: AgRadius.all(AgRadius.pill),
                   border: Border.all(
-                    color: zoneTone.primary.withValues(alpha: 0.4),
+                    color: (vpd.isOptimal ? colors.brand : zoneTone.primary)
+                        .withValues(alpha: 0.4),
                   ),
                 ),
                 child: Text(
-                  vpd.isOptimal ? 'OPTIMAL' : 'ATTENTION',
+                  vpd.isOptimal ? 'Just right' : 'Attention',
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
-                    color: zoneTone.primary,
+                    color: colors.text,
                   ),
                 ),
               ),
@@ -169,11 +170,15 @@ class VpdGaugeCard extends ConsumerWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      Icon(Icons.thermostat, size: 16, color: colors.brand),
+                      Icon(
+                        Icons.thermostat,
+                        size: 16,
+                        color: colors.textSecondary,
+                      ),
                       const SizedBox(width: AgSpace.s4),
                       Flexible(
                         child: Text(
-                          'Air Temp: ${vpd.airTemperatureC.toStringAsFixed(1)}°C',
+                          'Air temp: ${vpd.airTemperatureC.toStringAsFixed(1)}°C',
                           style: textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: colors.text,
@@ -187,10 +192,14 @@ class VpdGaugeCard extends ConsumerWidget {
                 const SizedBox(width: AgSpace.s8),
                 Row(
                   children: [
-                    Icon(Icons.water_drop, size: 16, color: colors.brand),
+                    Icon(
+                      Icons.water_drop,
+                      size: 16,
+                      color: colors.textSecondary,
+                    ),
                     const SizedBox(width: AgSpace.s4),
                     Text(
-                      'RH: ${vpd.relativeHumidityPct.toStringAsFixed(0)}%',
+                      'Humidity ${vpd.relativeHumidityPct.toStringAsFixed(0)}%',
                       style: textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: colors.text,
@@ -262,25 +271,17 @@ class VpdGaugeCard extends ConsumerWidget {
                 width: barWidth,
                 child: Row(
                   children: [
-                    // Under-transpiration: 0 - 0.4
+                    // Under-transpiration: 0 - 0.8
                     Expanded(
-                      flex: 18,
-                      child: Container(
-                        color: colors.warning.withValues(alpha: 0.6),
-                      ),
+                      flex: 36,
+                      child: Container(color: colors.warning),
                     ),
-                    // Early veg: 0.4 - 0.8
+                    // Ideal: 0.8 - 1.2
                     Expanded(
-                      flex: 18,
-                      child: Container(
-                        color: colors.brand.withValues(alpha: 0.7),
-                      ),
+                      flex: 36,
+                      child: Container(color: colors.brand),
                     ),
-                    // Ideal veg: 0.8 - 1.2
-                    Expanded(flex: 18, child: Container(color: colors.brand)),
-                    // Ideal generative: 1.2 - 1.6
-                    Expanded(flex: 18, child: Container(color: colors.warning)),
-                    // Over-transpiration: 1.6+
+                    // Over-transpiration: 1.2+
                     Expanded(
                       flex: 28,
                       child: Container(color: colors.critical),

@@ -9,6 +9,7 @@ import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/controls/presentation/pod_controls_card.dart';
 import 'package:aquagrow_mobile/features/dashboard/application/home_clock.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/priority_task.dart';
+import 'package:aquagrow_mobile/features/dashboard/domain/tile_caption.dart';
 import 'package:aquagrow_mobile/features/dashboard/domain/time_ago.dart';
 import 'package:aquagrow_mobile/features/dashboard/presentation/widgets/pod_selector.dart';
 import 'package:aquagrow_mobile/features/dashboard/presentation/widgets/priority_task_card.dart';
@@ -72,7 +73,10 @@ class _PodHome extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final now = ref.watch(homeClockProvider)();
-    final reading = ref.watch(latestReadingProvider(pod.id)).valueOrNull;
+    final readings = ref.watch(latestReadingProvider(pod.id));
+    final reading = readings.valueOrNull;
+    // A new pod has never reported, so there is no "last reading" to show.
+    final neverReported = readings.error is DeviceFailure && reading == null;
     final online = pod.isOnline;
 
     final lastAt =
@@ -101,7 +105,9 @@ class _PodHome extends ConsumerWidget {
         const SizedBox(height: AgSpace.s32),
         SectionHeader(
           title: 'Growing conditions',
-          caption: online ? 'Updated $ago' : 'Last reading $ago',
+          caption: neverReported
+              ? null
+              : (online ? 'Updated $ago' : 'Last reading $ago'),
         ),
         _ReadingsGrid(podId: pod.id, online: online),
         const SizedBox(height: AgSpace.s32),
@@ -178,8 +184,18 @@ class _ReadingsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final readings = ref.watch(latestReadingProvider(podId));
+    // A pod that was just added has not reported yet. That is not an error,
+    // so say what will happen instead of offering "Try again".
+    if (readings.error is DeviceFailure && !readings.hasValue) {
+      return const EmptyView(
+        icon: Icons.sensors_rounded,
+        title: 'No readings yet',
+        message: 'They appear here when the pod sends its first reading.',
+      );
+    }
     return AsyncValueView(
-      value: ref.watch(latestReadingProvider(podId)),
+      value: readings,
       onRetry: () => ref.invalidate(latestReadingProvider(podId)),
       data: (reading) => LayoutBuilder(
         builder: (context, constraints) {
@@ -198,7 +214,9 @@ class _ReadingsGrid extends ConsumerWidget {
                   label: metric.label,
                   value: metric.format(metric.valueOf(reading)),
                   // An offline pod's numbers are stale, so do not grade them.
-                  caption: online ? metric.targetLabel : 'Last known value',
+                  caption: online
+                      ? tileCaption(metric, metric.valueOf(reading))
+                      : 'Last known value',
                   status: online
                       ? metric.statusOf(metric.valueOf(reading))
                       : SensorStatus.normal,

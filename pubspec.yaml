@@ -34,6 +34,10 @@ dependencies:
   geolocator: ^12.0.0
   sensors_plus: ^5.0.1 # shake to refresh
   flutter_local_notifications: ^17.2.1 # alert notifications
+  url_launcher: ^6.3.0
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  share_plus: ^10.0.0
 
   # Networking
   http: ^1.2.1

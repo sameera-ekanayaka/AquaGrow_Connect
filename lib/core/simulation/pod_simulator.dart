@@ -115,6 +115,9 @@ class PodSimulator {
   final int _seed;
   final DateTime Function() _now;
   final Map<String, _SimPod> _pods = {};
+
+  /// Serial numbers of pods added with [addPod], upper-cased.
+  final Set<String> _serials = {};
   int _tickCount = 0;
   Timer? _timer;
 
@@ -138,6 +141,35 @@ class PodSimulator {
   /// Emits the actuator state of [podId] whenever it changes.
   Stream<ActuatorState> actuatorStream(String podId) =>
       _actuatorsChanged.stream.where((e) => e.key == podId).map((e) => e.value);
+
+  /// Whether a pod with [serialNumber] was already added (any case).
+  bool hasSerial(String serialNumber) => _serials.contains(serialNumber.trim().toUpperCase());
+
+  /// Adds a pod with no crop yet and returns it. Its readings start at the
+  /// healthy defaults and follow the same physics as the demo pods.
+  ///
+  /// Throws an [ArgumentError] if [serialNumber] was already added.
+  Pod addPod({required String name, required String room, required String serialNumber}) {
+    final serial = serialNumber.trim().toUpperCase();
+    if (_serials.contains(serial)) {
+      throw ArgumentError.value(serialNumber, 'serialNumber', 'Already added');
+    }
+    final slug = serial.toLowerCase().replaceAll(RegExp('[^a-z0-9]+'), '-');
+    var id = 'pod-$slug';
+    for (var n = 2; _pods.containsKey(id); n++) {
+      id = 'pod-$slug-$n';
+    }
+    final pod = _SimPod.empty(
+      SimPodSeed(id: id, name: name.trim(), room: room.trim(), cropName: '', plantedDaysAgo: 0, daysToHarvest: 0),
+      _now(),
+    );
+    _pods[id] = pod;
+    _serials.add(serial);
+    _log.info('Pod added: $id');
+    _emitPods();
+    _emitNow(pod);
+    return pod.toPod();
+  }
 
   /// The most recent reading for [podId].
   SensorReading latest(String podId) => _pod(podId).toReading(_now(), _tickCount);
@@ -395,6 +427,19 @@ class _SimPod {
         waterTempTarget = baseline.waterTemp,
         lastSeenAt = startedAt;
 
+  /// A pod the user just added: default healthy water and no crop yet.
+  factory _SimPod.empty(SimPodSeed s, DateTime now) {
+    return _SimPod(
+      baseline: s,
+      startedAt: now,
+      ph: s.ph,
+      ec: s.ec,
+      waterTemp: s.waterTemp,
+      waterLevel: s.waterLevel,
+      batch: null,
+    );
+  }
+
   factory _SimPod.fromSeed(SimPodSeed s, DateTime now) {
     return _SimPod(
       baseline: s,
@@ -416,7 +461,9 @@ class _SimPod {
 
   final SimPodSeed baseline;
   final DateTime startedAt;
-  final CropBatch batch;
+
+  /// The crop growing now, or null for a pod added without one.
+  final CropBatch? batch;
   final List<SensorReading> buffer = [];
 
   String get id => baseline.id;

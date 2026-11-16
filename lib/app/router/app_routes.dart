@@ -20,6 +20,8 @@ abstract final class AppRoutes {
   // Opened on top of a tab
   static const alerts = '/alerts';
   static const profile = '/profile';
+  static const editProfile = '/profile/edit';
+  static const changePassword = '/profile/password';
   static const simulator = '/simulator';
   static const settings = '/settings';
   static const supplierMap = '/care/suppliers';

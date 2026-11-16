@@ -70,12 +70,28 @@ class _PodControlsCardState extends ConsumerState<PodControlsCard> {
       clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AgSpace.s8),
-        child: AsyncValueView(
-          value: ref.watch(actuatorStateProvider(_pod.id)),
-          onRetry: () => ref.invalidate(actuatorStateProvider(_pod.id)),
-          data: _controls,
-        ),
+        child: _body(ref.watch(actuatorStateProvider(_pod.id))),
       ),
+    );
+  }
+
+  Widget _body(AsyncValue<ActuatorState> actuators) {
+    // In live mode, commands still go to the built-in simulator, which does
+    // not know pods from Supabase, so they have no actuator state. That is
+    // not the user's fault: explain it instead of "Something went wrong".
+    if (actuators.hasError && !actuators.hasValue) {
+      if (!_pod.isOnline) return _controls(ActuatorState.initial);
+      return EmptyView(
+        icon: Icons.tune_rounded,
+        title: 'Controls not connected yet',
+        message: 'Pump, light and pH controls for ${_pod.name} are not '
+            'connected in live mode yet.',
+      );
+    }
+    return AsyncValueView(
+      value: actuators,
+      onRetry: () => ref.invalidate(actuatorStateProvider(_pod.id)),
+      data: _controls,
     );
   }
 

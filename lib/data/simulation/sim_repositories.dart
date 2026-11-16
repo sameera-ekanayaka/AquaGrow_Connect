@@ -5,6 +5,7 @@ import 'package:aquagrow_mobile/core/interfaces/i_control_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_telemetry_repository.dart';
 import 'package:aquagrow_mobile/core/models/actuator_state.dart';
+import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
@@ -23,6 +24,15 @@ class SimPodRepository implements IPodRepository {
 
   @override
   Future<List<Pod>> getPods() async => _sim.pods;
+
+  /// Adds the pod to the simulator for this session only.
+  @override
+  Future<Pod> addPod(NewPod pod) async {
+    if (_sim.hasSerial(pod.serialNumber)) {
+      throw const ValidationFailure('This serial number is already registered.');
+    }
+    return _sim.addPod(name: pod.name, room: pod.room, serialNumber: pod.serialNumber);
+  }
 }
 
 /// Readings and history from the [PodSimulator].

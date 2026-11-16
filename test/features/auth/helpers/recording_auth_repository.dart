@@ -76,6 +76,43 @@ class RecordingAuthRepository implements IAuthRepository {
     resetCalls.add(email);
     if (error != null) throw error!;
   }
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String fullName,
+    String? farmName,
+    String? phone,
+  }) async {
+    if (error != null) throw error!;
+    user = (user ??
+            UserProfile(
+              id: 'u1',
+              email: 'grower@aquagrow.io',
+              role: UserRole.owner,
+              createdAt: DateTime(2026, 11, 1),
+            ))
+        .copyWith(
+      fullName: fullName,
+      farmName: farmName,
+      phone: phone,
+    );
+    _changes.add(user);
+    return user!;
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (error != null) throw error!;
+  }
+
+  @override
+  Future<void> deleteAccount({required String password}) async {
+    if (error != null) throw error!;
+    await signOut();
+  }
 }
 
 /// Shows [screen] alone, themed, with [repository] as the auth repository.

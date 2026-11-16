@@ -4,8 +4,8 @@ import 'package:aquagrow_mobile/shared/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
 
 /// One pod on the My Pods screen, from the Figma component "PodCard": a
-/// photo with a stage badge, then the crop name, where the pod is, the
-/// growth stage and a harvest line.
+/// photo with a stage badge, then the crop name, where the pod is and a
+/// harvest line. The stage is shown once, on the badge.
 ///
 /// ```dart
 /// PodCard(
@@ -38,7 +38,7 @@ class PodCard extends StatelessWidget {
   /// Room and pod name, for example "Kitchen · Pod Alpha".
   final String location;
 
-  /// Growth stage, for example "Growing". Shown in the photo badge and the body.
+  /// Growth stage, for example "Growing". Shown in the photo badge.
   final String stageLabel;
 
   /// Progress and harvest estimate, for example "Day 8 of 28, harvest in about 20 days".
@@ -124,9 +124,9 @@ class PodCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: AgSpace.s12),
-                      Text(stageLabel, style: text.labelLarge),
-                      const SizedBox(height: AgSpace.s4),
+                      // The stage is already on the photo badge, so the
+                      // body goes straight to progress.
+                      const SizedBox(height: AgSpace.s8),
                       Text(
                         harvestLine,
                         style:

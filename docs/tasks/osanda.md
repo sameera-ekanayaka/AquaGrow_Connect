@@ -136,6 +136,20 @@ presenter sees the change happen. Group scenarios as Water, Nutrients, Device.
 
 - [x] Done: live pH, water level and water temp tiles at the top of the panel, scenarios grouped as Water, Nutrients and Device, and a reset-to-healthy button.
 
+### 8. MUST (Monday, by 10 PM): Release APK (handed over from Tharindu's task 8, PR #50)
+
+Build after #51 (alerts polish) and #52 (Inter font) are merged. On the laptop with Android
+Studio and the demo phone, follow `docs/RELEASE.md`:
+
+- Create the upload keystore **outside the repo** and write `android/key.properties` (git-ignored).
+  Never commit either, and never put the password in a commit, PR or chat.
+- `flutter build apk --release` (simulation mode, as `docs/DEMO.md` expects), check the signature,
+  `adb install -r` on the demo phone.
+- Run the whole of `docs/DEMO.md` once on the installed APK and tick the checklist at the end of
+  `docs/RELEASE.md`. Sameera can help with `android/` signing questions.
+
+- [ ] Done: signed release APK installed on the demo phone and the full demo run passes.
+
 ## Demo lines you present (about 1.5 minutes)
 
 "This is Home, built from our Figma design. Pod Alpha is live. I'll crash the pH from the

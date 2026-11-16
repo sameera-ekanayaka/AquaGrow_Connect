@@ -79,7 +79,24 @@ What already works well:
 | 9 | Help users recognise, diagnose and recover from errors | The offline pod explains itself ("Controls come back when Pod Alpha reconnects"). Dose notes say why ("Check the pH-down bottle, 2 of 5"). Retry on `AsyncValueView` errors. | The weather card prints the raw exception (5). | Fair |
 | 10 | Help and documentation | Settings explains data and privacy. The empty alerts state says when alerts appear. Each control dialog explains what will happen. | No first-run guide yet (Osanda, task 5 onboarding). | Fair |
 
+## Round 2: visual polish (Monday 16 November)
+
+Checked on the signed release APK (Pixel 7 Pro emulator, light mode) against `DESIGN.md`.
+The aim was one consistent look: the same accent, type, shapes and wording on every screen.
+
+| # | Severity | Screen | Problem | Fix | Owner |
+| --- | --- | --- | --- | --- | --- |
+| 17 | 3 | Home | An out-of-range tile (water 25°C) only turns amber; the caption still says "Target 18–24°C". Colour is the only signal (DESIGN rule 8). | Caption says which way first, on its own line: "Too high", then "Target 18–24°C". | Osanda (fixed in this round) |
+| 18 | 1 | My Pods | Every card says the stage twice: the photo badge and a "Growing" line under the name. | Keep the badge only. | Osanda (fixed in this round) |
+| 19 | 2 | Location dialog | The only lime filled button in the app. Everywhere else the primary button is near-black. Also Title Case ("Allow Location Access"). | Use the themed `FilledButton` and "Allow location access". | Imasha |
+| 20 | 2 | Weather and VPD cards | Wide letter spacing and capitals ("SCATTERED CLOUDS WITH MILD HUMI...") are cut off, and the spacing differs from every other screen. | Sentence case, normal spacing, let the condition wrap to two lines. | Imasha |
+| 21 | 2 | VPD card | The title is cut off ("Vapor Pressure Deficit ..."). The scale uses tan and brown that are not in the token set. "RH" is jargon. | Title "Air dryness (VPD)". Use `warning`/`critical`/`brand` for the scale. "Humidity 69%". | Imasha |
+| 22 | 2 | VPD card, weather icons | "OPTIMAL" and the small icons are lime on white (about 1.5:1). | Text in `c.text` on `brandSurface`; icons in `textSecondary`. | Imasha |
+| 23 | 1 | Insights, My Pods, Care headers | Capitals with letter spacing above every tab title ("LOOK AFTER YOUR PODS"), while Home uses a sentence-case greeting. | Sentence case overline in `TabHeader`, the same as Home. | Tharindu |
+| 24 | 1 | My Pods vs Home | "Harvest est. in 20 days" vs "Harvest in about 20 days". | One wording: "Harvest in about 20 days". | Udeshika |
+| 25 | 1 | Care | Four separate cards with equal weight, so the demo-only Pod simulator looks as important as Settings. Care reminders put cards inside a card. | One grouped list with dividers; reminders as plain rows. | Imasha |
+
 ## Still to review
 
 - Harvest Passport (#29) in dark mode and at 360 dp.
-- Any PR that opens before the freeze: Alerts polish (Tharindu) and New batch (Udeshika).
+- The app lock screen (draft PR #58) in light, dark and landscape.

@@ -4,6 +4,7 @@ import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/features/location/application/location_providers.dart';
 import 'package:aquagrow_mobile/features/location/domain/location_access_status.dart';
 import 'package:aquagrow_mobile/features/location/presentation/hydro_map_screen.dart';
+import 'package:aquagrow_mobile/features/location/presentation/widgets/supplier_map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -302,6 +303,26 @@ void main() {
 
       expect(find.text('rockwool'), findsNothing);
       expect(find.byTooltip('Clear search'), findsNothing);
+    });
+
+    testWidgets('segmented control toggles between List and Map view',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_buildScreen());
+      await tester.pump();
+
+      expect(find.text('List'), findsOneWidget);
+      expect(find.text('Map'), findsOneWidget);
+      expect(find.byType(SupplierMapView), findsNothing);
+
+      await tester.tap(find.text('Map'));
+      await tester.pump();
+
+      expect(find.byType(SupplierMapView), findsOneWidget);
     });
   });
 }

@@ -32,77 +32,67 @@ class CareReminderItemTile extends StatelessWidget {
     final urgency = ReminderUrgency.fromReminder(reminder, now);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AgSpace.s4),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: AgRadius.all(AgRadius.r16),
-          border: Border.all(color: colors.border),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AgSpace.s12,
-            vertical: AgSpace.s8,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AgSpace.s4,
+        vertical: AgSpace.s8,
+      ),
+      child: Row(
+        children: [
+          Checkbox(
+            value: reminder.isCompleted,
+            activeColor: colors.brand,
+            checkColor: colors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            onChanged: onToggle,
           ),
-          child: Row(
-            children: [
-              Checkbox(
-                value: reminder.isCompleted,
-                activeColor: colors.brand,
-                checkColor: colors.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                onChanged: onToggle,
-              ),
-              const SizedBox(width: AgSpace.s8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      reminder.title,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: reminder.isCompleted
-                                ? colors.textSecondary
-                                : colors.text,
-                            decoration: reminder.isCompleted
-                                ? TextDecoration.lineThrough
-                                : null,
-                          ),
-                    ),
-                    const SizedBox(height: AgSpace.s4),
-                    Text(
-                      reminder.frequencyLabel,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.textSecondary,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AgSpace.s8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AgSpace.s8,
-                  vertical: AgSpace.s4,
-                ),
-                decoration: BoxDecoration(
-                  color: urgency.backgroundColor(colors),
-                  borderRadius: AgRadius.all(AgRadius.pill),
-                ),
-                child: Text(
-                  urgency.label(days),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: urgency.foregroundColor(colors),
-                        fontWeight: FontWeight.w700,
+          const SizedBox(width: AgSpace.s8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  reminder.title,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: reminder.isCompleted
+                            ? colors.textSecondary
+                            : colors.text,
+                        decoration: reminder.isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                 ),
-              ),
-            ],
+                const SizedBox(height: AgSpace.s4),
+                Text(
+                  reminder.frequencyLabel,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                ),
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: AgSpace.s8),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AgSpace.s8,
+              vertical: AgSpace.s4,
+            ),
+            decoration: BoxDecoration(
+              color: urgency.backgroundColor(colors),
+              borderRadius: AgRadius.all(AgRadius.pill),
+            ),
+            child: Text(
+              urgency.label(days),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: urgency.foregroundColor(colors),
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

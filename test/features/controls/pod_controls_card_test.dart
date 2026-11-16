@@ -1,3 +1,4 @@
+import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/core/theme/app_theme.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
@@ -15,7 +16,7 @@ void main() {
   setUp(() => sim = PodSimulator(clock: () => DateTime(2026, 11, 15, 10)));
   tearDown(() => sim.dispose());
 
-  Future<void> pumpCard(WidgetTester tester) async {
+  Future<void> pumpCard(WidgetTester tester, {Pod? pod}) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -25,7 +26,7 @@ void main() {
           theme: AppTheme.light,
           home: Scaffold(
             body: SingleChildScrollView(
-              child: PodControlsCard(pod: sim.pods.first),
+              child: PodControlsCard(pod: pod ?? sim.pods.first),
             ),
           ),
         ),
@@ -164,5 +165,39 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  group('a live pod the controls cannot reach', () {
+    Pod livePod({required bool online}) => Pod(
+          id: 'live-uuid',
+          name: 'Pod Gamma',
+          room: 'Balcony',
+          isOnline: online,
+          lastSeenAt: DateTime(2026, 11, 15, 10),
+        );
+
+    testWidgets('offline: disabled controls and the reconnect note',
+        (tester) async {
+      await pumpCard(tester, pod: livePod(online: false));
+      await tester.pump();
+
+      expect(find.text('Something went wrong'), findsNothing);
+      expect(
+        find.text('Controls come back when Pod Gamma reconnects.'),
+        findsOneWidget,
+      );
+      for (final s in tester.widgetList<Switch>(find.byType(Switch))) {
+        expect(s.onChanged, isNull);
+      }
+    });
+
+    testWidgets('online: says controls are not connected yet', (tester) async {
+      await pumpCard(tester, pod: livePod(online: true));
+      await tester.pump();
+
+      expect(find.text('Something went wrong'), findsNothing);
+      expect(find.text('Controls not connected yet'), findsOneWidget);
+      expect(find.byType(Switch), findsNothing);
+    });
   });
 }

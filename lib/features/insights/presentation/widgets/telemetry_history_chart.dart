@@ -83,12 +83,18 @@ class TelemetryHistoryChart extends StatelessWidget {
     // Dynamic Y-axis scale based on data and metric targets
     final dataMin = stats.min;
     final dataMax = stats.max;
-    final minY =
+    final rawMinY =
         math.max(0.0, math.min(dataMin, metric.targetMin) - _yPadding(metric));
-    final maxY = math.max(dataMax, metric.targetMax) + _yPadding(metric);
+    final rawMaxY = math.max(dataMax, metric.targetMax) + _yPadding(metric);
 
     final xInterval = range == HistoryRange.hours24 ? 6.0 : 24.0;
     final yInterval = _yInterval(metric);
+
+    // Snap to grid multiples of yInterval to prevent unaligned min/max collision
+    final minY = (rawMinY / yInterval).floor() * yInterval;
+    final maxY = metric == SensorMetric.waterLevel
+        ? 100.0
+        : (rawMaxY / yInterval).ceil() * yInterval;
 
     return Container(
       padding: const EdgeInsets.all(AgSpace.s16),
@@ -104,13 +110,17 @@ class TelemetryHistoryChart extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                metric.label,
-                style: textTheme.titleMedium?.copyWith(
-                  color: colors.text,
-                  fontWeight: FontWeight.w700,
+              Flexible(
+                child: Text(
+                  metric.label,
+                  style: textTheme.titleMedium?.copyWith(
+                    color: colors.text,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: AgSpace.s8),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AgSpace.s8,
@@ -175,16 +185,26 @@ class TelemetryHistoryChart extends StatelessWidget {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 44,
+                      reservedSize: 40,
                       interval: yInterval,
                       getTitlesWidget: (value, meta) {
                         if (value < minY || value > maxY) {
                           return const SizedBox.shrink();
                         }
+                        // Only draw ticks on clean multiples of yInterval to prevent edge collisions
+                        final nearestTick =
+                            (value / yInterval).round() * yInterval;
+                        if ((value - nearestTick).abs() > 0.01) {
+                          return const SizedBox.shrink();
+                        }
+
                         return SideTitleWidget(
                           axisSide: meta.axisSide,
+                          fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
                           child: Text(
-                            metric.format(value),
+                            _formatAxisValue(metric, value),
+                            maxLines: 1,
+                            softWrap: false,
                             style: textTheme.labelSmall?.copyWith(
                               color: colors.textSecondary,
                             ),
@@ -202,6 +222,13 @@ class TelemetryHistoryChart extends StatelessWidget {
                         if (value < 0 || value > totalHours) {
                           return const SizedBox.shrink();
                         }
+                        // Only draw ticks on clean multiples of xInterval
+                        final nearestTick =
+                            (value / xInterval).round() * xInterval;
+                        if ((value - nearestTick).abs() > 0.01) {
+                          return const SizedBox.shrink();
+                        }
+
                         final tickTime = fromTime
                             .add(Duration(minutes: (value * 60).round()));
                         final label = range == HistoryRange.hours24
@@ -210,8 +237,11 @@ class TelemetryHistoryChart extends StatelessWidget {
 
                         return SideTitleWidget(
                           axisSide: meta.axisSide,
+                          fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
                           child: Text(
                             label,
+                            maxLines: 1,
+                            softWrap: false,
                             style: textTheme.labelSmall?.copyWith(
                               color: colors.textSecondary,
                             ),
@@ -281,5 +311,13 @@ class TelemetryHistoryChart extends StatelessWidget {
         SensorMetric.ec => 0.5,
         SensorMetric.waterTemp => 4.0,
         SensorMetric.waterLevel => 25.0,
+      };
+
+  String _formatAxisValue(SensorMetric metric, double value) =>
+      switch (metric) {
+        SensorMetric.ph => value.toStringAsFixed(1),
+        SensorMetric.ec => value.toStringAsFixed(1),
+        SensorMetric.waterTemp => '${value.toStringAsFixed(0)}°C',
+        SensorMetric.waterLevel => '${value.toStringAsFixed(0)}%',
       };
 }

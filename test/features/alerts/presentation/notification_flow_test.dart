@@ -28,6 +28,62 @@ void main() {
     expect(notifications.permissionRequests, 1);
   });
 
+  testWidgets('does not ask over onboarding on first launch', (tester) async {
+    final notifications = FakeNotificationService(enabled: false);
+    await tester.pumpWidget(
+      testApp(
+        sim: sim,
+        notifications: notifications,
+        signedIn: false,
+        onboardingSeen: false,
+        restoreDelay: const Duration(milliseconds: 300),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Skip'), findsOneWidget);
+    expect(find.text(NotificationSetup.explainTitle), findsNothing);
+    expect(notifications.permissionRequests, 0);
+
+    // The one chance to ask is kept for after sign-in.
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Use demo account'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(NotificationSetup.explainTitle), findsOneWidget);
+  });
+
+  testWidgets('does not ask over login when signed out', (tester) async {
+    final notifications = FakeNotificationService(enabled: false);
+    await tester.pumpWidget(
+      testApp(
+        sim: sim,
+        notifications: notifications,
+        signedIn: false,
+        restoreDelay: const Duration(milliseconds: 300),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Use demo account'), findsOneWidget);
+    expect(find.text(NotificationSetup.explainTitle), findsNothing);
+  });
+
+  testWidgets('still asks after a slow restore when signed in', (tester) async {
+    final notifications = FakeNotificationService(enabled: false);
+    await tester.pumpWidget(
+      testApp(
+        sim: sim,
+        notifications: notifications,
+        restoreDelay: const Duration(milliseconds: 300),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(NotificationSetup.explainTitle), findsOneWidget);
+  });
+
   testWidgets('shows no dialog when notifications are already allowed',
       (tester) async {
     await tester.pumpWidget(testApp(sim: sim));
