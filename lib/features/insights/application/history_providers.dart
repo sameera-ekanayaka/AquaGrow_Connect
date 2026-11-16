@@ -31,7 +31,9 @@ final historyMetricProvider =
 
 /// Asynchronously fetches telemetry history for the selected pod and range.
 final historyProvider = FutureProvider<List<SensorReading>>((ref) async {
-  final podId = ref.watch(selectedPodIdProvider);
+  // The resolved pod: the stored id can be a demo id that live mode lacks.
+  final podId = ref.watch(selectedPodProvider)?.id;
+  if (podId == null) return const [];
   final range = ref.watch(historyRangeProvider);
   final repo = ref.watch(telemetryRepositoryProvider);
   final now = ref.watch(clockProvider)();

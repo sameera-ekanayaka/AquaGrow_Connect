@@ -12,6 +12,7 @@ class FakeControlSource implements ControlSource {
     'pump_on': true,
     'light_on': true,
     'light_brightness': 80,
+    'mist_on': true,
     'ph_dose_requested_at': null,
   };
   final updates = <Map<String, dynamic>>[];
@@ -67,6 +68,7 @@ void main() {
     await repo.setLight('pod-1', on: true, brightness: 140);
     final dose = await repo.dosePhDown('pod-1');
     await repo.markRefilled('pod-1');
+    await repo.setMist('pod-1', on: false);
 
     expect(dose, PhDoseResult.applied);
     expect(source.updates, [
@@ -74,6 +76,7 @@ void main() {
       {'light_on': true, 'light_brightness': 100},
       {'ph_dose_requested_at': '2026-11-16T15:00:00.000Z'},
       {'refill_requested_at': '2026-11-16T15:00:00.000Z'},
+      {'mist_on': false},
     ]);
   });
 

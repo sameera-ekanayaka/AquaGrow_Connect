@@ -195,6 +195,13 @@ class PodSimulator {
     _emitPods();
   }
 
+  /// Removes [podId] from this session.
+  void removePod(String podId) {
+    _pod(podId);
+    _pods.remove(podId);
+    _emitPods();
+  }
+
   /// The most recent reading for [podId].
   SensorReading latest(String podId) => _pod(podId).toReading(_now(), _tickCount);
 
@@ -329,6 +336,13 @@ class PodSimulator {
   void setPump(String podId, {required bool on}) {
     final pod = _pod(podId);
     pod.actuators = pod.actuators.copyWith(pumpOn: on);
+    _emitActuators(pod);
+  }
+
+  /// Turns the ultrasonic mist maker on or off.
+  void setMist(String podId, {required bool on}) {
+    final pod = _pod(podId);
+    pod.actuators = pod.actuators.copyWith(mistOn: on);
     _emitActuators(pod);
   }
 

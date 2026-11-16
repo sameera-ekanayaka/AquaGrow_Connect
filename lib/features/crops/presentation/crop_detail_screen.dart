@@ -6,9 +6,11 @@ import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/features/crops/application/crop_detail_providers.dart';
 import 'package:aquagrow_mobile/features/crops/domain/crop_recipes.dart';
+import 'package:aquagrow_mobile/features/crops/presentation/delete_pod.dart';
 import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
-import 'package:aquagrow_mobile/shared/widgets/crop_hero.dart';
+import 'package:aquagrow_mobile/shared/widgets/crop_photo.dart';
 import 'package:aquagrow_mobile/shared/widgets/state_views.dart';
+import 'package:aquagrow_mobile/shared/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +19,13 @@ import 'package:go_router/go_router.dart';
 ///
 /// OWNER: Udeshika (see docs/tasks/udeshika.md).
 class CropDetailScreen extends ConsumerWidget {
+  Pod? _podOf(List<Pod>? pods) {
+    for (final pod in pods ?? const <Pod>[]) {
+      if (pod.id == podId) return pod;
+    }
+    return null;
+  }
+
   /// Creates the screen for the pod with [podId].
   const CropDetailScreen({required this.podId, super.key});
 
@@ -29,7 +38,21 @@ class CropDetailScreen extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          if (_podOf(podsAsync.valueOrNull) case final pod?)
+            IconButton(
+              tooltip: 'Delete pod',
+              icon: const Icon(Icons.delete_outline_rounded),
+              onPressed: () async {
+                if (await confirmDeletePod(context, ref, pod) &&
+                    context.mounted) {
+                  context.pop();
+                }
+              },
+            ),
+        ],
+      ),
       body: SafeArea(
         child: AsyncValueView<List<Pod>>(
           value: podsAsync,
@@ -56,11 +79,32 @@ class CropDetailScreen extends ConsumerWidget {
             return ListView(
               padding: const EdgeInsets.all(AgSpace.screen),
               children: [
-                CropHero(
-                  name: batch.cropName,
-                  badgeLabel: 'Day ${batch.dayNumber(now)} · ${stage.label}',
-                  caption: '${pod.room} · ${pod.name}',
-                  imageAsset: batch.imageAsset,
+                // Minimal UI: photo with the stage badge, then the name.
+                SizedBox(
+                  height: 280,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CropPhoto(
+                        radius: AgRadius.r24,
+                        imageAsset: batch.imageAsset,
+                      ),
+                      Positioned(
+                        top: AgSpace.s12,
+                        left: AgSpace.s12,
+                        child: StatusBadge(
+                          label: 'Day ${batch.dayNumber(now)} · ${stage.label}',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AgSpace.s20),
+                Text(batch.cropName, style: text.headlineMedium),
+                Text(
+                  '${pod.room} · ${pod.name}',
+                  style: text.bodyMedium
+                      ?.copyWith(color: context.ag.textSecondary),
                 ),
                 const SizedBox(height: AgSpace.s16),
                 _StageCards(current: stage),
@@ -73,6 +117,7 @@ class CropDetailScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: _Tile(
+                        icon: Icons.science_rounded,
                         label: 'pH',
                         value:
                             '${recipe.minPh.toStringAsFixed(1)}–${recipe.maxPh.toStringAsFixed(1)}',
@@ -84,6 +129,7 @@ class CropDetailScreen extends ConsumerWidget {
                     const SizedBox(width: AgSpace.s12),
                     Expanded(
                       child: _Tile(
+                        icon: Icons.bolt_rounded,
                         label: 'Nutrients (EC)',
                         value: recipe.targetEc.toStringAsFixed(1),
                         note: avg?.avgEc == null
@@ -98,6 +144,7 @@ class CropDetailScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: _Tile(
+                        icon: Icons.thermostat_rounded,
                         label: 'Water temp',
                         value:
                             '${recipe.targetWaterTempC.toStringAsFixed(0)}°C',
@@ -107,6 +154,7 @@ class CropDetailScreen extends ConsumerWidget {
                     const SizedBox(width: AgSpace.s12),
                     Expanded(
                       child: _Tile(
+                        icon: Icons.lightbulb_rounded,
                         label: 'Light',
                         value: '${recipe.lightHoursPerDay} h',
                         note: 'Per day',
@@ -227,7 +275,7 @@ class _StageCard extends StatelessWidget {
         horizontal: AgSpace.s8,
       ),
       decoration: BoxDecoration(
-        color: isCurrent ? c.brand : c.subtle,
+        color: isCurrent ? c.brand : c.surface,
         borderRadius: AgRadius.all(AgRadius.r16),
       ),
       child: Column(
@@ -271,7 +319,7 @@ class _Progress extends StatelessWidget {
           children: [
             Text(
               'Day ${batch.dayNumber(now)} of ${batch.daysToHarvest}',
-              style: text.titleSmall,
+              style: text.titleMedium,
             ),
             Text(
               '${batch.daysLeft(now)} days left',
@@ -295,8 +343,14 @@ class _Progress extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.label, required this.value, required this.note});
+  const _Tile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.note,
+  });
 
+  final IconData icon;
   final String label;
   final String value;
   final String note;
@@ -310,15 +364,26 @@ class _Tile extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AgSpace.s16),
       decoration: BoxDecoration(
-        color: c.subtle,
-        borderRadius: AgRadius.all(AgRadius.r16),
+        color: c.surface,
+        borderRadius: AgRadius.all(AgRadius.r20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: c.background,
+            foregroundColor: c.text,
+            child: Icon(icon, size: 18),
+          ),
+          const SizedBox(height: AgSpace.s16),
           Text(label, style: text.bodySmall?.copyWith(color: c.textSecondary)),
           const SizedBox(height: AgSpace.s4),
-          Text(value, style: text.headlineSmall),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(value, style: text.displaySmall),
+          ),
           const SizedBox(height: AgSpace.s4),
           Text(note, style: text.bodySmall?.copyWith(color: c.textSecondary)),
         ],

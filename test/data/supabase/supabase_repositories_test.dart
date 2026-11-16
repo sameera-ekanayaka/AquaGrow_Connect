@@ -55,6 +55,11 @@ class FakeDeviceSource implements DeviceSource {
 
   @override
   Future<void> harvestBatches(String deviceId) async => harvested.add(deviceId);
+
+  final deleted = <String>[];
+
+  @override
+  Future<void> deleteDevice(String deviceId) async => deleted.add(deviceId);
 }
 
 class FakeTelemetrySource implements TelemetrySource {
@@ -305,6 +310,13 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('deletePod deletes the device row', () async {
+      final source = FakeDeviceSource();
+      await SupabasePodRepository(source).deletePod('pod-1');
+
+      expect(source.deleted, ['pod-1']);
     });
 
     test('harvest marks the pod\'s active batch harvested', () async {

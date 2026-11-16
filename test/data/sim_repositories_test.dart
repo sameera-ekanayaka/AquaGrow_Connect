@@ -115,4 +115,10 @@ void main() {
     planted = (await repo.getPods()).firstWhere((p) => p.id == pod.id);
     expect(planted.batch, isNull);
   });
+
+  test('deletePod removes the pod for this session', () async {
+    final repo = SimPodRepository(sim);
+    await repo.deletePod('pod-beta');
+    expect((await repo.getPods()).map((p) => p.id), ['pod-alpha']);
+  });
 }

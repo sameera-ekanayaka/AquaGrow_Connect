@@ -122,23 +122,14 @@ void main() {
     expect(button.onPressed, isNull);
   });
 
-  testWidgets('releasing the brightness slider asks before sending',
+  testWidgets('releasing the brightness slider sends it without a dialog',
       (tester) async {
     await pumpCard(tester);
     final before = sim.actuators('pod-alpha').lightBrightness;
 
     await tester.drag(find.byType(Slider), const Offset(-120, 0));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Set brightness to'), findsOneWidget);
-
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(sim.actuators('pod-alpha').lightBrightness, before);
-    expect(find.text('$before%'), findsOneWidget);
-
-    await tester.drag(find.byType(Slider), const Offset(-120, 0));
-    await tester.pumpAndSettle();
-    await tester.tap(find.textContaining(RegExp(r'^Set \d+%$')));
+    await tester.pump();
+    expect(find.byType(AlertDialog), findsNothing);
     await tester.pump(_roundTrip);
     await tester.pump();
 
@@ -154,7 +145,7 @@ void main() {
       find.text('Controls come back when Pod Alpha reconnects.'),
       findsOneWidget,
     );
-    expect(find.text('Pod is offline'), findsNWidgets(3));
+    expect(find.text('Pod is offline'), findsNWidgets(4));
     for (final s in tester.widgetList<Switch>(find.byType(Switch))) {
       expect(s.onChanged, isNull);
     }

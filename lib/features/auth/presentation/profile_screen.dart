@@ -70,11 +70,13 @@ class ProfileScreen extends ConsumerWidget {
                   subtitle: mode == DataMode.live
                       ? 'Live · Supabase'
                       : 'Simulation · built-in pods',
+                  onTap: () => context.push(AppRoutes.settings),
                 ),
-                const _ProfileRow(
+                _ProfileRow(
                   icon: Icons.shield_outlined,
                   title: 'Security',
                   subtitle: 'Your pods are private to your account.',
+                  onTap: () => context.push(AppRoutes.settings),
                 ),
               ],
             ),

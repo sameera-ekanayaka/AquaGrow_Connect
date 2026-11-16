@@ -166,16 +166,14 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                     label: Text(metric.label),
                     selected: isSelected,
                     showCheckmark: false,
-                    selectedColor: colors.brandSurface,
+                    // Minimal UI: pills, the selected one near-black.
+                    shape: const StadiumBorder(),
+                    selectedColor: colors.text,
                     backgroundColor: colors.surface,
-                    side: BorderSide(
-                      color: isSelected ? colors.brand : colors.border,
-                      width: 1.5,
-                    ),
+                    side: BorderSide.none,
                     labelStyle: TextStyle(
-                      color: isSelected ? colors.text : colors.textSecondary,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? colors.onDark : colors.text,
+                      fontWeight: FontWeight.w600,
                     ),
                     onSelected: (_) {
                       ref.read(historyMetricProvider.notifier).state = metric;

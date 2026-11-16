@@ -2358,6 +2358,7 @@
       currentPod().mistOn = e.target.checked;
       showToast(e.target.checked ? 'Ultrasonic humidifier mist ON' : 'Ultrasonic mist turned OFF');
       syncAllFromState();
+      pushActuators(currentPod());
     });
 
     document.getElementById('chk-online').addEventListener('change', (e) => {
@@ -2587,6 +2588,9 @@
         tds_ppm: +(pod.ec * 500).toFixed(1),
         water_temp_c: +pod.waterTemp.toFixed(2),
         water_level_pct: +pod.waterLevel.toFixed(2),
+        // Room air around the pod: the grow light warms it, the mist humidifies it.
+        ambient_temp_c: +(25 + (pod.lightOn ? 1.5 * (pod.lightBrightness / 100) : 0) + (Math.random() - 0.5) * 0.3).toFixed(2),
+        humidity_pct: +((pod.mistOn ? 72 : 55) + (Math.random() - 0.5) * 2).toFixed(2),
         recorded_at: new Date().toISOString(),
       };
       const { error } = await sbClient.from('telemetry_logs').insert(row);
@@ -2678,7 +2682,7 @@
 
     // The user's pods with their growing crop and control columns (migration 005).
     const LIVE_DEVICE_SELECT =
-      'id, device_name, room, is_online, pump_on, light_on, light_brightness, ' +
+      'id, device_name, room, is_online, pump_on, light_on, light_brightness, mist_on, ' +
       'ph_dose_requested_at, refill_requested_at, ' +
       'crop_batches(status, custom_crop_name, planted_date, crop_recipes(crop_name, duration_days))';
 
@@ -2719,7 +2723,7 @@
           pumpOn: d.pump_on ?? true,
           lightOn: d.light_on ?? true,
           lightBrightness: d.light_brightness ?? 80,
-          mistOn: prev?.mistOn ?? true,
+          mistOn: d.mist_on ?? true,
           isOnline: prev?.isOnline ?? true,
           serverOnline: !!d.is_online,
           doseSeen: d.ph_dose_requested_at,
@@ -2768,6 +2772,10 @@
       if (row.light_on !== undefined && row.light_on !== pod.lightOn) {
         pod.lightOn = row.light_on;
         said.push(`light ${row.light_on ? 'on' : 'off'}`);
+      }
+      if (row.mist_on !== undefined && row.mist_on !== pod.mistOn) {
+        pod.mistOn = row.mist_on;
+        said.push(`mist ${row.mist_on ? 'on' : 'off'}`);
       }
       if (row.light_brightness !== undefined && row.light_brightness !== pod.lightBrightness) {
         pod.lightBrightness = row.light_brightness;
@@ -2848,6 +2856,7 @@
           pump_on: pod.pumpOn,
           light_on: pod.lightOn,
           light_brightness: Math.round(pod.lightBrightness),
+          mist_on: pod.mistOn,
         })
         .eq('id', pod.id);
       if (error) setSyncStatus('warning', 'Update err', `Control update failed: ${error.message}`);

@@ -65,7 +65,6 @@ class TelemetryHistoryChart extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: AgRadius.all(AgRadius.r20),
-          border: Border.all(color: colors.border),
         ),
         child: Center(
           child: Padding(
@@ -101,7 +100,6 @@ class TelemetryHistoryChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: AgRadius.all(AgRadius.r20),
-        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,31 +267,42 @@ class TelemetryHistoryChart extends StatelessWidget {
 
           const SizedBox(height: AgSpace.s12),
 
-          // Divider
-          Divider(color: colors.border, height: 1),
-
-          const SizedBox(height: AgSpace.s12),
-
-          // Stat row: Avg 6.1 · Min 5.8 · Max 6.4 · 96% in range
-          Row(
-            children: [
-              Icon(
-                Icons.analytics_outlined,
-                size: 16,
-                color: colors.textSecondary,
-              ),
-              const SizedBox(width: AgSpace.s8),
-              Expanded(
-                child: Text(
-                  stats.summaryLabel(metric),
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colors.text,
-                    fontWeight: FontWeight.w600,
+          // Minimal UI: four white stat tiles.
+          if (stats.isEmpty)
+            Text(stats.summaryLabel(metric), style: textTheme.bodySmall)
+          else
+            Row(
+              children: [
+                for (final (label, value) in [
+                  ('Average', metric.format(stats.average)),
+                  ('Lowest', metric.format(stats.min)),
+                  ('Highest', metric.format(stats.max)),
+                  ('In range', '${stats.stabilityPercent.round()}%'),
+                ]) ...[
+                  if (label != 'Average') const SizedBox(width: AgSpace.s8),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(AgSpace.s8),
+                      decoration: BoxDecoration(
+                        color: colors.background,
+                        borderRadius: AgRadius.all(AgRadius.r16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(label, style: textTheme.bodySmall),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(value, style: textTheme.titleMedium),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
+                ],
+              ],
+            ),
         ],
       ),
     );

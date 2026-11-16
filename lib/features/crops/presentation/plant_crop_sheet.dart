@@ -5,6 +5,7 @@ import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_rows.dart';
 import 'package:aquagrow_mobile/features/crops/domain/crop_recipes.dart';
+import 'package:aquagrow_mobile/features/crops/presentation/delete_pod.dart';
 import 'package:aquagrow_mobile/shared/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,6 +122,21 @@ class _PlantCropSheetState extends ConsumerState<PlantCropSheet> {
                     busy: _planting == recipes[i].cropName,
                     onTap: _planting == null ? () => _plant(recipes[i]) : null,
                   ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _planting == null
+                    ? () async {
+                        if (await confirmDeletePod(context, ref, widget.pod) &&
+                            context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      }
+                    : null,
+                icon: Icon(Icons.delete_outline_rounded, color: c.critical),
+                label: Text(
+                  'Delete this pod',
+                  style: TextStyle(color: c.critical),
                 ),
               ),
             ],

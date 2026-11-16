@@ -138,9 +138,10 @@ final ambientHumidityProvider = StateProvider<double>((ref) => 72.0);
 /// and [SensorReading.humidityPct] via [latestReadingProvider], falling back to
 /// manual ambient settings if not yet reporting.
 final vpdReadingProvider = Provider<VpdReading>((ref) {
-  final selectedPodId = ref.watch(selectedPodIdProvider);
-  final latestReading =
-      ref.watch(latestReadingProvider(selectedPodId)).valueOrNull;
+  final selectedPodId = ref.watch(selectedPodProvider)?.id;
+  final latestReading = selectedPodId == null
+      ? null
+      : ref.watch(latestReadingProvider(selectedPodId)).valueOrNull;
 
   final double temp =
       latestReading?.ambientTempC ?? ref.watch(ambientTempProvider);

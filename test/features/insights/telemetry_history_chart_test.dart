@@ -72,7 +72,8 @@ void main() {
 
       // EC target badge and stat row display units
       expect(find.text('Target 1.2–2.4 mS/cm'), findsOneWidget);
-      expect(find.textContaining('Avg 1.6 mS/cm'), findsOneWidget);
+      expect(find.text('Average'), findsOneWidget);
+      expect(find.text('1.6 mS/cm'), findsWidgets);
 
       // Y-axis ticks are clean numbers (e.g. 1.0, 1.5, 2.0, 2.5) without multi-line wrapping
       expect(find.text('1.0'), findsOneWidget);
@@ -99,7 +100,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Target 5.5–6.5'), findsOneWidget);
-      expect(find.text('6.0'), findsOneWidget);
+      // 6.0 is a y-axis tick (and can also be the average stat tile).
+      expect(find.text('6.0'), findsWidgets);
     });
   });
 }

@@ -52,6 +52,10 @@ class SimPodRepository implements IPodRepository {
 
   @override
   Future<void> harvest(String podId) async => _sim.harvest(podId);
+
+  /// Removes the pod from the simulator for this session only.
+  @override
+  Future<void> deletePod(String podId) async => _sim.removePod(podId);
 }
 
 /// Readings and history from the [PodSimulator].
@@ -104,6 +108,12 @@ class SimControlRepository implements IControlRepository {
   Future<void> setLight(String podId, {required bool on, int? brightness}) async {
     await _roundTrip(podId);
     _sim.setLight(podId, on: on, brightness: brightness);
+  }
+
+  @override
+  Future<void> setMist(String podId, {required bool on}) async {
+    await _roundTrip(podId);
+    _sim.setMist(podId, on: on);
   }
 
   @override

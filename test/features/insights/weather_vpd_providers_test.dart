@@ -1,5 +1,6 @@
 import 'package:aquagrow_mobile/core/config/app_config.dart';
 import 'package:aquagrow_mobile/core/mocks/mock_weather_service.dart';
+import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/core/models/vpd_reading.dart';
 import 'package:aquagrow_mobile/core/services/weather_service.dart';
@@ -72,6 +73,15 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           selectedPodIdProvider.overrideWith((ref) => 'pod-alpha'),
+          selectedPodProvider.overrideWith(
+            (ref) => Pod(
+              id: 'pod-alpha',
+              name: 'Pod Alpha',
+              room: 'Kitchen',
+              isOnline: true,
+              lastSeenAt: DateTime(2026, 11, 15),
+            ),
+          ),
           latestReadingProvider('pod-alpha')
               .overrideWith((ref) => Stream.value(liveReading)),
         ],

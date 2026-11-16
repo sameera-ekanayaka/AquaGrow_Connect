@@ -28,4 +28,7 @@ abstract interface class IPodRepository {
 
   /// Marks the crop in [podId] as harvested, so the pod is empty again.
   Future<void> harvest(String podId);
+
+  /// Deletes pod [podId] with its crops and readings. Cannot be undone.
+  Future<void> deletePod(String podId);
 }

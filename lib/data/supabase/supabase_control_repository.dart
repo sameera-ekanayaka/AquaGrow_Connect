@@ -10,7 +10,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 const _log = AppLogger('supabase');
 
 /// The `devices` columns the controls read.
-const controlColumns = 'id, is_online, pump_on, light_on, light_brightness, '
+const controlColumns =
+    'id, is_online, pump_on, light_on, light_brightness, mist_on, '
     'ph_dose_requested_at';
 
 /// Where a pod's control row comes from. An interface so tests can use a fake.
@@ -88,6 +89,7 @@ class SupabaseControlRepository implements IControlRepository {
         pumpOn: (row['pump_on'] as bool?) ?? true,
         lightOn: (row['light_on'] as bool?) ?? true,
         lightBrightness: (row['light_brightness'] as num?)?.toInt() ?? 80,
+        mistOn: (row['mist_on'] as bool?) ?? true,
         lastPhDoseAt: row['ph_dose_requested_at'] is String
             ? DateTime.tryParse(row['ph_dose_requested_at'] as String)
             : null,
@@ -109,6 +111,10 @@ class SupabaseControlRepository implements IControlRepository {
         'light_on': on,
         if (brightness != null) 'light_brightness': brightness.clamp(0, 100),
       });
+
+  @override
+  Future<void> setMist(String podId, {required bool on}) =>
+      _send(podId, {'mist_on': on});
 
   @override
   Future<PhDoseResult> dosePhDown(String podId) async {
