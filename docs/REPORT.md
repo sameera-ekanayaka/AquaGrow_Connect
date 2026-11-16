@@ -34,10 +34,11 @@ The app is built in layers (see `docs/ARCHITECTURE.md`):
 | --- | --- | --- |
 | L3 | Platform and tools | Flutter and Android Studio setup, CI on GitHub |
 | L5 | Lists, cards and navigation | My Pods list, pod cards, go_router to crop detail |
-| L6 | Figma fidelity | My Pods, crop detail and Harvest Passport follow the Figma screens |
-| L8 | Device hardware | Location, shake to refresh, biometric unlock, local notifications |
-| L9 | Data integrity | SHA-256 hash in the Harvest Passport QR |
-| L11 | Testing and release | About 420 automated tests, release APK steps in `docs/RELEASE.md` |
+| L6 | Figma fidelity | My Pods, crop detail, Harvest Passport, and Profile follow the Figma screens |
+| L7 | Web services & APIs | OpenWeatherMap integration with Sri Lankan fallback, URL launcher for phone dialer and GPS navigation |
+| L8 | Device hardware | OpenStreetMap interactive map, location permissions, shake to refresh, biometric unlock, local notifications |
+| L9 | Data integrity & security | SHA-256 hash in Harvest Passport, defensive two-step account deletion, RFC 4180 CSV export |
+| L11 | Testing and release | Comprehensive automated test suite, custom adaptive launcher icons, release APK steps in `docs/RELEASE.md` |
 
 ## 5. Security
 
