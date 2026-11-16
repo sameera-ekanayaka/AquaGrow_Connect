@@ -49,9 +49,9 @@ class CropsScreen extends ConsumerWidget {
               return ListView(
                 padding: const EdgeInsets.all(AgSpace.screen),
                 children: [
-                  const TabHeader(
-                    overline: 'YOUR GROWING SPACES',
+                  TabHeader(
                     title: 'My Pods',
+                    subtitle: growingLine(pods),
                   ),
                   const SizedBox(height: AgSpace.s16),
                   if (crossAxisCount == 1)
@@ -115,6 +115,15 @@ class CropsScreen extends ConsumerWidget {
           ? () => showPlantCropSheet(context, pod)
           : () => context.push(AppRoutes.cropDetail(pod.id)),
     );
+  }
+
+  /// "2 pods growing", or "1 pod, none growing yet" when all are empty.
+  static String growingLine(List<Pod> pods) {
+    final growing = pods.where((p) => p.batch != null).length;
+    final count = pods.length == 1 ? '1 pod' : '${pods.length} pods';
+    if (growing == pods.length) return '$count growing';
+    if (growing == 0) return '$count, none growing yet';
+    return '$count, $growing growing';
   }
 
   /// Opens the Add a pod form, then confirms with a snackbar.

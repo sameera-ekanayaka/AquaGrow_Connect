@@ -32,13 +32,14 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final now = ref.watch(homeClockProvider)();
-
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(AgSpace.screen),
         children: [
-          TabHeader(overline: greeting(now), title: 'Your garden'),
+          TabHeader(
+            title: 'Your garden',
+            subtitle: podCount(ref.watch(podsProvider).valueOrNull),
+          ),
           AsyncValueView(
             value: ref.watch(podsProvider),
             onRetry: () => ref.invalidate(podsProvider),
@@ -55,6 +56,12 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// "1 pod" or "3 pods", or null while the pods load.
+  static String? podCount(List<Pod>? pods) {
+    if (pods == null || pods.isEmpty) return null;
+    return pods.length == 1 ? '1 pod' : '${pods.length} pods';
   }
 
   /// "Good morning", "Good afternoon" or "Good evening" for [now].
@@ -207,16 +214,20 @@ class _ReadingsGrid extends ConsumerWidget {
         builder: (context, constraints) {
           // Two columns on phones, four on tablets and landscape.
           final columns = constraints.maxWidth >= 600 ? 4 : 2;
-          return GridView.count(
-            crossAxisCount: columns,
+          return GridView(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisSpacing: AgSpace.s12,
+              crossAxisSpacing: AgSpace.s12,
+              // Fits the icon, label, value and a two-line caption.
+              mainAxisExtent: 184,
+            ),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: AgSpace.s12,
-            crossAxisSpacing: AgSpace.s12,
-            childAspectRatio: 1.15,
             children: [
               for (final metric in SensorMetric.values)
                 SensorTile(
+                  icon: metricIcon(metric),
                   label: metric.label,
                   value: metric.format(metric.valueOf(reading)),
                   // An offline pod's numbers are stale, so do not grade them.
@@ -278,3 +289,11 @@ class _YourPlants extends ConsumerWidget {
     );
   }
 }
+
+/// The Minimal UI icon for each reading.
+IconData metricIcon(SensorMetric metric) => switch (metric) {
+      SensorMetric.ph => Icons.science_rounded,
+      SensorMetric.ec => Icons.bolt_rounded,
+      SensorMetric.waterTemp => Icons.thermostat_rounded,
+      SensorMetric.waterLevel => Icons.waves_rounded,
+    };
