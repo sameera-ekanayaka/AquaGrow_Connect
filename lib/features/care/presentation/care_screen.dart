@@ -21,7 +21,7 @@ class CareScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(AgSpace.screen),
         children: [
-          const TabHeader(overline: 'LOOK AFTER YOUR PODS', title: 'Care'),
+          const TabHeader(title: 'Care'),
           Card(
             child: Column(
               children: [

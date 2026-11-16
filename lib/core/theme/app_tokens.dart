@@ -94,17 +94,17 @@ class AgColors extends ThemeExtension<AgColors> {
   final Color criticalSurface;
 
   static const light = AgColors(
-    background: Color(0xFFFAFAFA),
-    surface: Color(0xFFFFFFFF),
-    subtle: Color(0xFFF5F5F5),
-    border: Color(0xFFE5E7EB),
-    text: Color(0xFF0A0A0A),
-    textSecondary: Color(0xFF616161),
+    background: Color(0xFFFFFFFF),
+    surface: Color(0xFFF5F6F3),
+    subtle: Color(0xFFECEDE9),
+    border: Color(0xFFE6E7E3),
+    text: Color(0xFF111311),
+    textSecondary: Color(0xFF676A65),
     onDark: Color(0xFFFFFFFF),
     brand: Color(0xFFA8E63D),
     brandSurface: Color(0xFFF1F9DC),
     warning: Color(0xFF8A5300),
-    warningSurface: Color(0xFFFFF5E8),
+    warningSurface: Color(0xFFFFF3E0),
     critical: Color(0xFFB3261E),
     criticalSurface: Color(0xFFFDECEA),
   );

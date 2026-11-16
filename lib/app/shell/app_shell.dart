@@ -1,5 +1,6 @@
 import 'package:aquagrow_mobile/app/shell/notification_setup.dart';
 import 'package:aquagrow_mobile/app/shell/offline_banner.dart';
+import 'package:aquagrow_mobile/app/shell/pill_nav_bar.dart';
 import 'package:aquagrow_mobile/features/alerts/application/alert_engine.dart';
 import 'package:aquagrow_mobile/features/sync/presentation/sync_listener.dart';
 import 'package:flutter/material.dart';
@@ -22,24 +23,24 @@ class AppShell extends ConsumerWidget {
 
   /// Tab order must match the branches in `app_router.dart`.
   static const destinations = [
-    NavigationDestination(
-      icon: Icon(Icons.home_outlined),
-      selectedIcon: Icon(Icons.home),
+    PillNavItem(
+      icon: Icons.home_outlined,
+      selectedIcon: Icons.home,
       label: 'Home',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.eco_outlined),
-      selectedIcon: Icon(Icons.eco),
+    PillNavItem(
+      icon: Icons.eco_outlined,
+      selectedIcon: Icons.eco,
       label: 'Crops',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.insights_outlined),
-      selectedIcon: Icon(Icons.insights),
+    PillNavItem(
+      icon: Icons.insights_outlined,
+      selectedIcon: Icons.insights,
       label: 'Insights',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.add_box_outlined),
-      selectedIcon: Icon(Icons.add_box),
+    PillNavItem(
+      icon: Icons.spa_outlined,
+      selectedIcon: Icons.spa,
       label: 'Care',
     ),
   ];
@@ -67,10 +68,10 @@ class AppShell extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: PillNavBar(
+        items: destinations,
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onTap,
-        destinations: destinations,
+        onSelected: _onTap,
       ),
     );
   }

@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(testApp(sim: sim));
     await settle(tester);
 
-    await tester.tap(find.widgetWithText(NavigationDestination, 'Crops'));
+    await tester.tap(find.byTooltip('Crops'));
     await settle(tester);
     await tester.tap(find.text('Genovese Basil').first);
     await settle(tester);

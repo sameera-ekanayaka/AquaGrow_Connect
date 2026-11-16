@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:aquagrow_mobile/data/supabase/supabase_rows.dart';
+import 'package:aquagrow_mobile/features/crops/domain/crop_recipes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -37,7 +40,7 @@ void main() {
       expect(pod.batch!.cropName, 'Italian Basil');
       expect(pod.batch!.variety, 'Genovese');
       expect(pod.batch!.daysToHarvest, 28);
-      expect(pod.batch!.imageAsset, 'assets/images/crops/basil.png');
+      expect(pod.batch!.imageAsset, 'assets/images/crops/basil-plants.webp');
       expect(pod.batch!.plantedAt, DateTime(2026, 11, 8));
     });
 
@@ -114,6 +117,15 @@ void main() {
 
   test('cropImage matches bundled photos and leaves others empty', () {
     expect(SupabaseRows.cropImage('Genovese Basil'), contains('basil'));
-    expect(SupabaseRows.cropImage('Pak Choi'), isNull);
+    expect(SupabaseRows.cropImage('Pak Choi'), contains('pak-choi'));
+    expect(SupabaseRows.cropImage('Tomato'), isNull);
+  });
+
+  test('every recipe has a photo that is bundled with the app', () {
+    for (final recipe in CropRecipes.all) {
+      final asset = SupabaseRows.cropImage(recipe.cropName);
+      expect(asset, isNotNull, reason: recipe.cropName);
+      expect(File(asset!).existsSync(), isTrue, reason: asset);
+    }
   });
 }

@@ -129,7 +129,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
 
     final podSubtitle = selectedPod != null
         ? selectedPod.displayName
-        : 'HOW YOUR PODS ARE DOING';
+        : 'How your pods are doing';
 
     return SafeArea(
       child: ListView(
@@ -140,7 +140,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
             children: [
               Expanded(
                 child: TabHeader(
-                  overline: podSubtitle.toUpperCase(),
+                  subtitle: podSubtitle,
                   title: 'Insights',
                 ),
               ),

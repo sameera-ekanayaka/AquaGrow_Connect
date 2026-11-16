@@ -1,7 +1,9 @@
 # Design system
 
-Source of truth: Figma file **AquaGrow**, page **01 — Refined Direction**
-(<https://www.figma.com/design/nuNDbA7UACR4QPQ2PVV4j3/AquaGrow>). The look is
+Source of truth: Figma file **AquaGrow — Minimal UI**, page **Screens**
+(<https://www.figma.com/design/C1QLO2lVYJ0zJbkdLYZYii/AquaGrow-%E2%80%94-Minimal-UI>).
+The older file "AquaGrow" (page "01 — Refined Direction") is out of date: do not build from
+it. The look is
 **white and near-black with a lime accent, plant photography, and calm, clear hierarchy.**
 Urgent care comes before streaks, and every reading shows its target.
 
@@ -33,8 +35,9 @@ Container(color: c.warningSurface, child: Text('Water needs attention', style: T
 
 ## 2. Type (line height 1.4)
 
-Figma uses **Inter**. It is bundled in `assets/fonts/` (Regular, Medium, SemiBold, Bold, OFL
-licence in `OFL.txt`) and set once in `AppTheme` (`fontFamily: 'Inter'`), so every
+Figma uses **Plus Jakarta Sans**. It is bundled in `assets/fonts/` (Regular, Medium, SemiBold,
+Bold, ExtraBold for titles; OFL licence in `OFL.txt`) and set once in `AppTheme`
+(`fontFamily: 'PlusJakartaSans'`), so every
 `textTheme` style uses it. Never set a font family in a feature, and never load fonts from the
 internet at runtime: the demo phone may be offline.
 
@@ -90,5 +93,6 @@ Text must scale with the phone's font size setting. Never wrap the app in a fixe
 
 ## 6. Images
 
-Crop photos are in `assets/images/crops/` (exported from Figma). Add new ones there,
-as PNG or WebP under 300 KB, and reference them by path in `CropBatch.imageAsset`.
+Crop photos are in `assets/images/crops/`: basil and spinach exported from Figma, the others
+from Unsplash (free under the Unsplash License), cropped to 480 × 480 WebP. Every recipe maps
+to a photo in `SupabaseRows.cropImage`. Add new ones there, as PNG or WebP under 300 KB.

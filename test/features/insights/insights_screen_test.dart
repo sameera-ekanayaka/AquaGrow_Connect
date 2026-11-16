@@ -125,9 +125,9 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Screen title and pod display name in overline
+        // Screen title and pod display name in the subtitle
         expect(find.text('Insights'), findsOneWidget);
-        expect(find.textContaining('POD ALPHA'), findsOneWidget);
+        expect(find.textContaining('Pod Alpha'), findsWidgets);
 
         // Metric chips are present
         expect(

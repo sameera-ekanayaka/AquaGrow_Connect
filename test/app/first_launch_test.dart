@@ -1,9 +1,9 @@
 import 'package:aquagrow_mobile/app/router/app_router.dart';
 import 'package:aquagrow_mobile/app/router/app_routes.dart';
+import 'package:aquagrow_mobile/app/shell/pill_nav_bar.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
 import 'package:aquagrow_mobile/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:aquagrow_mobile/features/onboarding/presentation/splash_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -99,7 +99,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byType(OnboardingScreen), findsNothing);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(PillNavBar), findsNothing);
       expect(find.text('Use demo account'), findsOneWidget);
     });
   });

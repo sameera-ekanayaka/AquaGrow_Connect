@@ -1,7 +1,7 @@
 import 'package:aquagrow_mobile/app/router/app_router.dart';
 import 'package:aquagrow_mobile/app/router/app_routes.dart';
+import 'package:aquagrow_mobile/app/shell/pill_nav_bar.dart';
 import 'package:aquagrow_mobile/core/simulation/pod_simulator.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -61,21 +61,21 @@ void main() {
       await tester.pumpWidget(testApp(sim: sim));
       await tester.pump();
 
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Crops'));
+      await tester.tap(find.byTooltip('Crops'));
       await tester.pump();
       await tester.pump();
       expect(find.text('My Pods'), findsOneWidget);
       expect(find.text('Genovese Basil'), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Insights'));
+      await tester.tap(find.byTooltip('Insights'));
       await tester.pump();
       expect(find.text('Weather and VPD'), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Care'));
+      await tester.tap(find.byTooltip('Care'));
       await tester.pump();
       expect(find.text('Pod simulator'), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(NavigationDestination, 'Home'));
+      await tester.tap(find.byTooltip('Home'));
       await tester.pump();
       expect(find.text('Your garden'), findsOneWidget);
     });
@@ -96,7 +96,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1)); // finish the page transition
 
       expect(find.text('Your garden'), findsNothing);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(PillNavBar), findsNothing);
     });
   });
 }
