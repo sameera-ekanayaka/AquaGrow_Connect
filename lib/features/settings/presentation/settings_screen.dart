@@ -128,7 +128,8 @@ class _PrivacyCard extends ConsumerWidget {
     (
       Icons.lock_outline,
       'In secure storage',
-      'Your sign-in tokens only, protected by the Android Keystore.',
+      'Your sign-in tokens only, protected by the Android Keystore or iOS '
+          'Keychain.',
     ),
     (
       Icons.cloud_outlined,
