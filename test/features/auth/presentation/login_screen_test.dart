@@ -170,4 +170,21 @@ void main() {
     expect(find.text('Enter a valid email'), findsOneWidget);
     expect(repo.resetCalls, isEmpty);
   });
+
+  testWidgets('fields check themselves while typing, before Sign in',
+      (tester) async {
+    await pumpLogin(tester);
+
+    await tester.enterText(find.byKey(const Key('login-email')), 'grower@');
+    await tester.pump();
+    expect(find.text('Enter a valid email'), findsOneWidget);
+
+    await tester.enterText(
+      find.byKey(const Key('login-email')),
+      'grower@aquagrow.io',
+    );
+    await tester.pump();
+    expect(find.text('Enter a valid email'), findsNothing);
+    expect(repo.signInCalls, isEmpty);
+  });
 }

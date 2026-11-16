@@ -117,6 +117,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         body: SafeArea(
           child: Form(
             key: _formKey,
+            // Each field checks itself as soon as the user types in it.
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: ListView(
               padding: const EdgeInsets.all(AgSpace.screen),
               children: [
