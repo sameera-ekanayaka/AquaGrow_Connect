@@ -14,7 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 const _log = AppLogger('controls');
 
 /// The four commands on the card. Each can be busy on its own.
-enum _Command { pump, light, brightness, dose }
+enum _Command { pump, light, mist, brightness, dose }
 
 /// "Pod controls" on Home, from the Figma frame "Home · Light": pump and
 /// grow light switches, a brightness slider and a pH-down button.
@@ -127,6 +127,14 @@ class _PodControlsCardState extends ConsumerState<PodControlsCard> {
               ? (on) => _setLight(on: on, brightness: state.lightBrightness)
               : null,
         ),
+        SwitchRow(
+          icon: Icons.water_drop_outlined,
+          title: 'Mist',
+          subtitle: online ? (state.mistOn ? 'On' : 'Off') : offline,
+          value: state.mistOn,
+          busy: _busy.contains(_Command.mist),
+          onChanged: online ? (on) => _setMist(on: on) : null,
+        ),
         SliderRow(
           icon: Icons.wb_sunny_rounded,
           title: 'Brightness',
@@ -170,6 +178,17 @@ class _PodControlsCardState extends ConsumerState<PodControlsCard> {
         confirmLabel: on ? 'Turn on' : 'Turn off',
         destructive: !on,
         command: (repo) => repo.setPump(_pod.id, on: on),
+      );
+
+  Future<void> _setMist({required bool on}) => _send(
+        _Command.mist,
+        title: on ? 'Turn the mist on?' : 'Turn the mist off?',
+        message: on
+            ? 'The ultrasonic mist maker in ${_pod.name} starts again.'
+            : 'The leaves in ${_pod.name} get no extra humidity until you '
+                'turn it back on.',
+        confirmLabel: on ? 'Turn on' : 'Turn off',
+        command: (repo) => repo.setMist(_pod.id, on: on),
       );
 
   Future<void> _setLight({required bool on, required int brightness}) => _send(

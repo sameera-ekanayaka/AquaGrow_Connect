@@ -107,6 +107,12 @@ class SimControlRepository implements IControlRepository {
   }
 
   @override
+  Future<void> setMist(String podId, {required bool on}) async {
+    await _roundTrip(podId);
+    _sim.setMist(podId, on: on);
+  }
+
+  @override
   Future<PhDoseResult> dosePhDown(String podId) async {
     await _roundTrip(podId);
     return _sim.dosePhDown(podId);

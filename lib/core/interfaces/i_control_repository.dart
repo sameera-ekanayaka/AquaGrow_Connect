@@ -22,6 +22,9 @@ abstract interface class IControlRepository {
   /// Turns the grow light on or off, optionally setting brightness (0 to 100).
   Future<void> setLight(String podId, {required bool on, int? brightness});
 
+  /// Turns the ultrasonic mist maker on or off.
+  Future<void> setMist(String podId, {required bool on});
+
   /// Runs one pH-down pulse. Check the result: it can be locked for safety.
   Future<PhDoseResult> dosePhDown(String podId);
 

@@ -145,7 +145,7 @@ void main() {
       find.text('Controls come back when Pod Alpha reconnects.'),
       findsOneWidget,
     );
-    expect(find.text('Pod is offline'), findsNWidgets(3));
+    expect(find.text('Pod is offline'), findsNWidgets(4));
     for (final s in tester.widgetList<Switch>(find.byType(Switch))) {
       expect(s.onChanged, isNull);
     }

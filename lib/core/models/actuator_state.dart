@@ -7,6 +7,7 @@ class ActuatorState {
     required this.pumpOn,
     required this.lightOn,
     required this.lightBrightness,
+    this.mistOn = true,
     this.lastPhDoseAt,
     this.phDosesWithoutChange = 0,
   });
@@ -26,6 +27,9 @@ class ActuatorState {
   /// 0 to 100 percent.
   final int lightBrightness;
 
+  /// Ultrasonic mist maker (humidity for the leaves).
+  final bool mistOn;
+
   /// Time of the last pH-down pulse, or null.
   final DateTime? lastPhDoseAt;
 
@@ -39,6 +43,7 @@ class ActuatorState {
     bool? pumpOn,
     bool? lightOn,
     int? lightBrightness,
+    bool? mistOn,
     DateTime? lastPhDoseAt,
     int? phDosesWithoutChange,
   }) {
@@ -46,6 +51,7 @@ class ActuatorState {
       pumpOn: pumpOn ?? this.pumpOn,
       lightOn: lightOn ?? this.lightOn,
       lightBrightness: lightBrightness ?? this.lightBrightness,
+      mistOn: mistOn ?? this.mistOn,
       lastPhDoseAt: lastPhDoseAt ?? this.lastPhDoseAt,
       phDosesWithoutChange: phDosesWithoutChange ?? this.phDosesWithoutChange,
     );
@@ -57,10 +63,11 @@ class ActuatorState {
       other.pumpOn == pumpOn &&
       other.lightOn == lightOn &&
       other.lightBrightness == lightBrightness &&
+      other.mistOn == mistOn &&
       other.lastPhDoseAt == lastPhDoseAt &&
       other.phDosesWithoutChange == phDosesWithoutChange;
 
   @override
   int get hashCode =>
-      Object.hash(pumpOn, lightOn, lightBrightness, lastPhDoseAt, phDosesWithoutChange);
+      Object.hash(pumpOn, lightOn, lightBrightness, mistOn, lastPhDoseAt, phDosesWithoutChange);
 }

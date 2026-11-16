@@ -332,6 +332,13 @@ class PodSimulator {
     _emitActuators(pod);
   }
 
+  /// Turns the ultrasonic mist maker on or off.
+  void setMist(String podId, {required bool on}) {
+    final pod = _pod(podId);
+    pod.actuators = pod.actuators.copyWith(mistOn: on);
+    _emitActuators(pod);
+  }
+
   /// Turns the grow light on or off and optionally sets brightness (0 to 100).
   void setLight(String podId, {required bool on, int? brightness}) {
     final pod = _pod(podId);
