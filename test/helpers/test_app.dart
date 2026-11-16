@@ -31,8 +31,15 @@ final testUser = UserProfile(
 class FakeAuthRepository implements IAuthRepository {
   /// [user] is who is signed in at startup (null for signed out);
   /// [account] is who any sign-in or sign-up succeeds as.
-  FakeAuthRepository({this.user, UserProfile? account})
-      : account = account ?? testUser;
+  FakeAuthRepository({
+    this.user,
+    UserProfile? account,
+    this.restoreDelay = Duration.zero,
+  }) : account = account ?? testUser;
+
+  /// How long restoring the saved session takes, like reading the Keystore
+  /// on a real phone. The app builds under the splash meanwhile.
+  final Duration restoreDelay;
 
   /// The signed-in user, or null.
   UserProfile? user;
@@ -46,7 +53,10 @@ class FakeAuthRepository implements IAuthRepository {
   Stream<UserProfile?> get authStateChanges => _changes.stream;
 
   @override
-  Future<UserProfile?> getCurrentUser() async => user;
+  Future<UserProfile?> getCurrentUser() async {
+    if (restoreDelay > Duration.zero) await Future<void>.delayed(restoreDelay);
+    return user;
+  }
 
   @override
   bool get isAuthenticated => user != null;
@@ -86,7 +96,9 @@ class FakeAuthRepository implements IAuthRepository {
 /// - always online,
 /// - a [FakeNotificationService] (pass your own to check notifications),
 /// - preferences kept in memory, with onboarding already seen (pass
-///   `onboardingSeen: false` to test the first-launch walkthrough).
+///   `onboardingSeen: false` to test the first-launch walkthrough),
+/// - a session restored at once (pass `restoreDelay` to restore it later,
+///   as on a real phone).
 ///
 /// ```dart
 /// final sim = PodSimulator(clock: () => DateTime(2026, 11, 15, 10));
@@ -99,6 +111,7 @@ Widget testApp({
   bool signedIn = true,
   FakeNotificationService? notifications,
   bool onboardingSeen = true,
+  Duration restoreDelay = Duration.zero,
 }) {
   final preferences = InMemoryPreferencesStore();
   if (onboardingSeen) {
@@ -107,7 +120,10 @@ Widget testApp({
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(
-        FakeAuthRepository(user: signedIn ? (user ?? testUser) : null),
+        FakeAuthRepository(
+          user: signedIn ? (user ?? testUser) : null,
+          restoreDelay: restoreDelay,
+        ),
       ),
       podSimulatorProvider.overrideWithValue(sim),
       isOfflineProvider.overrideWith((ref) => Stream.value(false)),
