@@ -3,6 +3,7 @@ import 'package:aquagrow_mobile/app/shell/tab_header.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
+import 'package:aquagrow_mobile/features/crops/presentation/add_pod_screen.dart';
 import 'package:aquagrow_mobile/shared/widgets/pod_card.dart';
 import 'package:aquagrow_mobile/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +28,14 @@ class CropsScreen extends ConsumerWidget {
       child: AsyncValueView<List<Pod>>(
         value: podsAsync,
         isEmpty: (pods) => pods.isEmpty,
-        empty: const EmptyView(
+        empty: EmptyView(
           title: 'No pods yet',
           message: 'Add a pod to start growing hydroponic crops.',
+          action: FilledButton.icon(
+            onPressed: () => _addPod(context),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Add a pod'),
+          ),
         ),
         data: (pods) {
           final now = DateTime.now();
@@ -74,7 +80,7 @@ class CropsScreen extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => _showAddPodDialog(context),
+                      onPressed: () => _addPod(context),
                       icon: const Icon(Icons.add_rounded),
                       label: const Text('Add a pod'),
                     ),
@@ -107,23 +113,12 @@ class CropsScreen extends ConsumerWidget {
     );
   }
 
-  void _showAddPodDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Add a Pod'),
-          content: const Text(
-            'Coming soon: Bluetooth and Wi-Fi pod pairing will be available in a future update.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+  /// Opens the Add a pod form, then confirms with a snackbar.
+  Future<void> _addPod(BuildContext context) async {
+    final pod = await showAddPodScreen(context);
+    if (pod == null || !context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('${pod.name} added')));
   }
 }
