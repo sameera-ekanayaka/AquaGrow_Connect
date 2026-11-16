@@ -44,8 +44,18 @@ abstract final class SupabaseRows {
   /// The bundled photo for a crop name, or null for an icon placeholder.
   static String? cropImage(String cropName) {
     final name = cropName.toLowerCase();
-    if (name.contains('basil')) return 'assets/images/crops/basil.png';
-    if (name.contains('spinach')) return 'assets/images/crops/spinach.png';
+    const dir = 'assets/images/crops';
+    if (name.contains('italian basil')) return '$dir/basil-plants.webp';
+    if (name.contains('basil')) return '$dir/basil.png';
+    if (name.contains('spinach')) return '$dir/spinach.png';
+    if (name.contains('lettuce')) return '$dir/butterhead-lettuce.webp';
+    if (name.contains('rocket') || name.contains('arugula')) {
+      return '$dir/wild-rocket.webp';
+    }
+    if (name.contains('mint')) return '$dir/sweet-mint.webp';
+    if (name.contains('choi') || name.contains('bok')) {
+      return '$dir/pak-choi.webp';
+    }
     return null;
   }
 
