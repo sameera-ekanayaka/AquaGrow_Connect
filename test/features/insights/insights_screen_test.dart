@@ -151,8 +151,8 @@ void main() {
         expect(find.text('24 hours'), findsOneWidget);
         expect(find.text('7 days'), findsOneWidget);
 
-        // Stats row under chart has stability info
-        expect(find.textContaining('% in range'), findsOneWidget);
+        // Stat tiles under the chart include stability
+        expect(find.text('In range'), findsOneWidget);
 
         // Embedded weather summary and VPD cards
         expect(find.byType(WeatherSummaryCard), findsOneWidget);
