@@ -239,7 +239,8 @@ void main() {
 
       expect(
         find.text(
-            'You already have a pod called Pod Alpha. Pick another name.'),
+          'You already have a pod called Pod Alpha. Pick another name.',
+        ),
         findsOneWidget,
       );
       expect(sim.pods, hasLength(2));
