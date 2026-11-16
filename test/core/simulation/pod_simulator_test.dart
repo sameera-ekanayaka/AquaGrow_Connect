@@ -149,4 +149,31 @@ void main() {
       );
     }
   });
+
+  group('addPod', () {
+    test('adds an empty pod that reports like the demo pods', () async {
+      final pods = sim.podsStream.first;
+      final pod = sim.addPod(name: 'Pod Gamma', room: 'Balcony', serialNumber: 'aqg-2026-0042');
+
+      expect(pod.id, 'pod-aqg-2026-0042');
+      expect(pod.name, 'Pod Gamma');
+      expect(pod.room, 'Balcony');
+      expect(pod.batch, isNull);
+      expect(pod.isOnline, isTrue);
+      expect((await pods).map((p) => p.id), contains(pod.id));
+      expect(sim.pods, hasLength(3));
+
+      final reading = sim.readings.firstWhere((r) => r.deviceId == pod.id);
+      sim.tick();
+      expect((await reading).ph, closeTo(6.0, 0.2));
+    });
+
+    test('rejects a serial number already added, in any case', () {
+      sim.addPod(name: 'Pod Gamma', room: 'Balcony', serialNumber: 'AQG-1');
+
+      expect(sim.hasSerial(' aqg-1 '), isTrue);
+      expect(() => sim.addPod(name: 'Other', room: 'Hall', serialNumber: 'aqg-1'), throwsArgumentError);
+      expect(sim.pods, hasLength(3));
+    });
+  });
 }

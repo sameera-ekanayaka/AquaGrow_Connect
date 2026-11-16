@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:aquagrow_mobile/core/errors/app_failure.dart';
 import 'package:aquagrow_mobile/core/interfaces/i_pod_repository.dart';
 import 'package:aquagrow_mobile/core/logging/app_logger.dart';
+import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_rows.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,6 +18,10 @@ abstract interface class DeviceSource {
 
   /// Emits whenever a device row changes.
   Stream<void> changes();
+
+  /// Inserts a `devices` row owned by the signed-in user and returns it,
+  /// read back with [devicesSelect].
+  Future<Map<String, dynamic>> insertDevice(Map<String, dynamic> values);
 }
 
 /// [DeviceSource] backed by Supabase (REST for reads, realtime for changes).
@@ -29,6 +34,19 @@ class SupabaseDeviceSource implements DeviceSource {
   @override
   Future<List<Map<String, dynamic>>> fetchDevices() =>
       _client.from('devices').select(devicesSelect).order('created_at');
+
+  @override
+  Future<Map<String, dynamic>> insertDevice(Map<String, dynamic> values) async {
+    final user = _client.auth.currentUser;
+    if (user == null) {
+      throw const AuthFailure('Sign in again to add a pod.');
+    }
+    return _client
+        .from('devices')
+        .insert({...values, 'owner_id': user.id})
+        .select(devicesSelect)
+        .single();
+  }
 
   @override
   Stream<void> changes() {
@@ -76,6 +94,41 @@ class SupabasePodRepository implements IPodRepository {
         'Could not load your pods. Check your connection.',
         e,
       );
+    }
+  }
+
+  /// The `devices` columns for a new pod. It starts offline: it goes live
+  /// when the pod (or the 3D simulation) sends its first reading.
+  static Map<String, dynamic> newDeviceRow(NewPod pod) => {
+        'device_name': pod.name,
+        'room': pod.room,
+        'serial_number': pod.serialNumber,
+        'system_type': pod.systemType.code,
+        'is_online': false,
+      };
+
+  @override
+  Future<Pod> addPod(NewPod pod) async {
+    try {
+      final row = await _source.insertDevice(newDeviceRow(pod));
+      return SupabaseRows.pod(row);
+    } on AppFailure {
+      rethrow;
+    } on PostgrestException catch (e, s) {
+      _log.error('Could not add pod', e, s);
+      // 23505: unique_violation on devices.serial_number.
+      if (e.code == '23505') {
+        throw const ValidationFailure(
+            'This serial number is already registered.');
+      }
+      // 42501: Row Level Security refused the insert.
+      if (e.code == '42501') {
+        throw AuthFailure('Sign in again to add a pod.', cause: e);
+      }
+      throw NetworkFailure('Could not add the pod. Check your connection.', e);
+    } catch (e, s) {
+      _log.error('Could not add pod', e, s);
+      throw NetworkFailure('Could not add the pod. Check your connection.', e);
     }
   }
 
