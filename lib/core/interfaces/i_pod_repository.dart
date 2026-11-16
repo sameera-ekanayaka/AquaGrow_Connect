@@ -1,3 +1,4 @@
+import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 
 /// Source of the user's pods.
@@ -11,4 +12,10 @@ abstract interface class IPodRepository {
 
   /// One-off read of the current pods.
   Future<List<Pod>> getPods();
+
+  /// Adds [pod] for the signed-in user and returns it, with no crop yet.
+  ///
+  /// Throws a `ValidationFailure` if the serial number is already
+  /// registered, or another `AppFailure` (network, sign-in) if it fails.
+  Future<Pod> addPod(NewPod pod);
 }

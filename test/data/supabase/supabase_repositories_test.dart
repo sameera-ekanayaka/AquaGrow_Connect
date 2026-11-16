@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:aquagrow_mobile/core/errors/app_failure.dart';
+import 'package:aquagrow_mobile/core/models/new_pod.dart';
 import 'package:aquagrow_mobile/core/models/sensor_reading.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_pod_repository.dart';
 import 'package:aquagrow_mobile/data/supabase/supabase_telemetry_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException;
 
 class FakeDeviceSource implements DeviceSource {
   List<Map<String, dynamic>> rows = [];
@@ -21,6 +23,21 @@ class FakeDeviceSource implements DeviceSource {
 
   @override
   Stream<void> changes() => changesController.stream;
+
+  Map<String, dynamic>? inserted;
+  Object? insertError;
+
+  @override
+  Future<Map<String, dynamic>> insertDevice(Map<String, dynamic> values) async {
+    if (insertError != null) throw insertError!;
+    inserted = values;
+    return {
+      'id': 'new-uuid',
+      ...values,
+      'last_seen_at': '2026-11-16T10:00:00Z',
+      'crop_batches': <Map<String, dynamic>>[],
+    };
+  }
 }
 
 class FakeTelemetrySource implements TelemetrySource {
@@ -142,6 +159,79 @@ void main() {
 
       expect(emitted, [1]);
       await sub.cancel();
+    });
+
+    group('addPod', () {
+      final newPod = NewPod(
+        name: 'Pod Gamma',
+        room: 'Balcony',
+        serialNumber: 'aqg-2026-0042',
+        systemType: PodSystemType.dwc,
+      );
+
+      test('inserts the device columns and returns the new pod', () async {
+        final source = FakeDeviceSource();
+        final pod = await SupabasePodRepository(source).addPod(newPod);
+
+        expect(source.inserted, {
+          'device_name': 'Pod Gamma',
+          'room': 'Balcony',
+          'serial_number': 'AQG-2026-0042',
+          'system_type': 'DWC',
+          'is_online': false,
+        });
+        expect(pod.id, 'new-uuid');
+        expect(pod.name, 'Pod Gamma');
+        expect(pod.batch, isNull);
+        expect(pod.isOnline, isFalse);
+      });
+
+      test('a used serial number is a ValidationFailure', () async {
+        final source = FakeDeviceSource()
+          ..insertError = const PostgrestException(
+            message: 'duplicate key value violates unique constraint',
+            code: '23505',
+          );
+
+        await expectLater(
+          SupabasePodRepository(source).addPod(newPod),
+          throwsA(
+            isA<ValidationFailure>().having(
+              (f) => f.message,
+              'message',
+              'This serial number is already registered.',
+            ),
+          ),
+        );
+      });
+
+      test('a refused insert asks to sign in again', () async {
+        final source = FakeDeviceSource()
+          ..insertError = const PostgrestException(
+            message: 'new row violates row-level security policy',
+            code: '42501',
+          );
+
+        await expectLater(
+          SupabasePodRepository(source).addPod(newPod),
+          throwsA(isA<AuthFailure>()),
+        );
+      });
+
+      test('any other error is a friendly NetworkFailure', () async {
+        final source = FakeDeviceSource()..insertError = Exception('offline');
+
+        await expectLater(
+          SupabasePodRepository(source).addPod(newPod),
+          throwsA(
+            isA<NetworkFailure>().having(
+              (f) => f.message,
+              'message',
+              'Could not add the pod. Check your connection.',
+            ),
+          ),
+        );
+      });
     });
   });
 
