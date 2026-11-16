@@ -187,11 +187,13 @@ class _PodControlsCardState extends ConsumerState<PodControlsCard> {
       setState(() => _draftBrightness = null);
       return;
     }
+    // Brightness is a gentle, reversible tweak: sent on release, no dialog.
     await _send(
       _Command.brightness,
-      title: 'Set brightness to $percent%?',
-      message: 'The grow light in ${_pod.name} changes right away.',
-      confirmLabel: 'Set $percent%',
+      confirm: false,
+      title: '',
+      message: '',
+      confirmLabel: '',
       command: (repo) => repo.setLight(_pod.id, on: true, brightness: percent),
     );
     // Show the pod's real value again, whether it was sent or cancelled.
@@ -220,14 +222,16 @@ class _PodControlsCardState extends ConsumerState<PodControlsCard> {
     required String confirmLabel,
     required Future<void> Function(IControlRepository repo) command,
     bool destructive = false,
+    bool confirm = true,
   }) async {
-    final ok = await showConfirmDialog(
-      context,
-      title: title,
-      message: message,
-      confirmLabel: confirmLabel,
-      destructive: destructive,
-    );
+    final ok = !confirm ||
+        await showConfirmDialog(
+          context,
+          title: title,
+          message: message,
+          confirmLabel: confirmLabel,
+          destructive: destructive,
+        );
     if (!ok || !mounted) return;
 
     setState(() => _busy.add(which));
