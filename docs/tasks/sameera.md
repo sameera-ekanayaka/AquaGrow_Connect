@@ -73,6 +73,7 @@ Done when: turn on flight mode, wait 20 s, turn it off: the SnackBar shows readi
 ### 4. SHOULD: Biometric guard (`feature/sameera-biometric`)
 
 - [x] Done: `BiometricGuard.confirm` + `biometricGuardProvider`, FragmentActivity and AppCompat launch theme.
+- [x] Changed (Monday): the per-command check became an optional **app lock** in Settings > Privacy (`AppLockController`, `AppLockGate`, `DeviceAuthenticator`). Unlock with the phone's fingerprint, face or PIN on opening and after 1 minute away.
 
 `lib/core/security/biometric_guard.dart` + `biometricGuardProvider`:
 `Future<bool> confirm(String reason)` using `local_auth`. Returns true when the device has no

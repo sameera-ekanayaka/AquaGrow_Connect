@@ -128,7 +128,8 @@ go_router, configured in `lib/app/router/app_router.dart`. Paths live in `AppRou
 | Insecure storage | Tokens only in `flutter_secure_storage` (Android Keystore). Never in Hive or SharedPreferences. |
 | Data access | Supabase Row Level Security: users read and write only their own devices (`supabase/migrations`). |
 | Network | HTTPS only. Cleartext blocked in `network_security_config.xml`. |
-| Risky actions | Pump, light, dosing and logout need a confirm dialog. Biometric unlock before controls (Should have). |
+| Risky actions | Pump, light, dosing and logout need a confirm dialog. |
+| App access | Optional app lock (Settings > Privacy), like WhatsApp: the phone's fingerprint, face or PIN on opening and after 1 minute away. AquaGrow stores no password. |
 | Backups | `android:allowBackup="false"` so app data is not copied to cloud backups. |
 | Privacy note | Settings > Privacy says what is stored where, and "Delete my local data" clears the Hive boxes (`localDataEraserProvider`). |
 | Input | Every form uses `Validators`, with numeric ranges for pH and EC. |
