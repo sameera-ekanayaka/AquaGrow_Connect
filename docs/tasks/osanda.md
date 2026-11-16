@@ -98,7 +98,7 @@ Offline pod: `Offline` badge, controls disabled. Loading and error states via `A
 
 ### 3. MUST: Pod controls UI (`feature/osanda-controls`)
 
-- [x] Done: `PodControlsCard` on Home (pump, light, brightness, pH down) with confirm, biometric check, busy, dosing and offline states (PR #23).
+- [x] Done: `PodControlsCard` on Home (pump, light, brightness, pH down) with confirm, busy, dosing and offline states (PR #23). The per-command fingerprint check was replaced by the optional app lock in Settings.
 
 `lib/features/controls/presentation/pod_controls_card.dart`, on Home under the readings.
 
