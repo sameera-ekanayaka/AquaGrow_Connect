@@ -83,7 +83,7 @@ void main() {
       await tester.tap(find.text('Use my location'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Allow Location Access'), findsOneWidget);
+      expect(find.text('Use your location?'), findsOneWidget);
     });
 
     testWidgets('shows Open settings button when permanently denied',
