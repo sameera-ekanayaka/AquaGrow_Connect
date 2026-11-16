@@ -3,10 +3,16 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Left Leaf -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M54,26 C54,26 35,48 35,63 C35,74 43.5,82 54,82 C64.5,82 73,74 73,63 C73,48 54,26 54,26 Z" />
+        android:pathData="M51,64 C42,53 33,46 26,43 C26,43 27,56 36,66 C49,71 50,69 51,66 Z" />
+    <!-- Right Leaf -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M54,36 C54,36 53,50 47,58 C45,60 41,63 38,63 C39,69 45,75 54,75 C54,75 54,52 54,36 Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,61 C58,47 66,36 81,29 C86,45 76,63 55,71 C55,68 55,64 55,61 Z" />
+    <!-- Stem -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,71 C50,75 51,79 52,82 L55,82 C54,79 54,75 54,71 Z" />
 </vector>
