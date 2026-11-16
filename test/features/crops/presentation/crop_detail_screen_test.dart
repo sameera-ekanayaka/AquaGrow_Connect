@@ -17,9 +17,7 @@ void main() {
       sim.dispose();
     });
 
-    testWidgets(
-        'renders crop hero, stage timeline, recipe targets, and harvest button for pod-alpha',
-        (tester) async {
+    Future<void> pumpScreen(WidgetTester tester) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -37,35 +35,28 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
+    }
 
-      expect(find.text('Crop Detail'), findsOneWidget);
+    testWidgets(
+        'renders crop hero, stage cards, recipe tiles and harvest button',
+        (tester) async {
+      await pumpScreen(tester);
+
       expect(find.text('Genovese Basil'), findsAtLeast(1));
-      expect(find.text('Growth Stages'), findsOneWidget);
-      expect(find.text('Progress'), findsOneWidget);
+      expect(find.text('Seedling'), findsOneWidget);
+      expect(find.text('Growing'), findsAtLeast(1));
+      expect(find.text('Ready to harvest'), findsOneWidget);
       expect(find.text('Recipe targets'), findsOneWidget);
-      expect(find.text("Today's average (24h)"), findsOneWidget);
+      expect(find.text('pH'), findsOneWidget);
+      expect(find.text('Nutrients (EC)'), findsOneWidget);
+      expect(find.text('Water temp'), findsOneWidget);
+      expect(find.text('Light'), findsOneWidget);
       expect(find.text('Harvest crop'), findsOneWidget);
     });
 
     testWidgets('shows confirmation dialog when Harvest crop is tapped',
         (tester) async {
-      tester.view.physicalSize = const Size(800, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            podSimulatorProvider.overrideWithValue(sim),
-            podsProvider.overrideWith((ref) => Stream.value(sim.pods)),
-          ],
-          child: const MaterialApp(
-            home: CropDetailScreen(podId: 'pod-alpha'),
-          ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await pumpScreen(tester);
 
       final harvestBtn = find.text('Harvest crop');
       await tester.ensureVisible(harvestBtn);

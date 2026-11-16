@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:aquagrow_mobile/app/router/app_routes.dart';
 import 'package:aquagrow_mobile/core/models/crop_batch.dart';
-import 'package:aquagrow_mobile/core/models/crop_recipe.dart';
 import 'package:aquagrow_mobile/core/models/pod.dart';
 import 'package:aquagrow_mobile/core/theme/app_tokens.dart';
 import 'package:aquagrow_mobile/data/data_providers.dart';
@@ -10,7 +7,6 @@ import 'package:aquagrow_mobile/features/crops/application/crop_detail_providers
 import 'package:aquagrow_mobile/features/crops/domain/crop_recipes.dart';
 import 'package:aquagrow_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:aquagrow_mobile/shared/widgets/crop_hero.dart';
-import 'package:aquagrow_mobile/shared/widgets/section_header.dart';
 import 'package:aquagrow_mobile/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,19 +15,20 @@ import 'package:go_router/go_router.dart';
 /// Detail of the crop growing in one pod.
 ///
 /// OWNER: Udeshika (see docs/tasks/udeshika.md).
-/// Displays crop status, stage timeline, target recipe parameters,
-/// 24h telemetry averages, and the harvest action.
 class CropDetailScreen extends ConsumerWidget {
+  /// Creates the screen for the pod with [podId].
   const CropDetailScreen({required this.podId, super.key});
 
+  /// The pod whose crop is shown.
   final String podId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final podsAsync = ref.watch(podsProvider);
+    final text = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Crop Detail')),
+      appBar: AppBar(),
       body: SafeArea(
         child: AsyncValueView<List<Pod>>(
           value: podsAsync,
@@ -48,44 +45,82 @@ class CropDetailScreen extends ConsumerWidget {
             }
 
             final now = DateTime.now();
-            final currentStage = batch.stage(now);
+            final stage = batch.stage(now);
             final recipe = CropRecipes.findForCrop(batch.cropName);
-            final todayTelemetry = ref.watch(cropTodayTelemetryProvider(podId));
-
-            final isHarvestable = currentStage == GrowthStage.readyToHarvest ||
-                currentStage == GrowthStage.growing;
+            final avg =
+                ref.watch(cropTodayTelemetryProvider(podId)).valueOrNull;
+            final canHarvest = stage == GrowthStage.readyToHarvest ||
+                stage == GrowthStage.growing;
 
             return ListView(
               padding: const EdgeInsets.all(AgSpace.screen),
               children: [
                 CropHero(
                   name: batch.cropName,
-                  badgeLabel:
-                      '${currentStage.label} · Day ${batch.dayNumber(now)}',
-                  caption: batch.daysLeft(now) == 0
-                      ? 'Ready for harvest'
-                      : 'Harvest est. in ${batch.daysLeft(now)} days',
+                  badgeLabel: 'Day ${batch.dayNumber(now)} · ${stage.label}',
+                  caption: '${pod.room} · ${pod.name}',
                   imageAsset: batch.imageAsset,
                 ),
-                const SizedBox(height: AgSpace.s20),
-                _StageTimelineCard(currentStage: currentStage),
                 const SizedBox(height: AgSpace.s16),
-                _ProgressCard(batch: batch, now: now),
+                _StageCards(current: stage),
+                const SizedBox(height: AgSpace.s16),
+                _Progress(batch: batch, now: now),
                 const SizedBox(height: AgSpace.s20),
-                const SectionHeader(title: 'Recipe targets'),
-                _RecipeTargetsCard(recipe: recipe),
-                const SizedBox(height: AgSpace.s20),
-                const SectionHeader(title: "Today's average (24h)"),
-                _TodayAverageCard(todayTelemetry: todayTelemetry),
+                Text('Recipe targets', style: text.titleLarge),
+                const SizedBox(height: AgSpace.s12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _Tile(
+                        label: 'pH',
+                        value:
+                            '${recipe.minPh.toStringAsFixed(1)}–${recipe.maxPh.toStringAsFixed(1)}',
+                        note: avg?.avgPh == null
+                            ? 'Today --'
+                            : 'Today ${avg!.avgPh!.toStringAsFixed(1)}',
+                      ),
+                    ),
+                    const SizedBox(width: AgSpace.s12),
+                    Expanded(
+                      child: _Tile(
+                        label: 'Nutrients (EC)',
+                        value: recipe.targetEc.toStringAsFixed(1),
+                        note: avg?.avgEc == null
+                            ? 'Today --'
+                            : 'Today ${avg!.avgEc!.toStringAsFixed(1)} mS/cm',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AgSpace.s12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _Tile(
+                        label: 'Water temp',
+                        value:
+                            '${recipe.targetWaterTempC.toStringAsFixed(0)}°C',
+                        note: 'Target',
+                      ),
+                    ),
+                    const SizedBox(width: AgSpace.s12),
+                    Expanded(
+                      child: _Tile(
+                        label: 'Light',
+                        value: '${recipe.lightHoursPerDay} h',
+                        note: 'Per day',
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: AgSpace.s24),
-                FilledButton.icon(
-                  onPressed: isHarvestable
-                      ? () => _onHarvest(context, batch, currentStage)
+                FilledButton(
+                  onPressed: canHarvest
+                      ? () => _onHarvest(context, batch, stage)
                       : null,
-                  icon: const Icon(Icons.eco_rounded),
-                  label: Text(
-                    currentStage == GrowthStage.harvested
-                        ? 'Already Harvested'
+                  child: Text(
+                    stage == GrowthStage.harvested
+                        ? 'Already harvested'
                         : 'Harvest crop',
                   ),
                 ),
@@ -103,128 +138,102 @@ class CropDetailScreen extends ConsumerWidget {
     CropBatch batch,
     GrowthStage stage,
   ) async {
-    final bool isEarly = stage == GrowthStage.growing;
+    final isEarly = stage == GrowthStage.growing;
     final confirmed = await showConfirmDialog(
       context,
       title: isEarly ? 'Harvest early?' : 'Harvest crop?',
       message: isEarly
           ? '${batch.cropName} is still in the growing stage. Are you sure you want to harvest early?'
           : 'Are you ready to harvest ${batch.cropName} and generate its Harvest Passport?',
-      confirmLabel: isEarly ? 'Harvest Early' : 'Harvest',
+      confirmLabel: isEarly ? 'Harvest early' : 'Harvest',
     );
 
     if (confirmed && context.mounted) {
-      unawaited(context.push(AppRoutes.harvestPassport(podId)));
+      await context.push(AppRoutes.harvestPassport(podId));
     }
   }
 }
 
-class _StageTimelineCard extends StatelessWidget {
-  const _StageTimelineCard({required this.currentStage});
+class _StageCards extends StatelessWidget {
+  const _StageCards({required this.current});
 
-  final GrowthStage currentStage;
+  final GrowthStage current;
+
+  @override
+  Widget build(BuildContext context) {
+    const steps = [
+      (GrowthStage.seedling, 'Seedling'),
+      (GrowthStage.growing, 'Growing'),
+      (GrowthStage.readyToHarvest, 'Ready to harvest'),
+    ];
+
+    return Row(
+      children: [
+        for (var i = 0; i < steps.length; i++) ...[
+          if (i > 0) const SizedBox(width: AgSpace.s8),
+          Expanded(
+            child: _StageCard(
+              label: steps[i].$2,
+              isCurrent: current == steps[i].$1,
+              isPast: current.index > steps[i].$1.index,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _StageCard extends StatelessWidget {
+  const _StageCard({
+    required this.label,
+    required this.isCurrent,
+    required this.isPast,
+  });
+
+  final String label;
+  final bool isCurrent;
+  final bool isPast;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ag;
     final text = Theme.of(context).textTheme;
 
-    final steps = [
-      (GrowthStage.seedling, 'Seedling'),
-      (GrowthStage.growing, 'Growing'),
-      (GrowthStage.readyToHarvest, 'Ready to harvest'),
-    ];
-
-    return Card(
-      elevation: 0,
-      color: c.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: AgRadius.all(AgRadius.r20),
-        side: BorderSide(color: c.border),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: AgSpace.s12,
+        horizontal: AgSpace.s8,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AgSpace.s16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Growth Stages', style: text.titleMedium),
-            const SizedBox(height: AgSpace.s16),
-            Row(
-              children: steps.asMap().entries.map((entry) {
-                final idx = entry.key;
-                final stage = entry.value.$1;
-                final label = entry.value.$2;
-
-                final isCurrent = currentStage == stage;
-                final isPast = currentStage.index > stage.index;
-                final isActive = isCurrent || isPast;
-
-                return Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isCurrent
-                                    ? c.brand
-                                    : (isPast ? c.brandSurface : c.subtle),
-                                border: Border.all(
-                                  color: isActive ? c.brand : c.border,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Icon(
-                                isPast
-                                    ? Icons.check_rounded
-                                    : (isCurrent
-                                        ? Icons.eco_rounded
-                                        : Icons.circle_outlined),
-                                size: 16,
-                                color: isCurrent ? c.onDark : c.text,
-                              ),
-                            ),
-                            const SizedBox(height: AgSpace.s8),
-                            Text(
-                              label,
-                              style: text.bodySmall?.copyWith(
-                                fontWeight: isCurrent
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color: isCurrent ? c.text : c.textSecondary,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              softWrap: false,
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (idx < steps.length - 1)
-                        Expanded(
-                          child: Container(
-                            height: 2,
-                            color: isPast ? c.brand : c.border,
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              }).toList(),
+      decoration: BoxDecoration(
+        color: isCurrent ? c.brand : c.subtle,
+        borderRadius: AgRadius.all(AgRadius.r16),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            isPast ? Icons.check_circle_rounded : Icons.eco_rounded,
+            size: 20,
+            color: isCurrent ? c.text : c.textSecondary,
+          ),
+          const SizedBox(height: AgSpace.s8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            style: text.bodySmall?.copyWith(
+              fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+              color: isCurrent ? c.text : c.textSecondary,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _ProgressCard extends StatelessWidget {
-  const _ProgressCard({required this.batch, required this.now});
+class _Progress extends StatelessWidget {
+  const _Progress({required this.batch, required this.now});
 
   final CropBatch batch;
   final DateTime now;
@@ -234,172 +243,64 @@ class _ProgressCard extends StatelessWidget {
     final c = context.ag;
     final text = Theme.of(context).textTheme;
 
-    return Card(
-      elevation: 0,
-      color: c.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: AgRadius.all(AgRadius.r20),
-        side: BorderSide(color: c.border),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AgSpace.s16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Progress', style: text.titleMedium),
-                Text(
-                  '${(batch.progress(now) * 100).toInt()}%',
-                  style: text.labelLarge?.copyWith(color: c.text),
-                ),
-              ],
-            ),
-            const SizedBox(height: AgSpace.s12),
-            ClipRRect(
-              borderRadius: AgRadius.all(AgRadius.r16),
-              child: LinearProgressIndicator(
-                value: batch.progress(now),
-                minHeight: 10,
-                backgroundColor: c.subtle,
-                color: c.brand,
-              ),
-            ),
-            const SizedBox(height: AgSpace.s12),
             Text(
-              'Day ${batch.dayNumber(now)} of ${batch.daysToHarvest} · ${batch.daysLeft(now)} days left',
+              'Day ${batch.dayNumber(now)} of ${batch.daysToHarvest}',
+              style: text.titleSmall,
+            ),
+            Text(
+              '${batch.daysLeft(now)} days left',
               style: text.bodySmall?.copyWith(color: c.textSecondary),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _RecipeTargetsCard extends StatelessWidget {
-  const _RecipeTargetsCard({required this.recipe});
-
-  final CropRecipe recipe;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.ag;
-
-    return Card(
-      elevation: 0,
-      color: c.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: AgRadius.all(AgRadius.r20),
-        side: BorderSide(color: c.border),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AgSpace.s16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _TargetItem(
-                    label: 'pH Range',
-                    value:
-                        '${recipe.minPh.toStringAsFixed(1)} - ${recipe.maxPh.toStringAsFixed(1)}',
-                  ),
-                ),
-                Expanded(
-                  child: _TargetItem(
-                    label: 'Target EC',
-                    value: '${recipe.targetEc.toStringAsFixed(1)} mS/cm',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AgSpace.s16),
-            Row(
-              children: [
-                Expanded(
-                  child: _TargetItem(
-                    label: 'Water Temp',
-                    value: '${recipe.targetWaterTempC.toStringAsFixed(1)} °C',
-                  ),
-                ),
-                Expanded(
-                  child: _TargetItem(
-                    label: 'Light Hours',
-                    value: '${recipe.lightHoursPerDay} hrs / day',
-                  ),
-                ),
-              ],
-            ),
-          ],
+        const SizedBox(height: AgSpace.s8),
+        ClipRRect(
+          borderRadius: AgRadius.all(AgRadius.r16),
+          child: LinearProgressIndicator(
+            value: batch.progress(now),
+            minHeight: 8,
+            backgroundColor: c.subtle,
+            color: c.brand,
+          ),
         ),
-      ),
+      ],
     );
   }
 }
 
-class _TargetItem extends StatelessWidget {
-  const _TargetItem({required this.label, required this.value});
+class _Tile extends StatelessWidget {
+  const _Tile({required this.label, required this.value, required this.note});
 
   final String label;
   final String value;
+  final String note;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ag;
     final text = Theme.of(context).textTheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: text.bodySmall?.copyWith(color: c.textSecondary)),
-        const SizedBox(height: AgSpace.s4),
-        Text(value, style: text.titleMedium),
-      ],
-    );
-  }
-}
-
-class _TodayAverageCard extends StatelessWidget {
-  const _TodayAverageCard({required this.todayTelemetry});
-
-  final AsyncValue<({double? avgEc, double? avgPh})> todayTelemetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.ag;
-
-    return Card(
-      elevation: 0,
-      color: c.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: AgRadius.all(AgRadius.r20),
-        side: BorderSide(color: c.border),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AgSpace.s16),
+      decoration: BoxDecoration(
+        color: c.subtle,
+        borderRadius: AgRadius.all(AgRadius.r16),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AgSpace.s16),
-        child: AsyncValueView<({double? avgEc, double? avgPh})>(
-          value: todayTelemetry,
-          data: (data) {
-            final phStr =
-                data.avgPh != null ? data.avgPh!.toStringAsFixed(2) : '--';
-            final ecStr = data.avgEc != null
-                ? '${data.avgEc!.toStringAsFixed(2)} mS/cm'
-                : '--';
-
-            return Row(
-              children: [
-                Expanded(
-                  child: _TargetItem(label: 'Today Avg pH', value: phStr),
-                ),
-                Expanded(
-                  child: _TargetItem(label: 'Today Avg EC', value: ecStr),
-                ),
-              ],
-            );
-          },
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: text.bodySmall?.copyWith(color: c.textSecondary)),
+          const SizedBox(height: AgSpace.s4),
+          Text(value, style: text.headlineSmall),
+          const SizedBox(height: AgSpace.s4),
+          Text(note, style: text.bodySmall?.copyWith(color: c.textSecondary)),
+        ],
       ),
     );
   }
