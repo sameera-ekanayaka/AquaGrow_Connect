@@ -10,6 +10,7 @@ import 'package:aquagrow_mobile/features/insights/application/shake_detector.dar
 import 'package:aquagrow_mobile/features/insights/application/shake_detector_provider.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/widgets/shake_feedback.dart';
 import 'package:aquagrow_mobile/features/insights/presentation/widgets/telemetry_history_chart.dart';
+import 'package:aquagrow_mobile/features/insights/presentation/widgets/trend_chip.dart';
 import 'package:aquagrow_mobile/features/location/presentation/vpd_gauge_card.dart';
 import 'package:aquagrow_mobile/features/location/presentation/weather_summary_card.dart';
 import 'package:aquagrow_mobile/shared/widgets/widgets.dart';
@@ -191,6 +192,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           ),
 
           const SizedBox(height: AgSpace.s16),
+
+          // Short-term trend warning chip
+          const TrendChip(),
 
           // Historical chart card with loading/error/empty state handling
           AsyncValueView<List<SensorReading>>(
