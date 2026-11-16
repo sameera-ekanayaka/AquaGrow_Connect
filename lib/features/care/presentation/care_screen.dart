@@ -22,6 +22,7 @@ class CareScreen extends StatelessWidget {
         padding: const EdgeInsets.all(AgSpace.screen),
         children: [
           const TabHeader(title: 'Care'),
+          // Minimal UI: one grouped card, no dividers.
           Card(
             child: Column(
               children: [
@@ -31,16 +32,20 @@ class CareScreen extends StatelessWidget {
                   subtitle: 'Nutrients and parts near you',
                   onTap: () => context.push(AppRoutes.supplierMap),
                 ),
-                Divider(color: colors.border, height: 1),
+                _CareTile(
+                  icon: Icons.notifications_none,
+                  title: 'Alerts',
+                  subtitle: 'Pod warnings and history',
+                  onTap: () => context.push(AppRoutes.alerts),
+                ),
                 _CareTile(
                   icon: Icons.person_outline,
                   title: 'Profile',
                   subtitle: 'Account and sign out',
                   onTap: () => context.push(AppRoutes.profile),
                 ),
-                Divider(color: colors.border, height: 1),
                 _CareTile(
-                  icon: Icons.settings_outlined,
+                  icon: Icons.tune_rounded,
                   title: 'Settings',
                   subtitle: 'Theme, privacy and about',
                   onTap: () => context.push(AppRoutes.settings),
@@ -91,11 +96,22 @@ class _CareTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.ag;
+    final text = Theme.of(context).textTheme;
     return ListTile(
       minVerticalPadding: AgSpace.s12,
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: Text(subtitle),
+      // Minimal UI: icon in a white circle, semibold title.
+      leading: CircleAvatar(
+        radius: 20,
+        backgroundColor: c.background,
+        foregroundColor: c.text,
+        child: Icon(icon, size: 20),
+      ),
+      title: Text(title, style: text.titleMedium),
+      subtitle: Text(
+        subtitle,
+        style: text.bodySmall?.copyWith(color: c.textSecondary),
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
     );
