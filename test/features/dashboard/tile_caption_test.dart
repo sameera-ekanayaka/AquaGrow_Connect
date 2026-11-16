@@ -10,7 +10,9 @@ void main() {
 
   test('above the target says too high', () {
     expect(
-        tileCaption(SensorMetric.waterTemp, 25), 'Too high · Target 18–24°C');
+      tileCaption(SensorMetric.waterTemp, 25),
+      'Too high · Target 18–24°C',
+    );
     expect(tileCaption(SensorMetric.ph, 7.5), 'Too high · Target 5.5–6.5');
   });
 
