@@ -232,5 +232,17 @@ void main() {
       expect(gamma.batch?.cropName, 'Sweet Mint');
       expect(gamma.batch?.daysToHarvest, 35);
     });
+
+    testWidgets('a name already used by a pod is refused', (tester) async {
+      await openAddPod(tester);
+      await fillAndSubmit(tester, name: 'Pod Alpha');
+
+      expect(
+        find.text(
+            'You already have a pod called Pod Alpha. Pick another name.'),
+        findsOneWidget,
+      );
+      expect(sim.pods, hasLength(2));
+    });
   });
 }

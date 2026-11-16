@@ -6,9 +6,18 @@ abstract final class NewPodRules {
   /// Longest pod name or room, so it fits on the pod picker and cards.
   static const maxNameLength = 30;
 
-  /// Pod name: required, at most [maxNameLength] characters.
-  static String? name(String? value) =>
-      _text(value, field: 'Pod name', example: 'Pod Gamma');
+  /// Pod name: required, at most [maxNameLength] characters, and not one of
+  /// the user's [taken] pod names (any case), so two pods never look alike.
+  static String? name(String? value, {Iterable<String> taken = const []}) {
+    final error = _text(value, field: 'Pod name', example: 'Pod Gamma');
+    if (error != null) return error;
+    final v = value!.trim();
+    final lower = v.toLowerCase();
+    if (taken.any((t) => t.trim().toLowerCase() == lower)) {
+      return 'You already have a pod called $v. Pick another name.';
+    }
+    return null;
+  }
 
   /// Room: required, at most [maxNameLength] characters.
   static String? room(String? value) =>

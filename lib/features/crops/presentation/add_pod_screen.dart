@@ -131,7 +131,14 @@ class _AddPodScreenState extends ConsumerState<AddPodScreen> {
                   helperText: 'Shown on Home and My Pods.',
                   prefixIcon: Icon(Icons.spa_outlined),
                 ),
-                validator: NewPodRules.name,
+                validator: (v) => NewPodRules.name(
+                  v,
+                  taken: [
+                    for (final pod
+                        in ref.read(podsProvider).valueOrNull ?? const <Pod>[])
+                      pod.name,
+                  ],
+                ),
               ),
               const SizedBox(height: AgSpace.s16),
               TextFormField(
