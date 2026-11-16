@@ -43,14 +43,17 @@ class AuthPage extends StatelessWidget {
 
 /// The AquaGrow mark from Figma: a lime circle with a leaf.
 class AuthLogo extends StatelessWidget {
-  /// Creates the logo.
-  const AuthLogo({super.key});
+  /// Creates the logo, left-aligned unless [alignment] says otherwise.
+  const AuthLogo({this.alignment = Alignment.centerLeft, super.key});
+
+  /// Where the logo sits in the available width.
+  final AlignmentGeometry alignment;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ag;
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: alignment,
       child: Container(
         width: kMinTouchTarget,
         height: kMinTouchTarget,
