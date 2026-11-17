@@ -83,7 +83,7 @@ class VpdGaugeCard extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  vpd.isOptimal ? 'Just right' : 'Attention',
+                  vpd.isOptimal ? 'Healthy' : 'Attention',
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
