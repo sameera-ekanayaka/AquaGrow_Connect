@@ -35,5 +35,5 @@ Needs migrations 001 to 008 on that project.
 
 ## Demo scenarios
 
-Healthy pod, pH crash (4.8), pH drift high (7.6, fix with pH down in the app),
+Healthy pod, pH crash (4.8), pH drift high (7.4; two pH-down doses from the app: 6.9 amber, then 6.4 in range),
 low water (fix with Mark as refilled), heatwave, nutrient low, sensor offline.
