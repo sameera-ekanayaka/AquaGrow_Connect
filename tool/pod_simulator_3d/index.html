@@ -965,7 +965,7 @@
         </button>
         <button type="button" class="scenario-btn" data-scenario="alkaline">
           <span class="scenario-btn-title">⚗️ pH Drift High</span>
-          <span class="scenario-btn-desc">Raises pH to 7.6 · fix with pH down in the app</span>
+          <span class="scenario-btn-desc">Raises pH to 7.4 · two pH-down doses bring it back</span>
         </button>
         <button type="button" class="scenario-btn" data-scenario="lowWater">
           <span class="scenario-btn-title">🏜️ Low Water</span>
@@ -2396,7 +2396,7 @@
       pushDeviceOnlineState(currentPod());
     });
 
-    // Dose pH-Down (-0.5 pH so 7.6 drops into amber on 1st dose and safe range on 2nd)
+    // Dose pH-Down (-0.5 pH so 7.4 drops into amber on 1st dose and the 5.5–6.5 target on 2nd)
     document.getElementById('btn-dose-ph').addEventListener('click', () => {
       const pod = currentPod();
       if (!pod.isOnline) {
@@ -2473,8 +2473,8 @@
           pod.ph = 4.8;
           showToast('Scenario applied: pH Crash (4.8)');
         } else if (sc === 'alkaline') {
-          pod.ph = 7.6;
-          showToast('Scenario applied: pH Drift High (7.6)');
+          pod.ph = 7.4;
+          showToast('Scenario applied: pH Drift High (7.4)');
         } else if (sc === 'lowWater') {
           pod.waterLevel = 18;
           showToast('Scenario applied: Low Water (18%)');
