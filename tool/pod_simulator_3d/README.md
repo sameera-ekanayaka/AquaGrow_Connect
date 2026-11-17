@@ -24,11 +24,14 @@ Needs migrations 001 to 008 on that project.
   pod shows only the net cups. Plants grow with the crop's day.
 - Sends a reading for every online pod every 4 s (`telemetry_logs`). Water
   drifts a little, warms up while the pump is off and slowly evaporates.
-- Acts on app commands through realtime: pump, light, brightness,
-  pH-down (pH drops 0.3) and refill (tank to 100%).
-- Pump, light and brightness changed here are written back, so the app's
+- Acts on app commands through realtime: pump, light, brightness, mist,
+  pH-down (pH drops 0.5) and refill (tank to 100%).
+- Pump, light, mist and brightness changed here are written back, so the app's
   controls match.
-- Planting, harvesting or adding a pod in the app reloads the pods.
+- Planting, harvesting, adding or deleting a pod in the app reloads the pods.
+- **Crop Growth & Chart Demo** lets you fast-forward a pod's crop between
+  Seedling (Day 2), Growing (Day 14) and Ready to Harvest, and seed 24 hours
+  of chart readings into `telemetry_logs`.
 
 ## Demo scenarios
 

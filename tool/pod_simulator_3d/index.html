@@ -917,8 +917,34 @@
       </div>
 
       <div class="action-btn-row">
-        <button type="button" class="action-btn" id="btn-dose-ph">💧 Dose pH-Down (-0.15)</button>
+        <button type="button" class="action-btn" id="btn-dose-ph">💧 Dose pH-Down (-0.5)</button>
         <button type="button" class="action-btn secondary" id="btn-refill">🚰 Mark Tank Refilled</button>
+      </div>
+    </div>
+
+    <!-- Crop Growth & Chart Demo (Live Time-Travel) -->
+    <div class="panel-section">
+      <div class="section-header">
+        <h2 class="section-title">Crop Growth &amp; Chart Demo</h2>
+        <span class="section-caption">Live time-travel</span>
+      </div>
+      <div class="scenario-grid">
+        <button type="button" class="scenario-btn" data-growth="seedling">
+          <span class="scenario-btn-title">🌱 Seedling Stage</span>
+          <span class="scenario-btn-desc">Fast-forward crop to Day 2</span>
+        </button>
+        <button type="button" class="scenario-btn" data-growth="growing">
+          <span class="scenario-btn-title">🌿 Growing Stage</span>
+          <span class="scenario-btn-desc">Fast-forward crop to Day 14</span>
+        </button>
+        <button type="button" class="scenario-btn" data-growth="harvest">
+          <span class="scenario-btn-title">🧺 Ready to Harvest</span>
+          <span class="scenario-btn-desc">Full-grown · unlocks Harvest in app</span>
+        </button>
+        <button type="button" class="scenario-btn" id="btn-seed-history">
+          <span class="scenario-btn-title">📈 Seed 24h Chart Data</span>
+          <span class="scenario-btn-desc">Fills Insights 24h graph &amp; Passport</span>
+        </button>
       </div>
     </div>
 
@@ -1315,17 +1341,18 @@
         { label: 'pH:', val: `${pod.ph.toFixed(1)}`, st: statuses[1] },
         { label: 'EC:', val: `${pod.ec.toFixed(1)} mS`, st: statuses[3] },
         { label: 'LIGHT:', val: pod.lightOn ? `${pod.lightBrightness}%` : 'OFF', st: 'safe' },
+        { label: 'MIST:', val: pod.mistOn ? 'ON' : 'OFF', st: pod.mistOn ? 'safe' : 'warning' },
       ];
 
       rows.forEach((r, idx) => {
-        const y = 132 + idx * 58;
+        const y = 124 + idx * 48;
         oledCtx.fillStyle = '#cbd5e1';
-        oledCtx.font = '600 23px Inter, monospace';
+        oledCtx.font = '600 22px Inter, monospace';
         oledCtx.fillText(r.label, 24, y);
 
         oledCtx.fillStyle =
           r.st === 'critical' ? '#f87171' : r.st === 'warning' ? '#fbbf24' : '#ffffff';
-        oledCtx.font = '700 25px Inter, monospace';
+        oledCtx.font = '700 23px Inter, monospace';
         oledCtx.fillText(r.val, 158, y);
       });
 
@@ -2079,8 +2106,8 @@
       c.height = 128;
       const ctx = c.getContext('2d');
       const grad = ctx.createRadialGradient(64, 64, 4, 64, 64, 60);
-      grad.addColorStop(0, 'rgba(255, 255, 255, 0.38)');
-      grad.addColorStop(0.5, 'rgba(235, 240, 255, 0.16)');
+      grad.addColorStop(0, 'rgba(224, 242, 254, 0.78)');
+      grad.addColorStop(0.5, 'rgba(186, 230, 253, 0.36)');
       grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 128, 128);
@@ -2092,26 +2119,27 @@
     const mistGroup = new THREE.Group();
     podGroup.add(mistGroup);
 
-    for (let i = 0; i < 28; i++) {
+    for (let i = 0; i < 56; i++) {
+      const isDeckMist = i >= 28;
       const mat = new THREE.SpriteMaterial({
         map: mistTex,
         transparent: true,
-        opacity: 0.25,
+        opacity: 0.52,
         depthWrite: false,
       });
       const sprite = new THREE.Sprite(mat);
-      const s = 0.45 + Math.random() * 0.55;
+      const s = isDeckMist ? 0.55 + Math.random() * 0.65 : 0.5 + Math.random() * 0.6;
       sprite.scale.set(s, s, 1);
-      sprite.position.set(
-        mastX + 0.25 + Math.random() * 0.55,
-        basinHeight + 0.35 + Math.random() * 1.15,
-        mastZ + 0.18 + Math.random() * 0.45
-      );
+      const startX = isDeckMist ? (Math.random() - 0.5) * 2.5 : mastX + 0.18 + Math.random() * 0.55;
+      const startY = isDeckMist ? basinHeight + 0.14 + Math.random() * 0.85 : basinHeight + 0.3 + Math.random() * 1.25;
+      const startZ = isDeckMist ? (Math.random() - 0.5) * 1.15 : mastZ + 0.15 + Math.random() * 0.45;
+      sprite.position.set(startX, startY, startZ);
       mistGroup.add(sprite);
       mistParticles.push({
         sprite,
-        vy: 0.003 + Math.random() * 0.004,
-        vx: 0.001 + Math.random() * 0.002,
+        isDeckMist,
+        vy: isDeckMist ? 0.002 + Math.random() * 0.0028 : 0.0035 + Math.random() * 0.0045,
+        vx: (Math.random() - 0.35) * 0.0022,
         phase: Math.random() * Math.PI * 2,
       });
     }
@@ -2368,14 +2396,14 @@
       pushDeviceOnlineState(currentPod());
     });
 
-    // Dose pH-Down (-0.15 pH, matches PodSimulator.dosePhDown)
+    // Dose pH-Down (-0.5 pH so 7.6 drops into amber on 1st dose and safe range on 2nd)
     document.getElementById('btn-dose-ph').addEventListener('click', () => {
       const pod = currentPod();
       if (!pod.isOnline) {
         showToast('Cannot dose while pod is offline');
         return;
       }
-      pod.ph = Math.max(4.0, +(pod.ph - 0.15).toFixed(2));
+      pod.ph = Math.max(4.0, +(pod.ph - 0.5).toFixed(2));
       doseBurstTime = 1.0;
       showToast(`Dosed pH-Down: pH lowered to ${pod.ph.toFixed(1)}`);
       syncAllFromState();
@@ -2424,7 +2452,7 @@
     }
 
     // Scenario Presets
-    document.querySelectorAll('.scenario-btn').forEach((btn) => {
+    document.querySelectorAll('.scenario-btn[data-scenario]').forEach((btn) => {
       btn.addEventListener('click', () => {
         clearActiveScenarioButtons();
         btn.dataset.active = 'true';
@@ -2464,6 +2492,108 @@
         if (pod.isOnline !== prevOnline) pushDeviceOnlineState(pod);
         if (pod.isOnline) scheduleSupabasePush(true);
       });
+    });
+
+    function isoDateDaysFromToday(offsetDays) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + offsetDays);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    // Time-travel crop growth stage (Seedling / Growing / Ready to Harvest)
+    document.querySelectorAll('.scenario-btn[data-growth]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const pod = currentPod();
+        if (!pod.crop) {
+          showToast('Plant a crop in this pod first');
+          return;
+        }
+        const stage = btn.dataset.growth;
+        const duration = pod.durationDays || 28;
+        const targetDay =
+          stage === 'seedling'
+            ? 2
+            : stage === 'growing'
+            ? Math.max(7, Math.round(duration * 0.5))
+            : duration + 1;
+        const daysAgo = targetDay - 1;
+        pod.day = targetDay;
+        pod.daysToHarvest = Math.max(0, duration - daysAgo);
+        syncAllFromState();
+
+        const label =
+          stage === 'seedling'
+            ? `Seedling (Day ${targetDay})`
+            : stage === 'growing'
+            ? `Growing (Day ${targetDay})`
+            : `Ready to harvest (Day ${targetDay})`;
+        showToast(`${pod.name}: ${label}`);
+
+        if (sbClient && sbDeviceMapping[pod.id]) {
+          const plantedDate = isoDateDaysFromToday(-daysAgo);
+          const expectedDate = isoDateDaysFromToday(duration - daysAgo);
+          const { error } = await sbClient
+            .from('crop_batches')
+            .update({
+              planted_date: plantedDate,
+              expected_harvest_date: expectedDate,
+            })
+            .eq('device_id', sbDeviceMapping[pod.id])
+            .eq('status', 'ACTIVE');
+          if (error) {
+            setSyncStatus('warning', 'Batch err', `Could not update growth stage: ${error.message}`);
+          } else {
+            setSyncStatus('brand', 'Stage synced', `${pod.name} set to ${label} in Supabase.`);
+          }
+        }
+      });
+    });
+
+    async function seed24hHistoryForPod(pod, silent = false) {
+      if (!sbClient) {
+        if (!silent) showToast('Connect to Supabase Live Sync first');
+        return;
+      }
+      const deviceId = sbDeviceMapping[pod.id];
+      if (!deviceId) return;
+      const nowMs = Date.now();
+      const rows = [];
+      for (let i = 48; i >= 1; i--) {
+        const t = new Date(nowMs - i * 30 * 60 * 1000);
+        const wave = Math.sin((i / 48) * Math.PI * 2);
+        const cosWave = Math.cos((i / 48) * Math.PI * 2);
+        const ph = +(6.15 + wave * 0.18 + (Math.random() - 0.5) * 0.04).toFixed(2);
+        const ec = +(1.65 + cosWave * 0.12 + (Math.random() - 0.5) * 0.03).toFixed(2);
+        const temp = +(21.8 - wave * 1.1 + (Math.random() - 0.5) * 0.15).toFixed(2);
+        const level = +(Math.max(52, 94 - (48 - i) * 0.35)).toFixed(2);
+        rows.push({
+          device_id: deviceId,
+          reading_id: crypto.randomUUID(),
+          ph,
+          ec_ms: ec,
+          tds_ppm: +(ec * 500).toFixed(1),
+          water_temp_c: temp,
+          water_level_pct: level,
+          ambient_temp_c: +(25.2 - wave * 1.4).toFixed(2),
+          humidity_pct: +(68 + cosWave * 4.5).toFixed(2),
+          recorded_at: t.toISOString(),
+        });
+      }
+      const { error } = await sbClient.from('telemetry_logs').insert(rows);
+      if (error) {
+        if (!silent) setSyncStatus('warning', 'Seed err', `Could not seed history: ${error.message}`);
+      } else if (!silent) {
+        showToast(`Seeded 24h chart history (48 points) for ${pod.name}`);
+        setSyncStatus('brand', 'History seeded', `Inserted 48 readings over 24h for ${pod.name}.`);
+      }
+    }
+
+    document.getElementById('btn-seed-history').addEventListener('click', () => {
+      seed24hHistoryForPod(currentPod(), false);
     });
 
     // Camera & Cutaway Buttons
@@ -2611,6 +2741,8 @@
             setSyncStatus('warning', 'Update err', `Device online update failed: ${onlineErr.message}`);
             return;
           }
+          // Newly added pod coming online for the first time: seed 24h chart history automatically.
+          seed24hHistoryForPod(pod, true);
         }
         const now = new Date().toLocaleTimeString();
         setSyncStatus(
@@ -2715,6 +2847,7 @@
           room: d.room || 'Home',
           crop,
           day,
+          durationDays: duration,
           daysToHarvest: Math.max(0, duration - (day - 1)),
           ph: prev?.ph ?? 6.2,
           ec: prev?.ec ?? 1.6,
@@ -2731,7 +2864,10 @@
         };
         sbDeviceMapping[d.id] = d.id;
       });
-      if (!podsState[activePodId]) activePodId = sbDevices[0]?.id;
+      if (!podsState[activePodId]) {
+        const alpha = sbDevices.find((d) => /alpha/i.test(d.device_name || ''));
+        activePodId = (alpha || sbDevices[0])?.id;
+      }
     }
 
     async function goLiveWithDevices(user) {
@@ -2760,7 +2896,7 @@
       showToast('Connected to Supabase Realtime!');
     }
 
-    // Applies commands the app wrote on a device row (pump, light, pH-down, refill).
+    // Applies commands the app wrote on a device row (pump, light, mist, pH-down, refill).
     function applyAppCommands(row) {
       const pod = podsState[row.id];
       if (!pod) return;
@@ -2783,8 +2919,8 @@
       }
       if (row.ph_dose_requested_at && row.ph_dose_requested_at !== pod.doseSeen) {
         pod.doseSeen = row.ph_dose_requested_at;
-        pod.ph = Math.max(4.0, +(pod.ph - 0.3).toFixed(2));
-        if (row.id === activePodId) doseBurstTime = 1.0;
+        pod.ph = Math.max(4.0, +(pod.ph - 0.5).toFixed(2));
+        doseBurstTime = 1.0;
         said.push(`pH-down dosed (pH ${pod.ph.toFixed(1)})`);
       }
       if (row.refill_requested_at && row.refill_requested_at !== pod.refillSeen) {
@@ -2794,10 +2930,12 @@
       }
       if (typeof row.is_online === 'boolean') pod.serverOnline = row.is_online;
       if (!said.length) return;
+      // Switch the 3D view to whichever pod the user is controlling in the app.
+      activePodId = row.id;
       showToast(`App → ${pod.name}: ${said.join(', ')}`);
-      if (row.id === activePodId) syncAllFromState();
-      // Report the result straight away, so the app sees the change.
-      if (pod.isOnline && (row.ph_dose_requested_at || row.refill_requested_at)) {
+      syncAllFromState();
+      // Report the updated reading straight away, so the app sees the change.
+      if (pod.isOnline) {
         pushTelemetryToSupabase(pod);
       }
     }
@@ -2810,8 +2948,9 @@
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'devices' }, (p) =>
           applyAppCommands(p.new)
         )
-        // A pod added, planted or harvested in the app: reload the pods.
+        // A pod added, deleted, planted or harvested in the app: reload the pods.
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'devices' }, reloadFromApp)
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'devices' }, reloadFromApp)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'crop_batches' }, reloadFromApp)
         .subscribe();
     }
@@ -2931,20 +3070,30 @@
 
       controls.update();
 
-      // Ultrasonic mist plume animation (matches photo's vapor plume behind mast)
+      // Ultrasonic mist plume animation (visible vapor plume from mast & over plant deck)
       mistGroup.visible = pod.mistOn && pod.isOnline && pod.waterLevel > 10;
       if (mistGroup.visible) {
-        mistParticles.forEach((p, idx) => {
+        mistParticles.forEach((p) => {
           p.sprite.position.y += p.vy;
-          p.sprite.position.x += Math.sin(elapsed * 1.2 + p.phase) * 0.0018 + p.vx;
-          const progress = (p.sprite.position.y - (basinHeight + 0.3)) / 1.35;
-          p.sprite.material.opacity = Math.sin(Math.min(1, Math.max(0, progress)) * Math.PI) * 0.26;
-          if (p.sprite.position.y > basinHeight + 1.65) {
-            p.sprite.position.set(
-              mastX + 0.18 + Math.random() * 0.35,
-              basinHeight + 0.32,
-              mastZ + 0.15 + Math.random() * 0.35
-            );
+          p.sprite.position.x += Math.sin(elapsed * 1.4 + p.phase) * 0.0022 + p.vx;
+          const minY = p.isDeckMist ? basinHeight + 0.12 : basinHeight + 0.28;
+          const spanY = p.isDeckMist ? 0.95 : 1.4;
+          const progress = (p.sprite.position.y - minY) / spanY;
+          p.sprite.material.opacity = Math.sin(Math.min(1, Math.max(0, progress)) * Math.PI) * (p.isDeckMist ? 0.5 : 0.58);
+          if (p.sprite.position.y > minY + spanY) {
+            if (p.isDeckMist) {
+              p.sprite.position.set(
+                (Math.random() - 0.5) * 2.5,
+                basinHeight + 0.14,
+                (Math.random() - 0.5) * 1.15
+              );
+            } else {
+              p.sprite.position.set(
+                mastX + 0.18 + Math.random() * 0.55,
+                basinHeight + 0.3,
+                mastZ + 0.15 + Math.random() * 0.45
+              );
+            }
           }
         });
       }

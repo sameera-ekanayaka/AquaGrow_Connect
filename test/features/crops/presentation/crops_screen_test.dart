@@ -245,5 +245,45 @@ void main() {
       );
       expect(sim.pods, hasLength(2));
     });
+
+    testWidgets('deleting a pod lets its name and serial number be reused',
+        (tester) async {
+      await openAddPod(tester);
+      await fillAndSubmit(
+        tester,
+        name: 'Pod Gamma',
+        room: 'Balcony',
+        serial: 'AQG-REUSE-1',
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      expect(sim.pods, hasLength(3));
+
+      // Delete Pod Gamma from the empty pod sheet.
+      final podCard = find.text('Tap to plant a crop');
+      await tester.ensureVisible(podCard);
+      await tester.tap(podCard);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete this pod'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete pod'));
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      expect(sim.pods, hasLength(2));
+
+      // Re-add Pod Gamma with the same name and serial number.
+      final addBtn = find.text('Add a pod');
+      await tester.ensureVisible(addBtn);
+      await tester.tap(addBtn);
+      await tester.pumpAndSettle();
+      await fillAndSubmit(
+        tester,
+        name: 'Pod Gamma',
+        room: 'Balcony',
+        serial: 'AQG-REUSE-1',
+      );
+
+      expect(find.text('Pod Gamma added'), findsOneWidget);
+      expect(sim.pods, hasLength(3));
+      expect(sim.pods.last.name, 'Pod Gamma');
+    });
   });
 }
